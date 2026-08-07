@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="en"><head><title>CopticSports | Tampa Bay Coptic Basketball League</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<header id="topbar" class="topbar"></header>
+
+<section class="hero"><div class="wrap hero-grid">
+  <div>
+    <div class="kicker">Tampa Bay Coptic Basketball League</div>
+    <h1><span>Season 5</span><span class="accent">Tips Off</span><span>Jan 3, 2027</span></h1>
+    <p class="verse">"Honor all people. Love the brotherhood. Fear God…" (1 Peter 2:17)</p>
+    <div class="pillars"><span class="pill"><i>✚</i>Faith</span>
+      <span class="pill"><i>✚</i>Fellowship</span><span class="pill"><i>✚</i>Fitness</span></div>
+    <div class="count" id="countdown"></div>
+  </div>
+  <img class="hero-logo" src="assets/img/logo-white.png" alt="TCBL logo">
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Road to Season 5</h2>
+    <a class="more" href="calendar.html">Full calendar →</a></div>
+  <div class="grid3" style="grid-template-columns:1.1fr .9fr 1fr">
+    <div class="card"><h3>Milestones</h3><div class="timeline" id="miles"></div></div>
+    <div class="card"><span class="tag">Defending Champs</span><h3 id="champ-name" style="margin-top:12px"></h3>
+      <div id="champ-body"></div></div>
+    <div class="card"><h3>On the Coptic Calendar</h3><div id="feast-strip"></div></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Season 4 Finals</h2>
+    <a class="more" href="schedule.html">All results →</a></div>
+  <div class="score-strip" id="latest"></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Season 4 Leaders</h2>
+    <a class="more" href="stats.html">Full stats →</a></div>
+  <div class="grid3" id="leaders"></div>
+</div></section>
+
+<script src="assets/js/app.js"></script>
+<script>
+CS.nav("home"); CS.footer();
+CS.countdown(document.getElementById("countdown"), "2026-11-01T19:00:00", "Registration opens Nov 1");
+(async()=>{
+  const s5 = await CS.data("season5"), s4 = await CS.data("season4");
+  const now = new Date();
+  document.getElementById("miles").innerHTML = s5.milestones.map(m=>{
+    const past = new Date(m.date) < now;
+    return `<div class="mile ${past?"past":""}"><div class="dot"></div>
+      <div><b>${m.label}</b><span>${CS.fmtDate(m.date)}</span></div></div>`;
+  }).join("");
+  // champion card
+  document.getElementById("champ-name").innerHTML = CS.team(s4.champion,"lg");
+  const finals = s4.games.filter(g=>g.stage==="Finals")[0];
+  document.getElementById("champ-body").innerHTML =
+    `<p style="color:var(--ink-dim);font-size:13.5px;margin-top:8px">Season 4 champions. Defeated
+     ${s4.runnerUp} ${Math.max(finals.score1,finals.score2)}-${Math.min(finals.score1,finals.score2)} in the Finals at St. Reweis.</p>
+     <div class="banner-row"><span class="banner">★ Season 4</span></div>
+     <p style="margin-top:14px;font-size:13px"><a class="more" href="teams.html">Team banners →</a></p>`;
+  // feasts strip: next 4 upcoming
+  const cal = await CS.data("calendar");
+  const up = cal.feasts.filter(f=>new Date(f.date)>=now).sort((a,b)=>a.date<b.date?-1:1).slice(0,4);
+  document.getElementById("feast-strip").innerHTML = up.map(f=>
+    `<div class="leader"><div class="who"><b>${f.name}</b><span>${CS.fmtDate(f.date)}</span></div>
+     <div class="val"><span>${f.rank==="major"?"MAJOR FEAST":"FEAST"}</span></div></div>`).join("") ||
+    "<p style='color:var(--ink-dim)'>Feast dates load with the calendar.</p>";
+  // latest games: playoffs onward
+  const post = s4.games.filter(g=>!g.stage.startsWith("Week"));
+  document.getElementById("latest").innerHTML = post.map(g=>CS.gameCard(g)).join("");
+  // leaders
+  const cats = [["ppg","Points Per Game"],["rpg","Rebounds Per Game"],["apg","Assists Per Game"]];
+  document.getElementById("leaders").innerHTML = cats.map(([k,label])=>{
+    const top = [...s4.players].filter(p=>p.gp>=5).sort((a,b)=>b[k]-a[k]).slice(0,5);
+    return `<div class="card"><h3>${label}</h3>`+top.map((p,i)=>
+      `<div class="leader"><span class="n">${i+1}</span>
+        <div class="who"><b>${p.name}</b>${CS.team(p.team,"sm")}</div>
+        <div class="val"><b>${p[k].toFixed(1)}</b><span>${k}</span></div></div>`).join("")+"</div>";
+  }).join("");
+})();
+</script>
+</body></html>

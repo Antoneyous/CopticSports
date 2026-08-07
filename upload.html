@@ -1,0 +1,213 @@
+<!DOCTYPE html><html lang="en"><head><title>Stat Portal | CopticSports</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="assets/js/xlsx.full.min.js"></script></head><body>
+<header id="topbar" class="topbar"></header>
+<section class="section"><div class="wrap" style="max-width:900px">
+  <div class="sec-head"><div class="bar"></div><h2>Statistician Portal</h2></div>
+  <div class="stepper">
+    <div class="step on" id="st1"><span class="b">1</span> Upload scoresheet</div>
+    <div class="step" id="st2"><span class="b">2</span> Review & validate</div>
+    <div class="step" id="st3"><span class="b">3</span> Publish</div>
+  </div>
+
+  <div id="phase1">
+    <div class="drop" id="drop">
+      <h3>Drop the weekly scoresheet here</h3>
+      <p>…or click to browse. Use the official template (<code>templates/</code> folder of the site repo).<br>
+      Legacy scoresheets from Seasons 2 to 4 are understood too.</p>
+      <input type="file" id="file" accept=".xlsx" style="display:none">
+    </div>
+    <div style="display:flex;gap:14px;margin-top:16px;flex-wrap:wrap">
+      <div class="field"><label>Season</label><select id="season"><option value="5" selected>Season 5</option><option value="4">Season 4</option></select></div>
+      <div class="field"><label>Week label</label><select id="week">
+        <option>Week 1</option><option>Week 2</option><option>Week 3</option><option>Week 4</option><option>Week 5</option>
+        <option>Week 6</option><option>Week 7</option><option>Playoffs</option><option>Semifinals</option><option>Finals</option></select></div>
+      <div class="field"><label>Game date</label><input type="date" id="gdate" value="2027-01-03"></div>
+      <div class="field"><label>Venue</label><select id="venue"><option>St. Reweis</option><option>St. Verena</option></select></div>
+    </div>
+  </div>
+
+  <div id="phase2" style="display:none">
+    <div id="valreport"></div>
+    <div id="preview"></div>
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn" id="approve">Looks right, continue</button>
+      <button class="btn ghost" id="restart">Start over</button>
+    </div>
+  </div>
+
+  <div id="phase3" style="display:none">
+    <div class="note" style="margin-bottom:18px"><b>Two ways to publish:</b><br>
+      <b>A. Direct (recommended):</b> paste a GitHub fine-grained token with <i>Contents: read & write</i> on the
+      site repo, and this page commits the updated stats. The site republishes automatically.<br>
+      <b>B. Manual:</b> download the updated JSON and replace <code>data/season5.js</code> in the repo.</div>
+    <div class="card"><h3>A · Publish via GitHub</h3>
+      <div class="field"><label>Repository (owner/name)</label><input type="text" id="repo" placeholder="tcbl/copticsports"></div>
+      <div class="field"><label>Fine-grained token (never stored)</label><input type="password" id="token" placeholder="github_pat_…"></div>
+      <button class="btn" id="publish">Publish to site</button> <span id="pubmsg"></span></div>
+    <div class="card" style="margin-top:16px"><h3>B · Manual download</h3>
+      <p style="color:var(--ink-dim);font-size:13.5px;margin-bottom:12px">Replace <code>data/season5.js</code> with this file and push.</p>
+      <button class="btn ghost" id="download">Download updated season JSON</button></div>
+  </div>
+</div></section>
+<script src="assets/js/app.js"></script>
+<script>
+CS.nav(""); CS.footer();
+const CANON={"st. andrew":"St. Andrew","st. basil":"St. Basil","st. domatius":"St. Dometius","st. dometius":"St. Dometius",
+"st. gregory":"St. Gregory","st. james":"St. James","st. john":"St. John","st. maximus":"St. Maximus","st. peter":"St. Peter",
+"st. cosmas":"St. Cosmas","st. damian":"St. Damian"};
+const canon=v=>v?CANON[String(v).replace(/^TEAM\s*\d+\s*:\s*/i,"").trim().replace(/\s+/g," ").toLowerCase()]:null;
+const HDR={"#":"num","player":"name","started":"gs","started (gs)":"gs","played (g)":"gp","2fgm":"fg2m","2fga":"fg2a",
+"3fgm":"fg3m","3fga":"fg3a","ftm":"ftm","fta":"fta","pf (1st)":"pf1","pf (2nd)":"pf2","assists":"ast","rebounds":"reb",
+"blocks":"blk","turnovers":"to","steals":"stl","totals":"tot"};
+let parsed=null, merged=null;
+
+function parseSheet(ws){
+  const A=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+  const hdrs=[];
+  A.forEach((row,r)=>{ if(row && row.some(v=>String(v).trim().toLowerCase()==="player"))
+      hdrs.push({r, main: row.some(v=>String(v).trim().toLowerCase()==="2fgm")}); });
+  const blocks=[];
+  hdrs.forEach((h,hi)=>{
+    const cols={};
+    (A[h.r]||[]).forEach((v,c)=>{ const k=HDR[String(v??"").trim().toLowerCase()]; if(k) cols[k]=c; });
+    let team=null;
+    for(const up of [1,2]){ const row=A[h.r-up]||[]; for(const cell of row.slice(0,6)){ const t=canon(cell); if(t){team=t;break;} } if(team) break; }
+    const end = hi+1<hdrs.length ? hdrs[hi+1].r-2 : Math.min(h.r+14, A.length-1);
+    const players=[];
+    for(let r=h.r+1;r<=end;r++){
+      const row=A[r]||[]; const nm=row[cols.name??1];
+      const a0=String(row[0]??"");
+      if(/^\s*(to|t\d)[:/ ]/i.test(a0)) break;
+      if(nm==null||String(nm).trim()==="") continue;
+      if(canon(nm)) break;
+      const num=k=>{const c=cols[k];if(c==null)return 0;const v=row[c];const n=parseFloat(v);return isNaN(n)?0:Math.round(n)};
+      const p={name:String(nm).trim(),num:isNaN(parseFloat(row[cols.num??0]))?null:Math.round(parseFloat(row[cols.num??0]))};
+      ["fg2m","fg2a","fg3m","fg3a","ftm","fta","ast","reb","blk","to","stl"].forEach(k=>p[k]=num(k));
+      p.pf=num("pf1")+num("pf2");
+      const gsv=row[cols.gs]; p.gs=(gsv===true||String(gsv).trim().toLowerCase()==="true")?1:0;
+      const gpv=cols.gp!=null?row[cols.gp]:null;
+      p.gp=cols.gp!=null ? ((gpv===true||String(gpv).trim().toLowerCase()==="true"||p.gs)?1:0)
+        : ((p.gs||["fg2m","fg2a","fg3m","fg3a","ftm","fta","ast","reb","pf"].some(k=>p[k]))?1:0);
+      p.pts=2*p.fg2m+3*p.fg3m+p.ftm;
+      if(h.main) players.push(p);
+    }
+    if(h.main&&team&&players.length) blocks.push({team,players});
+  });
+  return blocks;
+}
+function validate(games){
+  const msgs=[]; let errs=0;
+  games.forEach(g=>{
+    if(g.blocks.length!==2){msgs.push(`<li class="err">${g.sheet}: found ${g.blocks.length} team blocks (need 2)</li>`);errs++;return;}
+    g.blocks.forEach(b=>{
+      b.players.forEach(p=>{
+        if(p.fg2m>p.fg2a||p.fg3m>p.fg3a||p.ftm>p.fta){msgs.push(`<li class="err">${g.sheet} · ${b.team} · ${p.name}: makes exceed attempts</li>`);errs++;}
+      });
+      const pts=b.players.reduce((s,p)=>s+p.pts,0);
+      msgs.push(`<li class="ok">${g.sheet}: ${b.team}: ${b.players.filter(p=>p.gp).length} played, ${pts} pts</li>`);
+    });
+    if(g.blocks.length===2&&g.blocks[0].team===g.blocks[1].team){msgs.push(`<li class="err">${g.sheet}: same team twice</li>`);errs++;}
+  });
+  return {msgs,errs};
+}
+const drop=document.getElementById("drop"), file=document.getElementById("file");
+drop.onclick=()=>file.click();
+drop.ondragover=e=>{e.preventDefault();drop.classList.add("hot")};
+drop.ondragleave=()=>drop.classList.remove("hot");
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove("hot");handle(e.dataTransfer.files[0])};
+file.onchange=()=>handle(file.files[0]);
+async function handle(f){
+  if(!f) return;
+  const wb=XLSX.read(await f.arrayBuffer());
+  const games=wb.SheetNames.filter(n=>/^game/i.test(n)).map(n=>({sheet:n.toUpperCase(),blocks:parseSheet(wb.Sheets[n])}));
+  const {msgs,errs}=validate(games);
+  parsed={games,week:document.getElementById("week").value,date:document.getElementById("gdate").value,
+          venue:document.getElementById("venue").value,season:+document.getElementById("season").value};
+  document.getElementById("valreport").innerHTML=
+    `<div class="note" style="margin-bottom:16px"><b>${errs?`⚠️ ${errs} issue(s) need fixing`:"✓ Scoresheet validated"}</b>
+     <ul style="margin:8px 0 0 18px">${msgs.join("")}</ul></div>`;
+  document.getElementById("preview").innerHTML=games.filter(g=>g.blocks.length===2).map((g,i)=>{
+    const [a,b]=g.blocks, pa=a.players.reduce((s,p)=>s+p.pts,0), pb=b.players.reduce((s,p)=>s+p.pts,0);
+    return `<div class="game" style="margin-bottom:10px"><div class="meta"><span>${g.sheet} · ${parsed.week} · ${parsed.venue}</span><span>PREVIEW</span></div>
+      <div class="row ${pa>pb?"win":"dim"}">${CS.team(a.team)}<span class="score">${pa}</span></div>
+      <div class="row ${pb>pa?"win":"dim"}">${CS.team(b.team)}<span class="score">${pb}</span></div></div>`;
+  }).join("");
+  document.getElementById("phase1").style.display="none";
+  document.getElementById("phase2").style.display="block";
+  document.getElementById("st2").classList.add("on");
+  document.getElementById("approve").disabled=!!errs;
+}
+document.getElementById("restart").onclick=()=>location.reload();
+document.getElementById("approve").onclick=async()=>{
+  const sn=parsed.season;
+  const cur=JSON.parse(JSON.stringify(await CS.data(`season${sn}`)));
+  // re-uploading the same week replaces it rather than double-counting
+  cur.playerLines=(cur.playerLines||[]).filter(l=>l.stage!==parsed.week);
+  parsed.games.forEach((g,gi)=>{
+    if(g.blocks.length!==2)return;
+    const [a,b]=g.blocks, s1=a.players.reduce((s,p)=>s+p.pts,0), s2=b.players.reduce((s,p)=>s+p.pts,0);
+    // replace matching scheduled game or append
+    const wk=parsed.week;
+    let slot=cur.games.find(x=>x.stage===wk&&((x.team1===a.team&&x.team2===b.team)||(x.team1===b.team&&x.team2===a.team)));
+    if(!slot){slot={week:0,stage:wk,game:gi+1};cur.games.push(slot);}
+    Object.assign(slot,{date:parsed.date,venue:parsed.venue,team1:a.team,team2:b.team,score1:s1,score2:s2,
+      status:(s1===0&&s2===0)?"FFT":"F"});
+    [a,b].forEach(blk=>blk.players.forEach(p=>{
+      cur.playerLines.push({...p,team:blk.team,opp:blk===a?b.team:a.team,stage:wk,date:parsed.date});
+    }));
+  });
+  // recompute aggregates + standings client-side
+  const agg={};
+  (cur.playerLines||[]).forEach(l=>{
+    if(!l.gp)return;
+    const k=l.team+"|"+l.name+"|"+l.num;
+    const a=agg[k]=agg[k]||{name:l.name,team:l.team,num:l.num,gp:0,gs:0,pts:0,reb:0,ast:0,fg2m:0,fg2a:0,fg3m:0,fg3a:0,ftm:0,fta:0,pf:0,blk:0,to:0,stl:0};
+    a.gp++;a.gs+=l.gs;["pts","reb","ast","fg2m","fg2a","fg3m","fg3a","ftm","fta","pf","blk","to","stl"].forEach(x=>a[x]+=l[x]||0);
+  });
+  cur.players=Object.values(agg).map(a=>({...a,ppg:+(a.pts/a.gp).toFixed(1),rpg:+(a.reb/a.gp).toFixed(1),apg:+(a.ast/a.gp).toFixed(1),
+    fgp:(a.fg2a+a.fg3a)?+(100*(a.fg2m+a.fg3m)/(a.fg2a+a.fg3a)).toFixed(1):null,
+    ftp:a.fta?+(100*a.ftm/a.fta).toFixed(1):null})).sort((x,y)=>y.pts-x.pts);
+  const st={};
+  cur.games.filter(g=>g.status==="F"&&g.stage.startsWith("Week")).forEach(g=>{
+    [[g.team1,g.score1,g.score2],[g.team2,g.score2,g.score1]].forEach(([t,me,op])=>{
+      const s=st[t]=st[t]||{team:t,w:0,l:0,t:0,pf:0,pa:0};
+      s.pf+=me;s.pa+=op; me>op?s.w++:me<op?s.l++:s.t++;
+    });
+  });
+  cur.standings=Object.values(st).sort((a,b)=>(b.w/(b.w+b.l+b.t||1))-(a.w/(a.w+a.l+a.t||1))||((b.pf-b.pa)-(a.pf-a.pa)))
+    .map((s,i)=>({...s,rank:i+1,diff:s.pf-s.pa,pct:+((s.w/(s.w+s.l+s.t||1))).toFixed(3)}));
+  merged=cur;
+  document.getElementById("phase2").style.display="none";
+  document.getElementById("phase3").style.display="block";
+  document.getElementById("st3").classList.add("on");
+};
+function dataFileContents(){
+  return `CS._recv("season${parsed.season}", ` + JSON.stringify(merged) + `);\n`;
+}
+document.getElementById("download").onclick=()=>{
+  const blob=new Blob([dataFileContents()],{type:"text/javascript"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`season${parsed.season}.js`;a.click();
+};
+document.getElementById("publish").onclick=async()=>{
+  const repo=document.getElementById("repo").value.trim(), token=document.getElementById("token").value.trim();
+  const msg=document.getElementById("pubmsg");
+  if(!repo||!token){msg.innerHTML='<span class="err">Repo and token required.</span>';return;}
+  msg.textContent="Publishing…";
+  try{
+    const path=`data/season${parsed.season}.js`;
+    const api=`https://api.github.com/repos/${repo}/contents/${path}`;
+    const headers={Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json"};
+    const curFile=await fetch(api,{headers}).then(r=>r.ok?r.json():null);
+    const body={message:`stats: ${parsed.week} upload via Stat Portal`,
+      content:btoa(unescape(encodeURIComponent(dataFileContents()))), ...(curFile?{sha:curFile.sha}:{})};
+    const res=await fetch(api,{method:"PUT",headers,body:JSON.stringify(body)});
+    if(!res.ok) throw new Error((await res.json()).message||res.status);
+    msg.innerHTML='<span class="ok">✓ Published! The site rebuilds in ~1 minute.</span>';
+  }catch(e){ msg.innerHTML=`<span class="err">Failed: ${e.message}</span>`; }
+};
+</script></body></html>
