@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="en"><head><title>Standings | CopticSports</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<header id="topbar" class="topbar"></header>
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Standings</h2></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="tbl-scroll"><table class="tbl" id="stable"><thead>
+    <tr><th></th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num x">T</th>
+    <th class="num">PCT</th><th class="num x">PF</th><th class="num x">PA</th><th class="num">+/−</th></tr></thead>
+    <tbody id="body"></tbody></table></div>
+  <p class="note" style="margin-top:14px" id="footnote"></p>
+</div></section>
+<script src="assets/js/app.js"></script>
+<script>
+CS.nav("standings"); CS.footer();
+async function show(n){
+  const s = await CS.data("season"+n);
+  document.getElementById("body").innerHTML = s.standings.map(r=>`
+    <tr><td class="rank">${r.rank}</td>
+    <td>${CS.team(r.team)}
+      ${s.champion===r.team?'<span class="banner" style="margin-left:8px">★ Champions</span>':""}</td>
+    <td class="num hot">${r.w}</td><td class="num">${r.l}</td><td class="num x">${r.t||0}</td>
+    <td class="num">${r.pct.toFixed(3).slice(1)}</td><td class="num x">${r.pf}</td>
+    <td class="num x">${r.pa}</td><td class="num" style="color:${r.diff>=0?"var(--good)":"var(--bad)"}">${r.diff>0?"+":""}${r.diff}</td></tr>`).join("")
+    || `<tr><td colspan="9" style="text-align:center;color:var(--ink-dim);padding:30px">Standings will appear once Season ${n} tips off.</td></tr>`;
+  document.getElementById("footnote").textContent = n==4
+    ? "Regular season only. The Week 8 St. James / St. Peter forfeit is excluded from records."
+    : "Regular season only. Playoff seeding follows final standings.";
+}
+CS.seasonTabs(document.getElementById("tabs"), 4, show); show(4);
+CS.colToggle(document.getElementById("stable"));
+</script></body></html>

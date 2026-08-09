@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="en"><head><title>Stats | CopticSports</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1a28">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/img/logo-mini.png">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<header id="topbar" class="topbar"></header>
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Player Statistics</h2></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="grid3" id="leaders" style="margin-bottom:30px"></div>
+  <div class="sec-head"><div class="bar"></div><h2 style="font-size:19px">All Players</h2>
+    <span style="color:var(--ink-faint);font-size:12.5px">tap a column to sort</span></div>
+  <div class="tbl-scroll"><table class="tbl" id="ptable"><thead><tr>
+    <th>Player</th><th>Team</th><th class="num" data-k="gp">GP</th><th class="num" data-k="pts">PTS</th>
+    <th class="num" data-k="ppg">PPG</th><th class="num x" data-k="reb">REB</th><th class="num x" data-k="rpg">RPG</th>
+    <th class="num x" data-k="ast">AST</th><th class="num x" data-k="apg">APG</th><th class="num x" data-k="fgp">FG%</th>
+    <th class="num x" data-k="fg3m">3PM</th><th class="num x" data-k="ftp">FT%</th><th class="num x" data-k="pf">PF</th>
+  </tr></thead><tbody id="body"></tbody></table></div>
+  <p class="note" style="margin-top:14px">GP counts games with recorded activity. FG% combines 2-pt and 3-pt attempts.
+  Blocks/steals/turnovers were trialed in Season 3 and return as a full stat in Season 5.</p>
+</div></section>
+<script src="assets/js/app.js"></script>
+<script>
+CS.nav("stats"); CS.footer();
+let players = [];
+function render(list){
+  document.getElementById("body").innerHTML = list.map(p=>`
+    <tr><td><b>${p.name}</b>${p.num!=null?` <span style="color:var(--ink-faint)">#${p.num}</span>`:""}</td>
+    <td>${CS.teamShort(p.team,"sm")}</td>
+    <td class="num">${p.gp}</td><td class="num hot">${p.pts}</td><td class="num">${p.ppg.toFixed(1)}</td>
+    <td class="num x">${p.reb}</td><td class="num x">${p.rpg.toFixed(1)}</td>
+    <td class="num x">${p.ast}</td><td class="num x">${p.apg.toFixed(1)}</td>
+    <td class="num x">${p.fgp!=null?p.fgp.toFixed(1):"·"}</td><td class="num x">${p.fg3m}</td>
+    <td class="num x">${p.ftp!=null?p.ftp.toFixed(1):"·"}</td><td class="num x">${p.pf}</td></tr>`).join("")
+    || `<tr><td colspan="13" style="text-align:center;color:var(--ink-dim);padding:30px">
+        Stats land here after Week 1. Statisticians upload straight from the Stat Portal.</td></tr>`;
+}
+async function show(n){
+  const s = await CS.data("season"+n);
+  players = [...s.players];
+  render(players);
+  const cats=[["ppg","Scoring"],["rpg","Rebounding"],["apg","Playmaking"]];
+  document.getElementById("leaders").innerHTML = players.length ? cats.map(([k,label])=>{
+    const top=[...players].filter(p=>p.gp>=Math.min(3, Math.max(...players.map(x=>x.gp)))).sort((a,b)=>b[k]-a[k]).slice(0,5);
+    return `<div class="card"><h3>${label}</h3>`+top.map((p,i)=>
+      `<div class="leader"><span class="n">${i+1}</span>
+       <div class="who"><b>${p.name}</b>${CS.team(p.team,"sm")}</div>
+       <div class="val"><b>${p[k].toFixed(1)}</b><span>${k}</span></div></div>`).join("")+"</div>";
+  }).join("") : "";
+  CS.sortTable(document.getElementById("ptable"), players, render);
+}
+CS.seasonTabs(document.getElementById("tabs"), 4, show); show(4);
+CS.colToggle(document.getElementById("ptable"));
+</script></body></html>

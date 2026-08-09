@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="en"><head><title>Teams | CopticSports</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<header id="topbar" class="topbar"></header>
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2 id="title">The Teams</h2></div>
+  <div id="content"></div>
+</div></section>
+<script src="assets/js/app.js"></script>
+<script>
+CS.nav("teams"); CS.footer();
+const CHAMPS = {"St. Andrew":["Season 1"],"St. Maximus":["Season 2"],"St. James":["Season 3"],"St. Gregory":["Season 4"]};
+(async()=>{
+  const teams = await CS.data("teams");
+  const params = new URLSearchParams(location.search);
+  const pick = params.get("t");
+  if(pick && teams[pick]) return detail(pick, teams);
+  const core = Object.keys(teams).filter(t=>teams[t].seasons["5"]);
+  const legacy = Object.keys(teams).filter(t=>!teams[t].seasons["5"]);
+  const card = t => {
+    const c = CS.colors[t]||{bg:"#334",fg:"#fff"};
+    return `<a class="team-card" href="teams.html?t=${encodeURIComponent(t)}">
+      <div class="swatch" style="background:${c.bg}">
+        <span style="font-family:var(--font-disp);font-size:19px;letter-spacing:.6px;color:${c.fg};text-transform:uppercase">${t}</span></div>
+      <div class="body">
+        <p>${teams[t].seasons["5"] ? (teams[t].seasons["5"].captain || "Captain named on Draft Night") : "Alumni club, Season 2 era"}</p>
+        <div class="banner-row">${(CHAMPS[t]||[]).map(s=>`<span class="banner">★ ${s}</span>`).join("")}</div>
+      </div></a>`;
+  };
+  document.getElementById("content").innerHTML =
+    `<div class="grid4">${core.map(card).join("")}</div>
+     ${legacy.length?`<div class="sec-head" style="margin-top:40px"><div class="bar"></div><h2>Season 2 Alumni Clubs</h2></div>
+     <div class="grid4">${legacy.map(card).join("")}</div>`:""}`;
+})();
+async function detail(t, teams){
+  document.getElementById("title").innerHTML = CS.team(t,"lg");
+  const info = teams[t]; const c = CS.colors[t];
+  const secs = Object.entries(info.seasons).sort((a,b)=>b[0]-a[0]).map(([sn,d])=>{
+    const roster = (d.roster && d.roster.length)
+      ? `<table class="tbl"><thead><tr><th>Player</th><th class="num">#</th><th class="num">Pos</th></tr></thead><tbody>
+          ${d.roster.map(p=>`<tr><td>${p.name}${d.captain===p.name?' <span class="banner">C</span>':""}</td>
+          <td class="num">${p.num??""}</td><td class="num">${p.pos??""}</td></tr>`).join("")}</tbody></table>`
+      : `<p class="note">${d.note || "Roster not on record for this season."}</p>`;
+    return `<div class="card"><h3>Season ${sn}${d.jerseyColor?`: ${d.jerseyColor} jerseys`:""}</h3>
+      ${d.captain?`<p style="color:var(--ink-dim);font-size:13px;margin-bottom:10px">Captain: <b style="color:var(--ink)">${d.captain}</b></p>`:""}
+      ${roster}</div>`;
+  }).join("");
+  const chs = {"St. Andrew":"Season 1","St. Maximus":"Season 2","St. James":"Season 3","St. Gregory":"Season 4"}[t];
+  const note = info.note ? `<p class="note" style="margin-bottom:18px">${info.note}</p>` : "";
+  document.getElementById("content").innerHTML =
+    note + `<p style="margin:-8px 0 20px"><a class="more" href="teams.html">← All teams</a>
+      ${chs?`&nbsp; <span class="banner">★ ${chs} Champions</span>`:""}</p>
+     <div class="grid3">${secs}</div>`;
+}
+</script></body></html>

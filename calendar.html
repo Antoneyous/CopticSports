@@ -1,4 +1,8 @@
-<!DOCTYPE html><html lang="en"><head><title>Coptic Calendar | CopticSports</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html><html lang="en"><head><title>Coptic Calendar | CopticSports</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1a28">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/img/logo-mini.png">
 <link rel="icon" href="assets/img/logo-mini.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
@@ -13,7 +17,9 @@
     <button id="prev">‹</button><h3 id="mlabel"></h3><button id="next">›</button>
     <span style="color:var(--ink-faint);font-size:12.5px" id="fastnote"></span>
   </div>
+  <p class="ag-fastnote" id="ag-fastnote"></p>
   <div class="cal-wrap"><div class="cal" id="cal"></div></div>
+  <div class="agenda" id="agenda"></div>
   <div class="legend">
     <span><i style="background:rgba(254,111,15,.5)"></i>TCBL games & league events</span>
     <span><i style="background:rgba(61,220,132,.45)"></i>Coptic feasts</span>
@@ -67,9 +73,12 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
     const first=new Date(cur), startDow=first.getDay(), dim=new Date(cur.getFullYear(),cur.getMonth()+1,0).getDate();
     let html='["S","M","T","W","T","F","S"]'; html=JSON.parse(html).map(d=>`<div class="dow">${d}</div>`).join("");
     for(let i=0;i<startDow;i++) html+='<div class="day out"></div>';
+    let agenda="";                       // mobile day-by-day list
+    const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const todayKey=new Date().toISOString().slice(0,10);
     for(let d=1;d<=dim;d++){
       const key=`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-      const isToday = key===new Date().toISOString().slice(0,10);
+      const isToday = key===todayKey;
       const evs=(events[key]||[]).map(e=> e.teams
         ? `<div class="evt game">${CS.teamShort(e.teams[0],"sm")} <span style="opacity:.75">v</span> ${CS.teamShort(e.teams[1],"sm")}<br><span style="opacity:.8">${e.label}</span></div>`
         : `<div class="evt ${e.type} ${e.major?"major":""}">${e.label}</div>`).join("");
@@ -77,10 +86,23 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
       html+=`<div class="day ${fasting?"fasting":""} ${isToday?"today":""}">
         <span class="dnum">${d}</span> ${fasting?`<span class="fast-tag">${shortFast(fastName[key])}</span>`:""}
         ${evs}</div>`;
+      // agenda skips ordinary empty days so the list stays scannable
+      if(evs || fasting){
+        const dow=new Date(cur.getFullYear(),cur.getMonth(),d).getDay();
+        agenda+=`<div class="ag-day ${fasting?"fasting":""} ${evs?"":"quiet"} ${isToday?"today":""}">
+          <div class="ag-date"><b>${d}</b><span>${isToday?"Today":DOW[dow]}</span></div>
+          <div class="ag-body">
+            ${fasting?`<span class="fast-tag">${shortFast(fastName[key])}</span>`:""}
+            ${evs}</div></div>`;
+      }
     }
     document.getElementById("cal").innerHTML=html;
+    document.getElementById("agenda").innerHTML = agenda ||
+      `<p class="ag-empty">Nothing on the calendar this month.</p>`;
     const monthFasts=cal.fasts.filter(f=>new Date(f.end)>=cur && new Date(f.start)<=new Date(cur.getFullYear(),cur.getMonth()+1,0));
-    document.getElementById("fastnote").textContent = monthFasts.map(f=>`${f.name}: ${CS.fmtDate(f.start,{month:"short",day:"numeric"})} to ${CS.fmtDate(f.end,{month:"short",day:"numeric"})}`).join("   ·   ");
+    const fastLine = monthFasts.map(f=>`${f.name}: ${CS.fmtDate(f.start,{month:"short",day:"numeric"})} to ${CS.fmtDate(f.end,{month:"short",day:"numeric"})}`).join("   ·   ");
+    document.getElementById("fastnote").textContent = fastLine;
+    document.getElementById("ag-fastnote").textContent = fastLine;
     document.getElementById("prev").disabled = cur<=MIN;
     document.getElementById("next").disabled = new Date(cur.getFullYear(),cur.getMonth()+1,1)>MAX;
   };

@@ -68,12 +68,51 @@ const CS = {
         : line(g.team1,g.score1,w1,w2)+line(g.team2,g.score2,w2,w1)}
     </div>`;
   },
+  // tab-bar icons (24px stroke set)
+  icons:{
+    home:'M3 10.6 12 3.2l9 7.4M5.6 9.4V20.8h12.8V9.4',
+    schedule:'M8 6h12M8 12h12M8 18h12M3.6 6h.01M3.6 12h.01M3.6 18h.01',
+    teams:'M15.5 20.5v-1.4a3.8 3.8 0 0 0-3.8-3.8H6.3a3.8 3.8 0 0 0-3.8 3.8v1.4M9 11.9a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2M21.5 20.5v-1.4a3.8 3.8 0 0 0-2.9-3.7M15.8 4.9a3.6 3.6 0 0 1 0 7',
+    stats:'M3 20.5h18M6.5 20.5v-6.4M11.5 20.5V7.6M16.5 20.5v-4M21 20.5V4',
+    standings:'M7 3.8h10v5.1a5 5 0 0 1-10 0zM7 5.8H4.2v1a3 3 0 0 0 2.9 3M17 5.8h2.8v1a3 3 0 0 1-2.9 3M9 20.2h6M12 14v6.2',
+    calendar:'M3.2 8.6h17.6M7.6 3.4v3.2M16.4 3.4v3.2M4.4 6.2h15.2a1.2 1.2 0 0 1 1.2 1.2v12.4a1.2 1.2 0 0 1-1.2 1.2H4.4a1.2 1.2 0 0 1-1.2-1.2V7.4a1.2 1.2 0 0 1 1.2-1.2z'
+  },
   nav(active){
     const links = [["index.html","Home"],["schedule.html","Schedule"],["teams.html","Teams"],
       ["stats.html","Stats"],["standings.html","Standings"],["calendar.html","Calendar"]];
+    const onPortal = /upload\.html$/.test(location.pathname);
+    // ---- desktop top bar (unchanged) + mobile-only brand & portal link ----
     document.getElementById("topbar").innerHTML = `<div class="wrap">
+      <a class="brand m-only" href="index.html" aria-label="TCBL home"><img src="assets/img/logo-mini.png" alt=""></a>
+      <a class="m-only m-portal${onPortal?" on":""}" href="upload.html">Stat Portal</a>
       <nav class="nav">${links.map(([h,l])=>`<a href="${h}" class="${l.toLowerCase()===active?"on":""}">${l}</a>`).join("")}
         <a class="cta spacer" href="upload.html">Stat Portal</a></nav></div>`;
+    // ---- mobile bottom tab bar ----
+    const tabs = document.createElement("nav");
+    tabs.className = "tabbar";
+    tabs.setAttribute("aria-label","Primary");
+    tabs.innerHTML = links.map(([h,l])=>{
+      const k = l.toLowerCase(), cur = k===active;
+      return `<a href="${h}" class="${cur?"on":""}"${cur?' aria-current="page"':""}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${this.icons[k]}"/></svg>
+        <span>${l}</span></a>`;
+    }).join("");
+    document.body.appendChild(tabs);
+  },
+  // "Show all stats" control for wide tables on small screens
+  colToggle(tbl){
+    const host = tbl.closest(".tbl-scroll") || tbl;
+    if(host.previousElementSibling && host.previousElementSibling.classList.contains("more-cols")) return;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn ghost more-cols"; b.textContent = "Show all stats";
+    b.onclick = ()=>{
+      const on = tbl.classList.toggle("wide");
+      b.textContent = on ? "Show fewer stats" : "Show all stats";
+      b.setAttribute("aria-expanded", on);
+    };
+    b.setAttribute("aria-expanded","false");
+    host.insertAdjacentElement("beforebegin", b);
   },
 
   footer(){
