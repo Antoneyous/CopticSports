@@ -10,7 +10,10 @@
   --font-body:'Archivo',system-ui,sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+/* The canvas colour is what shows in the overscroll bounce and behind mobile
+   browser chrome. Matching it to the tab bar removes the black seam that
+   appeared under the tabs on iOS Safari. */
+html{scroll-behavior:smooth;background:var(--navy-950)}
 body{background:var(--ink-black);color:var(--ink);font-family:var(--font-body);line-height:1.55;
   background-image:radial-gradient(1200px 520px at 72% -12%, rgba(255,113,16,.10), transparent 60%),
                    radial-gradient(1000px 460px at 0% 0%, rgba(11,35,53,.95), transparent 60%);}
@@ -61,7 +64,6 @@ img{max-width:100%}
 .section{padding:44px 0}
 .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
 .sec-head h2{font-family:var(--font-disp);text-transform:uppercase;font-size:26px;letter-spacing:.5px}
-.sec-head .bar{flex:0 0 34px;height:6px;background:var(--orange);border-radius:3px;align-self:center}
 .sec-head .more{margin-left:auto;color:var(--orange);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
@@ -306,6 +308,10 @@ input[type=text],input[type=password],input[type=date],select{background:var(--n
     background:rgba(11,26,40,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);
     padding-bottom:env(safe-area-inset-bottom);
     box-shadow:0 -6px 22px rgba(0,0,0,.42)}
+  /* iOS Safari animates its toolbar in and out; this bleed keeps the tab bar
+     colour running past the bottom edge so no gap is ever visible mid-animation */
+  .tabbar:after{content:"";position:absolute;top:100%;left:0;right:0;height:140px;
+    background:rgba(11,26,40,.97);pointer-events:none}
   .tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     padding:8px 1px;min-height:56px;min-width:0;color:var(--ink-faint);
     font-size:8.5px;font-weight:800;letter-spacing:.2px;text-transform:uppercase;text-align:center}
@@ -350,7 +356,6 @@ input[type=text],input[type=password],input[type=date],select{background:var(--n
   .grid3,.grid4{grid-template-columns:1fr!important;gap:14px}
   .sec-head{flex-wrap:wrap;gap:10px;margin-bottom:16px}
   .sec-head h2{font-size:21px}
-  .sec-head .bar{flex:0 0 26px;height:5px}
   .sec-head .more{font-size:12px;width:100%;margin-left:0;order:3}
   .card{padding:16px;border-radius:14px}
   .score-strip{grid-template-columns:1fr;gap:12px}
