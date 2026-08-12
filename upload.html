@@ -103,6 +103,22 @@ function parseSheet(ws){
   });
   return blocks;
 }
+/* Rewrite every scoresheet name to the roster's "First Last" before anything
+   downstream sees it, and drop label rows the parser mistakes for players.
+   Returns the names the roster could not explain, for the validation report. */
+async function canonize(games,season){
+  const idx=await CS.rosterIndex(season), unknown=[], conflict=[];
+  games.forEach(g=>g.blocks.forEach(b=>{
+    b.players=b.players.filter(p=>!CS.JUNK.test(String(p.name||"")));
+    b.players.forEach(p=>{
+      const r=CS.canonName(idx,b.team,p.num,p.name);
+      if(r.how==="conflict") conflict.push(`${b.team} #${p.num} "${p.name}" (that number belongs to ${r.suggest})`);
+      else if(r.how==="unknown") unknown.push(`${b.team} #${p.num??"?"} "${p.name}"`);
+      else p.name=r.name;
+    });
+  }));
+  return {unknown,conflict};
+}
 function validate(games){
   const msgs=[]; let errs=0;
   games.forEach(g=>{
@@ -128,7 +144,13 @@ async function handle(f){
   if(!f) return;
   const wb=XLSX.read(await f.arrayBuffer());
   const games=wb.SheetNames.filter(n=>/^game/i.test(n)).map(n=>({sheet:n.toUpperCase(),blocks:parseSheet(wb.Sheets[n])}));
+  const season=+document.getElementById("season").value;
+  const {unknown,conflict}=await canonize(games,season);
   const {msgs,errs}=validate(games);
+  if(conflict.length) msgs.unshift(`<li class="err">${conflict.length} jersey number conflict(s) — `+
+    `left as typed rather than merged into the wrong player. Fix the sheet or add them to the roster: ${conflict.join("; ")}</li>`);
+  if(unknown.length) msgs.unshift(`<li class="err">${unknown.length} name(s) not on the roster — `+
+    `they will be saved exactly as typed: ${unknown.join(", ")}</li>`);
   parsed={games,week:document.getElementById("week").value,date:document.getElementById("gdate").value,
           venue:document.getElementById("venue").value,season:+document.getElementById("season").value};
   document.getElementById("valreport").innerHTML=
@@ -168,7 +190,9 @@ document.getElementById("approve").onclick=async()=>{
   const agg={};
   (cur.playerLines||[]).forEach(l=>{
     if(!l.gp)return;
-    const k=l.team+"|"+l.name+"|"+l.num;
+    // key on the canonical name only — a wrong jersey number on one week's
+    // sheet must not fork a player into two season rows
+    const k=l.team+"|"+l.name;
     const a=agg[k]=agg[k]||{name:l.name,team:l.team,num:l.num,gp:0,gs:0,pts:0,reb:0,ast:0,fg2m:0,fg2a:0,fg3m:0,fg3a:0,ftm:0,fta:0,pf:0,blk:0,to:0,stl:0};
     a.gp++;a.gs+=l.gs;["pts","reb","ast","fg2m","fg2a","fg3m","fg3a","ftm","fta","pf","blk","to","stl"].forEach(x=>a[x]+=l[x]||0);
   });

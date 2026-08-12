@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="en"><head><title>Register | CopticSports</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1a28">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Season 5 registration for the Tampa Bay Coptic Basketball League. $100 player fee, 72-player cap, ages 18 and up.">
+<link rel="apple-touch-icon" href="assets/img/logo-mini.png">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<header id="topbar" class="topbar"></header>
+
+<section class="hero"><div class="wrap hero-grid">
+  <div>
+    <div class="kicker">Tampa Bay Coptic Basketball League</div>
+    <h1><span>Season 5</span><span class="accent">Registration</span></h1>
+    <p class="verse">Players sign up individually. Teams are formed at the captains' draft.</p>
+    <div class="pillars"><span class="pill"><i>✚</i>Faith</span>
+      <span class="pill"><i>✚</i>Fellowship</span><span class="pill"><i>✚</i>Fitness</span></div>
+    <div class="count" id="regcount"></div>
+    <div class="hero-cta" id="hero-reg"></div>
+  </div>
+  <img class="hero-logo" src="assets/img/logo-white.png" alt="TCBL logo">
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Before You Register</h2>
+    <a class="more" href="calendar.html">Full calendar →</a></div>
+  <div class="grid3">
+    <div class="card"><span class="tag">$100</span><h3>Player Fee</h3>
+      <p class="cardp">A non-refundable $100 covers a personalized dry-fit TCBL jersey and guarantees
+      at least eight full-length games. Coach and volunteer registration is free.</p>
+      <div class="banner-row"><span class="banner">Extra jerseys $20</span></div></div>
+
+    <div class="card"><span class="tag">72 Spots</span><h3>Player Cap</h3>
+      <p class="cardp">Season 5 is capped at 72 players to protect the quality of the league and respect
+      our facilities, referees, and church schedules. Register early — when the cap is reached,
+      you can still join as a coach or volunteer.</p></div>
+
+    <div class="card"><h3>Who Can Play</h3>
+      <p class="cardp">Men ages 18 and up from any Coptic Orthodox church in the Tampa Bay area.
+      We are sanctioned under the Coptic Orthodox Diocese of the Southern United States and are not
+      tied to a single parish. Your home church has no bearing on your team.</p></div>
+  </div>
+
+  <div class="grid3" style="margin-top:16px">
+    <div class="card"><h3>How Teams Are Formed</h3>
+      <p class="cardp">The league committee selects eight captains from the registration pool. Captains
+      then take turns picking teammates at a private draft, landing each roster at 8–10 players.</p></div>
+
+    <div class="card"><h3>Season Format</h3>
+      <p class="cardp">Ten consecutive Sundays, 3:30–8:00 PM, alternating between St. Verena and
+      St. Reweis. Games are 40 minutes — two 20-minute halves — with professional referees.
+      Season 5 runs Jan 3 through the Finals on Mar 14, 2027.</p></div>
+
+    <div class="card"><h3>Key Dates</h3><div class="timeline" id="regmiles"></div></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Sign Up</h2></div>
+
+  <div class="signup">
+    <div>
+      <h3>Ready to play?</h3>
+      <p class="cardp">The form takes about five minutes. You'll enter player details and an emergency
+      contact, sign the release of liability and league rules, then pay by card, Apple&nbsp;Pay, or
+      Google&nbsp;Pay. A confirmation email arrives right away — check your spam folder if it doesn't.</p>
+      <div class="signup-list">
+        <span>✚ Have your emergency contact's phone number ready</span>
+        <span>✚ Know your shirt size</span>
+        <span>✚ Payment is handled securely by JotForm</span>
+      </div>
+    </div>
+    <div class="signup-go" id="signup-go"></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Questions</h2></div>
+  <div class="grid3">
+    <div class="card"><h3>Email</h3><p class="cardp"><a class="more" href="mailto:coptichoops@gmail.com">coptichoops@gmail.com</a></p></div>
+    <div class="card"><h3>Instagram</h3><p class="cardp"><a class="more" href="https://instagram.com/coptichoops" target="_blank" rel="noopener">@coptichoops</a></p></div>
+    <div class="card"><h3>Watch Live</h3><p class="cardp"><a class="more" href="https://www.youtube.com/@Coptichoops" target="_blank" rel="noopener">youtube.com/@Coptichoops</a></p></div>
+  </div>
+  <p class="formnote" style="margin-top:18px">The league operates under the guidance of Fr. Fam Nicoula
+  and a dedicated team of servants.</p>
+</div></section>
+
+<script src="assets/js/app.js"></script>
+<script>
+CS.nav("register"); CS.footer();
+
+const state = CS.regState();
+CS.regButton(document.getElementById("hero-reg"));
+(function(){
+  const el = document.getElementById("regcount");
+  if(state==="soon")      CS.countdown(el, CS.reg.open,  "Registration opens Nov 1");
+  else if(state==="open") CS.countdown(el, CS.reg.close, "Registration closes Nov 8");
+  else el.innerHTML = `<div class="count-label">Season 5 registration is closed</div>
+    <div class="cell" style="flex:1"><b style="font-size:19px">Email us about the waitlist</b>
+    <span>coptichoops@gmail.com</span></div>`;
+})();
+// the big call to action mirrors the same state
+(function(){
+  const go = document.getElementById("signup-go");
+  if(state==="open"){
+    go.innerHTML = `<a class="btn big" href="${CS.reg.form}" target="_blank" rel="noopener">Open Registration Form</a>
+      <span class="signup-sub">Opens in a new tab</span>
+      <span class="signup-sub">Coach &amp; volunteer sign-up is on the same form</span>`;
+  } else if(state==="soon"){
+    go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Opens Nov 1, 2026</span>
+      <span class="signup-sub">The form unlocks automatically</span>
+      <span class="signup-sub">Registration closes Nov 8</span>`;
+  } else {
+    go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Registration closed</span>
+      <span class="signup-sub">Email coptichoops@gmail.com about the waitlist</span>`;
+  }
+})();
+
+(async()=>{
+  const s5 = await CS.data("season5"), now = new Date();
+  document.getElementById("regmiles").innerHTML = s5.milestones.slice(0,4).map(m=>{
+    const past = new Date(m.date) < now;
+    return `<div class="mile ${past?"past":""}"><div class="dot"></div>
+      <div><b>${m.label}</b><span>${CS.fmtDate(m.date)}</span></div></div>`;
+  }).join("");
+})();
+</script>
+</body></html>

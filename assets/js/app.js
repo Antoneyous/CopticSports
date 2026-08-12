@@ -44,6 +44,152 @@ const CS = {
     return `<span class="tpill${size?" "+size:""}${light?" light":""}" style="background:${c.bg};color:${c.fg}">${name.replace("St. ","")}</span>`;
   },
 
+  /* ---- YouTube live stream ----
+     There is no way to ask YouTube "are you live?" from a static page without
+     an API key, so the schedule is the source of truth: a game day is treated
+     as live from 15 minutes before the first tip-off to 90 after the last. */
+  yt:{ channel:"UC7ZiDacChTUNhqhS9G1i53Q", url:"https://www.youtube.com/@Coptichoops" },
+  LIVE_PRE: 15, LIVE_POST: 90,   // minutes either side of the day's games
+
+  liveWindow(games, now){
+    now = now || new Date();
+    const byDate = {};
+    games.forEach(g=>{ if(g.date && g.time) (byDate[g.date] ||= []).push(g); });
+    const days = Object.keys(byDate).sort().map(d=>{
+      const t = byDate[d].map(g=> +new Date(`${d}T${g.time}:00`));
+      return { date:d, games:byDate[d].sort((a,b)=>a.time<b.time?-1:1),
+               start:new Date(Math.min(...t) - this.LIVE_PRE*6e4),
+               end:  new Date(Math.max(...t) + this.LIVE_POST*6e4) };
+    });
+    return { live: days.find(x=> now>=x.start && now<=x.end) || null,
+             next: days.find(x=> now < x.start) || null };
+  },
+  liveEmbed(){
+    return `<div class="ytwrap"><iframe
+      src="https://www.youtube.com/embed/live_stream?channel=${this.yt.channel}"
+      title="TCBL live stream" loading="lazy" allowfullscreen
+      allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+      referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
+  },
+  matchups(games){
+    const m = games.filter(g=>g.team1 && g.team2).map(g=>
+      `<span class="mchip">${this.teamShort(g.team1,"sm")}<i>vs</i>${this.teamShort(g.team2,"sm")}
+        <b>${this.fmtTime(g.time)}</b></span>`).join("");
+    return m ? `<div class="mgrid">${m}</div>` : "";
+  },
+  // Renders the player when a game is on, and a countdown to the next one when not.
+  async liveSection(host){
+    if(!host) return;
+    const w = this.liveWindow((await this.data("season5")).games);
+    if(w.live){
+      host.innerHTML = `<div class="livenow"><span class="ldot"></span>Live now ·
+        ${this.fmtDate(w.live.date)}${w.live.games[0].venue?" · "+w.live.games[0].venue:""}</div>
+        ${this.liveEmbed()}${this.matchups(w.live.games)}`;
+    } else if(w.next){
+      host.innerHTML = `<div class="card offair"><h3>Off air right now</h3>
+        <p class="cardp">Every TCBL game is streamed on our YouTube channel. This player switches
+        itself on when the first ball tips — no need to go looking for the link.</p>
+        <div class="count" id="live-count"></div>
+        ${this.matchups(w.next.games)}
+        <p style="margin-top:16px"><a class="btn ghost" href="${this.yt.url}"
+          target="_blank" rel="noopener">Past broadcasts on YouTube</a></p></div>`;
+      this.countdown(document.getElementById("live-count"), w.next.start.toISOString(),
+        `Next tip-off · ${this.fmtDate(w.next.date)}`);
+    } else {
+      host.innerHTML = `<div class="card offair"><h3>That's a wrap on the season</h3>
+        <p class="cardp">Every game from the season is up on our YouTube channel.</p>
+        <p style="margin-top:14px"><a class="btn ghost" href="${this.yt.url}"
+          target="_blank" rel="noopener">Watch on YouTube</a></p></div>`;
+    }
+  },
+  // Slim site-wide bar, skipped on pages that already show the player.
+  async liveBar(){
+    if(document.getElementById("livehost")) return;
+    const w = this.liveWindow((await this.data("season5")).games);
+    if(!w.live) return;
+    const a = document.createElement("a");
+    a.className = "livebar"; a.href = "index.html#live";
+    a.innerHTML = `<span class="ldot"></span><b>We're live now</b>
+      <span>Watch today's games →</span>`;
+    document.body.insertBefore(a, document.body.firstChild);
+  },
+
+  /* ---- registration state ----
+     One source of truth for the window so the hero button, the register page
+     and anything added later can never disagree. */
+  reg:{ open:"2026-11-01T19:00:00", close:"2026-11-08T23:59:00",
+        form:"https://pci.jotform.com/form/253064435211144" },
+  regState(now){
+    now = now || new Date();
+    if(now < new Date(this.reg.open))  return "soon";
+    if(now < new Date(this.reg.close)) return "open";
+    return "closed";
+  },
+  // Locked until registration opens, live during the window, retired after.
+  regButton(el, href){
+    if(!el) return;
+    const s = this.regState();
+    if(s==="open"){
+      el.innerHTML = `<a class="btn" href="${href||this.reg.form}">Register for Season 5</a>`;
+    } else if(s==="soon"){
+      el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link"
+        title="Registration opens November 1, 2026">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+        Registration opens Nov 1</span>`;
+    } else {
+      el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link">
+        Registration closed for Season 5</span>`;
+    }
+    return s;
+  },
+
+  /* ---- name canonicalisation ----
+     Scoresheets record people as "Hanna", "M. Hanna", "Hanna M" and so on. The
+     roster in teams.js is the source of truth, joined on jersey number, which
+     is the one field scorekeepers get right. Without this, one player's season
+     splits across several rows and the leaderboards undercount. */
+  JUNK: /^(livestream|overlay|scoreboard|stream)\b|^[\s\-:]*$/i,
+  async rosterIndex(season){
+    const teams = await this.data("teams");
+    const byNum = {}, bySur = {};
+    Object.entries(teams).forEach(([tn,t])=>{
+      ((((t.seasons||{})[String(season)])||{}).roster||[]).forEach(p=>{
+        byNum[tn+"|"+p.num] = p.name;
+        const s = tn+"|"+p.name.split(/\s+/).pop().toLowerCase();
+        (bySur[s] = bySur[s] || []).push(p.name);
+      });
+    });
+    return { byNum, bySur };
+  },
+  canonName(idx, team, num, raw){
+    const words = (String(raw||"").toLowerCase().match(/[a-z]{2,}/g)) || [];
+    const hit = idx.byNum[team+"|"+num];
+    if(hit){
+      // guard: a stranger wearing someone else's number must not be absorbed
+      // into that player. Only accept the match if a word actually agrees.
+      const rw = hit.toLowerCase().match(/[a-z]{2,}/g) || [];
+      const agrees = !words.length || words.some(w=>rw.includes(w));
+      return agrees ? { name:hit, how:"roster" }
+                    : { name:raw, how:"conflict", suggest:hit };
+    }
+    const sur = words.length ? words[words.length-1] : "";
+    const c = idx.bySur[team+"|"+sur] || [];
+    if(c.length===1) return { name:c[0], how:"surname" };
+    return { name:raw, how:"unknown" };
+  },
+
+  // 3-letter code for tight spots like calendar cells. Unique across all ten clubs.
+  abbr(name){ return name ? name.replace(/^St\.\s*/,"").slice(0,3).toUpperCase() : ""; },
+  teamTag(name){
+    if(!name) return "";
+    const c = this.colors[name] || {bg:"#1b405e",fg:"#ffffff"};
+    const light = ["#ffffff","#ccba92","#67aade","#b2d034"].includes(c.bg.toLowerCase());
+    return `<span class="ab${light?" light":""}" style="background:${c.bg};color:${c.fg}"
+      title="${name}">${this.abbr(name)}</span>`;
+  },
+
   fmtDate(d, opts){
     if(!d) return "TBD";
     return new Date(d+"T12:00:00").toLocaleDateString("en-US", opts || {weekday:"short", month:"short", day:"numeric", year:"numeric"});
@@ -81,11 +227,12 @@ const CS = {
     const links = [["index.html","Home"],["schedule.html","Schedule"],["teams.html","Teams"],
       ["stats.html","Stats"],["standings.html","Standings"],["calendar.html","Calendar"]];
     const onPortal = /upload\.html$/.test(location.pathname);
-    // ---- desktop top bar (unchanged) + mobile-only brand & portal link ----
+    // ---- desktop top bar + mobile-only brand & portal link ----
     document.getElementById("topbar").innerHTML = `<div class="wrap">
       <a class="brand m-only" href="index.html" aria-label="TCBL home"><img src="assets/img/logo-mini.png" alt=""></a>
       <a class="m-only m-portal${onPortal?" on":""}" href="upload.html">Stat Portal</a>
-      <nav class="nav">${links.map(([h,l])=>`<a href="${h}" class="${l.toLowerCase()===active?"on":""}">${l}</a>`).join("")}
+      <nav class="nav">${links.map(([h,l])=>
+        `<a href="${h}" class="${l.toLowerCase()===active?"on":""}">${l}</a>`).join("")}
         <a class="cta spacer" href="upload.html">Stat Portal</a></nav></div>`;
     // ---- mobile bottom tab bar ----
     const tabs = document.createElement("nav");
@@ -99,6 +246,7 @@ const CS = {
         <span>${l}</span></a>`;
     }).join("");
     document.body.appendChild(tabs);
+    this.liveBar();
   },
   // "Show all stats" control for wide tables on small screens
   colToggle(tbl){
@@ -136,9 +284,14 @@ const CS = {
     };
     tick(); setInterval(tick, 1000);
   },
-  seasonTabs(el, current, onPick, disable1){
+  async seasonTabs(el, current, onPick, disable1){
+    // which season is live comes from seasons.js, never a hardcoded number
+    const meta = await this.data("seasons");
+    const cur = (meta.find(s=>s.current) || {}).id;
     el.innerHTML = [5,4,3,2,1].map(n=>
-      `<button data-s="${n}" ${n===current?'class="on"':""} ${n===1&&disable1?"disabled title='Season 1 archive coming soon'":""}>Season ${n}</button>`).join("");
+      `<span class="tabwrap"><button data-s="${n}" ${n===current?'class="on"':""}
+        ${n===1&&disable1?"disabled title='Season 1 archive coming soon'":""}
+        >Season ${n}</button>${n===cur?'<i class="nowlabel">Current</i>':""}</span>`).join("");
     el.querySelectorAll("button").forEach(b=>b.onclick=()=>{
       el.querySelectorAll("button").forEach(x=>x.classList.remove("on"));
       b.classList.add("on"); onPick(+b.dataset.s);

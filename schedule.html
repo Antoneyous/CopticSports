@@ -8,6 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css"></head><body>
 <header id="topbar" class="topbar"></header>
+<section class="section" id="live"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Watch Live</h2>
+    <a class="more" href="https://www.youtube.com/@Coptichoops" target="_blank" rel="noopener">Our YouTube channel →</a></div>
+  <div id="livehost"></div>
+</div></section>
 <section class="section"><div class="wrap">
   <div class="sec-head"><div class="bar"></div><h2>Schedule & Results</h2></div>
   <div class="tabs" id="tabs"></div>
@@ -16,6 +21,7 @@
 <script src="assets/js/app.js"></script>
 <script>
 CS.nav("schedule"); CS.footer();
+CS.liveSection(document.getElementById("livehost"));
 async function show(n){
   const s = await CS.data("season"+n);
   const byWeek = {};

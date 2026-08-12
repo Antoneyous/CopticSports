@@ -18,8 +18,15 @@
     <div class="pillars"><span class="pill"><i>✚</i>Faith</span>
       <span class="pill"><i>✚</i>Fellowship</span><span class="pill"><i>✚</i>Fitness</span></div>
     <div class="count" id="countdown"></div>
+    <div class="hero-cta" id="hero-reg"></div>
   </div>
   <img class="hero-logo" src="assets/img/logo-white.png" alt="TCBL logo">
+</div></section>
+
+<section class="section" id="live"><div class="wrap">
+  <div class="sec-head"><div class="bar"></div><h2>Watch Live</h2>
+    <a class="more" href="https://www.youtube.com/@Coptichoops" target="_blank" rel="noopener">Our YouTube channel →</a></div>
+  <div id="livehost"></div>
 </div></section>
 
 <section class="section"><div class="wrap">
@@ -49,13 +56,17 @@
 <script>
 CS.nav("home"); CS.footer();
 CS.countdown(document.getElementById("countdown"), "2026-11-01T19:00:00", "Registration opens Nov 1");
+CS.liveSection(document.getElementById("livehost"));
+CS.regButton(document.getElementById("hero-reg"), "register.html");
 (async()=>{
   const s5 = await CS.data("season5"), s4 = await CS.data("season4");
   const now = new Date();
   document.getElementById("miles").innerHTML = s5.milestones.map(m=>{
     const past = new Date(m.date) < now;
+    const label = /^Registration/.test(m.label)
+      ? `<a href="register.html">${m.label} →</a>` : m.label;
     return `<div class="mile ${past?"past":""}"><div class="dot"></div>
-      <div><b>${m.label}</b><span>${CS.fmtDate(m.date)}</span></div></div>`;
+      <div><b>${label}</b><span>${CS.fmtDate(m.date)}</span></div></div>`;
   }).join("");
   // champion card
   document.getElementById("champ-name").innerHTML = CS.team(s4.champion,"lg");

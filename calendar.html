@@ -79,8 +79,13 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
     for(let d=1;d<=dim;d++){
       const key=`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
       const isToday = key===todayKey;
+      // grid cells are ~100px wide, so games collapse to one line: time + two codes
       const evs=(events[key]||[]).map(e=> e.teams
-        ? `<div class="evt game">${CS.teamShort(e.teams[0],"sm")} <span style="opacity:.75">v</span> ${CS.teamShort(e.teams[1],"sm")}<br><span style="opacity:.8">${e.label}</span></div>`
+        ? `<div class="evt game"><b class="t">${e.label.replace(/\s?[AP]M$/,"")}</b>${CS.teamTag(e.teams[0])}<i>v</i>${CS.teamTag(e.teams[1])}</div>`
+        : `<div class="evt ${e.type} ${e.major?"major":""}">${e.label}</div>`).join("");
+      // the mobile agenda has room for real names
+      const evsAg=(events[key]||[]).map(e=> e.teams
+        ? `<div class="evt game ag">${CS.teamShort(e.teams[0],"sm")}<i>v</i>${CS.teamShort(e.teams[1],"sm")}<b class="t">${e.label}</b></div>`
         : `<div class="evt ${e.type} ${e.major?"major":""}">${e.label}</div>`).join("");
       const fasting=fastDays.has(key);
       html+=`<div class="day ${fasting?"fasting":""} ${isToday?"today":""}">
@@ -93,7 +98,7 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
           <div class="ag-date"><b>${d}</b><span>${isToday?"Today":DOW[dow]}</span></div>
           <div class="ag-body">
             ${fasting?`<span class="fast-tag">${shortFast(fastName[key])}</span>`:""}
-            ${evs}</div></div>`;
+            ${evsAg}</div></div>`;
       }
     }
     document.getElementById("cal").innerHTML=html;
