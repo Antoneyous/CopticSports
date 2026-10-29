@@ -94,14 +94,14 @@
 <script>
 CS.nav("register"); CS.footer();
 
-// Everything below re-renders by itself at 7 PM Nov 1 and again when registration
+// Everything below re-renders by itself at 7 PM Nov 8 and again when registration
 // closes, so nobody has to refresh.
 CS.regWatch(state=>{
 CS.regButton(document.getElementById("hero-reg"));
 (function(){
   const el = document.getElementById("regcount");
-  if(state==="soon")      CS.countdown(el, CS.reg.open,  "Registration opens Nov 1 · 7 PM");
-  else if(state==="open") CS.countdown(el, CS.reg.close, "Registration closes Nov 8 · 11:59 PM");
+  if(state==="soon")      CS.countdown(el, CS.reg.open,  "Registration opens Nov 8 · 7 PM");
+  else if(state==="open") CS.countdown(el, CS.reg.close, "Registration closes Nov 15 · 11:59 PM");
   else { clearInterval(el._cd); el.innerHTML = `<div class="count-label">Season 5 registration is closed</div>
     <div class="cell wide"><b style="font-size:19px">Email us about the waitlist</b>
     <span>coptichoops@gmail.com</span></div>`; }
@@ -114,9 +114,9 @@ CS.regButton(document.getElementById("hero-reg"));
       <span class="signup-sub">Opens in a new tab</span>
       <span class="signup-sub">Coach &amp; volunteer sign-up is on the same form</span>`;
   } else if(state==="soon"){
-    go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Opens Nov 1 · 7 PM</span>
+    go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Opens Nov 8 · 7 PM</span>
       <span class="signup-sub">This button unlocks by itself at 7:00 PM Eastern</span>
-      <span class="signup-sub">Registration closes Nov 8</span>`;
+      <span class="signup-sub">Registration closes Nov 15</span>`;
   } else {
     go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Registration closed</span>
       <span class="signup-sub">Email coptichoops@gmail.com about the waitlist</span>`;

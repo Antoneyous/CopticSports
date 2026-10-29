@@ -63,8 +63,8 @@ CS.liveSection(document.getElementById("livehost"));
 CS.regWatch(async s=>{
   const el = document.getElementById("countdown");
   CS.regButton(document.getElementById("hero-reg"), "register.html");
-  if(s==="soon")      CS.countdown(el, CS.reg.open,  "Registration opens Nov 1 · 7 PM");
-  else if(s==="open") CS.countdown(el, CS.reg.close, "Registration closes Nov 8 · 11:59 PM");
+  if(s==="soon")      CS.countdown(el, CS.reg.open,  "Registration opens Nov 8 · 7 PM");
+  else if(s==="open") CS.countdown(el, CS.reg.close, "Registration closes Nov 15 · 11:59 PM");
   else {
     const g = (await CS.data("season5")).games.find(g=>g.date && g.time);
     if(g) CS.countdown(el, CS.et(g.date, g.time), "Season 5 tips off " + CS.fmtDate(g.date,{month:"short",day:"numeric"}));

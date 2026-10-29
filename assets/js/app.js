@@ -123,7 +123,7 @@ const CS = {
      and anything added later can never disagree. */
   // Times carry Tampa's UTC offset (EST, -05:00) so every visitor gets the same
   // moment, wherever their device's clock is set.
-  reg:{ open:"2026-11-01T19:00:00-05:00", close:"2026-11-08T23:59:00-05:00",
+  reg:{ open:"2026-11-08T19:00:00-05:00", close:"2026-11-15T23:59:00-05:00",
         form:"https://pci.jotform.com/form/253064435211144" },
   regState(now){
     now = now || new Date();
@@ -139,11 +139,11 @@ const CS = {
       el.innerHTML = `<a class="btn" href="${href||this.reg.form}">Register for Season 5</a>`;
     } else if(s==="soon"){
       el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link"
-        title="Registration opens November 1, 2026 at 7:00 PM Eastern">
+        title="Registration opens November 8, 2026 at 7:00 PM Eastern">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
-        Registration opens Nov 1</span>`;
+        Registration opens Nov 8</span>`;
     } else {
       el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link">
         Registration closed for Season 5</span>`;
