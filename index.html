@@ -58,19 +58,29 @@
 <script src="assets/js/app.js"></script>
 <script>
 CS.nav("home"); CS.footer();
-CS.countdown(document.getElementById("countdown"), "2026-11-01T19:00:00", "Registration opens Nov 1");
 CS.liveSection(document.getElementById("livehost"));
-CS.regButton(document.getElementById("hero-reg"), "register.html");
+// Hero countdown + button follow registration: opens -> closes -> tip-off.
+CS.regWatch(async s=>{
+  const el = document.getElementById("countdown");
+  CS.regButton(document.getElementById("hero-reg"), "register.html");
+  if(s==="soon")      CS.countdown(el, CS.reg.open,  "Registration opens Nov 1 · 7 PM");
+  else if(s==="open") CS.countdown(el, CS.reg.close, "Registration closes Nov 8 · 11:59 PM");
+  else {
+    const g = (await CS.data("season5")).games.find(g=>g.date && g.time);
+    if(g) CS.countdown(el, CS.et(g.date, g.time), "Season 5 tips off " + CS.fmtDate(g.date,{month:"short",day:"numeric"}));
+  }
+});
 (async()=>{
   const s5 = await CS.data("season5"), s4 = await CS.data("season4");
-  const now = new Date();
-  document.getElementById("miles").innerHTML = s5.milestones.map(m=>{
-    const past = new Date(m.date) < now;
+  const today = CS.todayET();
+  // re-drawn when registration opens/closes so those milestones tick off live
+  CS.regWatch(()=>{ document.getElementById("miles").innerHTML = s5.milestones.map(m=>{
+    const past = CS.milestonePast(m);
     const label = /^Registration/.test(m.label)
       ? `<a href="register.html">${m.label} →</a>` : m.label;
     return `<div class="mile ${past?"past":""}"><div class="dot"></div>
       <div><b>${label}</b><span>${CS.fmtDate(m.date)}</span></div></div>`;
-  }).join("");
+  }).join(""); });
   // champion card
   document.getElementById("champ-name").innerHTML = CS.team(s4.champion,"lg");
   const finals = s4.games.filter(g=>g.stage==="Finals")[0];
@@ -81,7 +91,7 @@ CS.regButton(document.getElementById("hero-reg"), "register.html");
      <p style="margin-top:14px;font-size:13px"><a class="more" href="teams.html">Team banners →</a></p>`;
   // feasts strip: next 4 upcoming
   const cal = await CS.data("calendar");
-  const up = cal.feasts.filter(f=>new Date(f.date)>=now).sort((a,b)=>a.date<b.date?-1:1).slice(0,4);
+  const up = cal.feasts.filter(f=>f.date>=today).sort((a,b)=>a.date<b.date?-1:1).slice(0,4);
   document.getElementById("feast-strip").innerHTML = up.map(f=>
     `<div class="leader"><div class="who"><b>${f.name}</b><span>${CS.fmtDate(f.date)}</span></div>
      <div class="val"><span>${f.rank==="major"?"MAJOR FEAST":"FEAST"}</span></div></div>`).join("") ||
@@ -92,7 +102,9 @@ CS.regButton(document.getElementById("hero-reg"), "register.html");
   // leaders
   const cats = [["ppg","Points Per Game"],["rpg","Rebounds Per Game"],["apg","Assists Per Game"]];
   document.getElementById("leaders").innerHTML = cats.map(([k,label])=>{
-    const top = [...s4.players].filter(p=>p.gp>=5).sort((a,b)=>b[k]-a[k]).slice(0,5);
+    // no games-played minimum: averages divide by games actually played, so a
+    // player is never diluted by games they missed, and never hidden either
+    const top = [...s4.players].sort((a,b)=>b[k]-a[k]).slice(0,5);
     return `<div class="card"><h3>${label}</h3>`+top.map((p,i)=>
       `<div class="leader"><span class="n">${i+1}</span>
         <div class="who"><b>${p.name}</b>${CS.team(p.team,"sm")}</div>

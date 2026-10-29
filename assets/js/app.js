@@ -56,7 +56,7 @@ const CS = {
     const byDate = {};
     games.forEach(g=>{ if(g.date && g.time) (byDate[g.date] ||= []).push(g); });
     const days = Object.keys(byDate).sort().map(d=>{
-      const t = byDate[d].map(g=> +new Date(`${d}T${g.time}:00`));
+      const t = byDate[d].map(g=> +this.et(d, g.time));   // Tampa time, not the viewer's
       return { date:d, games:byDate[d].sort((a,b)=>a.time<b.time?-1:1),
                start:new Date(Math.min(...t) - this.LIVE_PRE*6e4),
                end:  new Date(Math.max(...t) + this.LIVE_POST*6e4) };
@@ -81,7 +81,10 @@ const CS = {
   async liveSection(host){
     if(!host) return;
     const w = this.liveWindow((await this.data("season5")).games);
+    clearTimeout(host._liveT);
     if(w.live){
+      // switch back to "off air" by itself once the day's games are over
+      host._liveT = setTimeout(()=>this.liveSection(host), Math.min(w.live.end - new Date() + 1000, 2**31-1));
       host.innerHTML = `<div class="livenow"><span class="ldot"></span>Live now ·
         ${this.fmtDate(w.live.date)}${w.live.games[0].venue?" · "+w.live.games[0].venue:""}</div>
         ${this.liveEmbed()}${this.matchups(w.live.games)}`;
@@ -93,8 +96,9 @@ const CS = {
         ${this.matchups(w.next.games)}
         <p style="margin-top:16px"><a class="btn ghost" href="${this.yt.url}"
           target="_blank" rel="noopener">Past broadcasts on YouTube</a></p></div>`;
+      // when the countdown runs out, re-render so the player appears without a refresh
       this.countdown(document.getElementById("live-count"), w.next.start.toISOString(),
-        `Next tip-off · ${this.fmtDate(w.next.date)}`);
+        `Next tip-off · ${this.fmtDate(w.next.date)}`, ()=>this.liveSection(host));
     } else {
       host.innerHTML = `<div class="card offair"><h3>That's a wrap on the season</h3>
         <p class="cardp">Every game from the season is up on our YouTube channel.</p>
@@ -117,7 +121,9 @@ const CS = {
   /* ---- registration state ----
      One source of truth for the window so the hero button, the register page
      and anything added later can never disagree. */
-  reg:{ open:"2026-11-01T19:00:00", close:"2026-11-08T23:59:00",
+  // Times carry Tampa's UTC offset (EST, -05:00) so every visitor gets the same
+  // moment, wherever their device's clock is set.
+  reg:{ open:"2026-11-01T19:00:00-05:00", close:"2026-11-08T23:59:00-05:00",
         form:"https://pci.jotform.com/form/253064435211144" },
   regState(now){
     now = now || new Date();
@@ -133,7 +139,7 @@ const CS = {
       el.innerHTML = `<a class="btn" href="${href||this.reg.form}">Register for Season 5</a>`;
     } else if(s==="soon"){
       el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link"
-        title="Registration opens November 1, 2026">
+        title="Registration opens November 1, 2026 at 7:00 PM Eastern">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
@@ -143,6 +149,45 @@ const CS = {
         Registration closed for Season 5</span>`;
     }
     return s;
+  },
+  // Calls render(state) now, and again the moment registration opens or closes,
+  // so a page left open flips over by itself. Also re-checks when a phone or
+  // laptop wakes up and the tab comes back into view.
+  regWatch(render){
+    let last = null, t = null;
+    const run = ()=>{
+      const s = this.regState();
+      if(s !== last){ last = s; render(s); }
+      clearTimeout(t);
+      const next = s==="soon" ? this.reg.open : s==="open" ? this.reg.close : null;
+      if(next) t = setTimeout(run, Math.min(new Date(next) - new Date() + 50, 2**31-1));
+    };
+    document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) run(); });
+    run();
+  },
+  // A milestone counts as done once its moment has passed (Tampa time).
+  milestonePast(m){
+    const now = new Date();
+    if(/^Registration Opens/i.test(m.label))  return now >= new Date(this.reg.open);
+    if(/^Registration Closes/i.test(m.label)) return now >= new Date(this.reg.close);
+    return m.date < this.todayET();
+  },
+
+  /* ---- Tampa (America/New_York) time helpers ----
+     Date strings like "2026-11-01" are read by browsers as midnight UTC, which
+     is 8 PM the evening before in Tampa. These keep every date on local time. */
+  todayET(){
+    return new Intl.DateTimeFormat("en-CA",{timeZone:"America/New_York",
+      year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  },
+  // "2027-01-03","15:30" -> the Date for 3:30 PM in Tampa, EST or EDT as appropriate
+  et(date, time){
+    const [y,mo,d] = date.split("-").map(Number), [h,mi] = (time||"00:00").split(":").map(Number);
+    let t = Date.UTC(y, mo-1, d, h+5, mi);            // assume EST (UTC-5)
+    const shown = +new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",
+      hour:"numeric",hourCycle:"h23"}).format(new Date(t));
+    if(shown !== h) t -= 36e5;                         // daylight time (UTC-4)
+    return new Date(t);
   },
 
   /* ---- name canonicalisation ----
@@ -272,17 +317,21 @@ const CS = {
         Sanctioned under the Coptic Orthodox Diocese of the Southern United States</div></div>`;
     document.body.appendChild(f);
   },
-  countdown(el, target, label){
+  // Ticks every second; when it reaches zero it stops and calls onDone, which
+  // the page uses to swap in whatever comes next.
+  countdown(el, target, label, onDone){
+    if(!el) return;
+    clearInterval(el._cd);
     const tick = ()=>{
       const ms = new Date(target) - new Date();
-      if(ms<0){ el.innerHTML = `<div class="count-label">${label} is LIVE</div>`; return; }
+      if(ms<=0){ clearInterval(el._cd); el.innerHTML = ""; if(onDone) onDone(); return; }
       const d = Math.floor(ms/864e5), h = Math.floor(ms%864e5/36e5),
             m = Math.floor(ms%36e5/6e4), s = Math.floor(ms%6e4/1e3);
       el.innerHTML = `<div class="count-label">${label}</div>` +
         [[d,"Days"],[h,"Hours"],[m,"Min"],[s,"Sec"]].map(([v,l])=>
           `<div class="cell"><b>${v}</b><span>${l}</span></div>`).join("");
     };
-    tick(); setInterval(tick, 1000);
+    el._cd = setInterval(tick, 1000); tick();
   },
   async seasonTabs(el, current, onPick, disable1){
     // which season is live comes from seasons.js, never a hardcoded number

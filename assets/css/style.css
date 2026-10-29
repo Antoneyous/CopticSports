@@ -58,6 +58,7 @@ img{max-width:100%}
   min-width:86px;padding:12px 10px;text-align:center}
 .count b{display:block;font-family:var(--font-disp);font-size:30px;color:var(--orange)}
 .count span{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-faint)}
+.count .cell.wide{flex:1;grid-column:1/-1}
 .count-label{width:100%;font-size:12.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-dim);margin-bottom:2px}
 
 /* ---- sections / cards ---- */

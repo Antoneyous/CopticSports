@@ -78,7 +78,7 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
     for(let i=0;i<startDow;i++) html+='<div class="day out"></div>';
     let agenda="";                       // mobile day-by-day list
     const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    const todayKey=new Date().toISOString().slice(0,10);
+    const todayKey=CS.todayET();   // was UTC: flipped to tomorrow at 8 PM
     for(let d=1;d<=dim;d++){
       const key=`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
       const isToday = key===todayKey;
@@ -107,7 +107,7 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
     document.getElementById("cal").innerHTML=html;
     document.getElementById("agenda").innerHTML = agenda ||
       `<p class="ag-empty">Nothing on the calendar this month.</p>`;
-    const monthFasts=cal.fasts.filter(f=>new Date(f.end)>=cur && new Date(f.start)<=new Date(cur.getFullYear(),cur.getMonth()+1,0));
+    const monthFasts=cal.fasts.filter(f=>new Date(f.end+"T00:00")>=cur && new Date(f.start+"T00:00")<=new Date(cur.getFullYear(),cur.getMonth()+1,0));
     const fastLine = monthFasts.map(f=>`${f.name}: ${CS.fmtDate(f.start,{month:"short",day:"numeric"})} to ${CS.fmtDate(f.end,{month:"short",day:"numeric"})}`).join("   ·   ");
     document.getElementById("fastnote").textContent = fastLine;
     document.getElementById("ag-fastnote").textContent = fastLine;

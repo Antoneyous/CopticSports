@@ -48,7 +48,8 @@ async function show(n){
   render(players);
   const cats=[["ppg","Scoring"],["rpg","Rebounding"],["apg","Playmaking"]];
   document.getElementById("leaders").innerHTML = players.length ? cats.map(([k,label])=>{
-    const top=[...players].filter(p=>p.gp>=Math.min(3, Math.max(...players.map(x=>x.gp)))).sort((a,b)=>b[k]-a[k]).slice(0,5);
+    // same rule as the homepage: no games-played minimum
+    const top=[...players].sort((a,b)=>b[k]-a[k]).slice(0,5);
     return `<div class="card"><h3>${label}</h3>`+top.map((p,i)=>
       `<div class="leader"><span class="n">${i+1}</span>
        <div class="who"><b>${p.name}</b>${CS.team(p.team,"sm")}</div>

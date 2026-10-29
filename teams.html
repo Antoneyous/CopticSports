@@ -46,9 +46,9 @@ async function detail(t, teams){
   const info = teams[t]; const c = CS.colors[t];
   const secs = Object.entries(info.seasons).sort((a,b)=>b[0]-a[0]).map(([sn,d])=>{
     const roster = (d.roster && d.roster.length)
-      ? `<table class="tbl"><thead><tr><th>Player</th><th class="num">#</th><th class="num">Pos</th></tr></thead><tbody>
+      ? `<table class="tbl"><thead><tr><th>Player</th><th class="num">#</th></tr></thead><tbody>
           ${d.roster.map(p=>`<tr><td>${p.name}${d.captain===p.name?' <span class="banner">C</span>':""}</td>
-          <td class="num">${p.num??""}</td><td class="num">${p.pos??""}</td></tr>`).join("")}</tbody></table>`
+          <td class="num">${p.num??""}</td></tr>`).join("")}</tbody></table>`
       : `<p class="note">${d.note || "Roster not on record for this season."}</p>`;
     return `<div class="card"><h3>Season ${sn}${d.jerseyColor?`: ${d.jerseyColor} jerseys`:""}</h3>
       ${d.captain?`<p style="color:var(--ink-dim);font-size:13px;margin-bottom:10px">Captain: <b style="color:var(--ink)">${d.captain}</b></p>`:""}
