@@ -840,3 +840,12 @@ footer .fbottom .locked{display:inline-flex;align-items:center;gap:6px;color:var
     color:var(--ink-faint);opacity:.75;cursor:not-allowed;text-align:center}
   .sheet-grid span.locked svg{width:22px;height:22px}
 }
+
+/* phone home/register hero: show the whole photo, fade only its bottom edge */
+@media(max-width:780px){
+  .hero.photo .hero-bg.m{height:min(92vw,430px)}
+  .hero.photo{padding-top:min(78vw,365px)}
+  .hero.photo:after{background:linear-gradient(180deg,rgba(11,26,40,0) 0,rgba(11,26,40,0) min(52vw,245px),
+     rgba(20,20,20,.75) min(76vw,355px),var(--ink-black) min(92vw,430px),var(--ink-black) 100%)}
+  .hero.photo .kicker{text-shadow:0 1px 8px rgba(0,0,0,.8)}
+}
