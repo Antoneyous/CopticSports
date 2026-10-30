@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="en"><head><title>History | CopticSports · TCBL</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1a28">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CopticSports">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/img/icon-512.png">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<meta name="description" content="Four seasons, four champions. Every Finals, record and all-time leader in Tampa Bay Coptic Basketball League history.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
+<meta property="og:title" content="History · TCBL"><meta property="og:description" content="Four seasons, four champions. Every Finals, record and all-time leader in Tampa Bay Coptic Basketball League history.">
+<meta property="og:url" content="https://coptichoops.com/history.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<header id="topbar" class="topbar"></header>
+
+<section class="page-hero" style="--hero-pos:center 35%"><div class="hero-bg" style="background-image:url(assets/img/photos/s1-000.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s4-111.jpg);background-position:50% 30%"></div><div class="wrap">
+  <div class="kicker">TCBL · Since 2023</div>
+  <h1>Four seasons.<br><em>Four champions.</em></h1>
+  <p>Nobody has ever repeated. Every banner, every Finals, every record since the first tip-off in January 2023.</p>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head reveal"><h2>The champions</h2></div>
+  <div class="seasons-tl" id="tl"></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head reveal"><h2>Record book</h2><span class="more m-hide" style="color:var(--ink-faint)">Best single games on record</span></div>
+  <div class="rec-grid" id="records"></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head reveal"><h2>All-time leaders</h2><a class="more" href="stats.html">Season stats →</a></div>
+  <div class="grid3 m-swipe" id="career"></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head reveal"><h2>All-time team records</h2><a class="more" href="teams.html">The teams →</a></div>
+  <div class="tbl-scroll reveal"><table class="tbl" id="trec"><thead><tr><th>Team</th><th class="num x">Seasons</th><th class="num">W</th><th class="num">L</th>
+    <th class="num">Win %</th><th class="num x">Finals</th><th>Titles</th></tr></thead><tbody></tbody></table></div>
+  <p class="note" style="margin-top:14px">Regular-season records from the official standings. Season 1 Semifinal and Finals scores were never recorded on the old site.</p>
+</div></section>
+
+<script src="assets/js/app.js"></script>
+<script>
+CS.nav("history"); CS.footer();
+(async()=>{
+  const all = await CS.allTime(), meta = await CS.data("seasons");
+  // ---- season timeline, newest first, with the season to come on top ----
+  const cur = meta.find(s=>s.current);
+  const cards = [];
+  if(cur) cards.push(`<div class="scard next reveal"><div class="sn"><b>${cur.id}</b><span>${cur.year}</span></div>
+    <div class="ph"><img src="assets/img/logo-finals.png" alt=""></div>
+    <div class="tx"><div class="yr">Up next · tips off Jan 3, 2027</div><h3 style="font-family:var(--font-disp);text-transform:uppercase;font-size:28px">Your name here?</h3>
+      <p>Eight teams. One trophy. Nobody has ever won back-to-back — St. Gregory gets the first shot.</p>
+      <p><a class="btn" href="register.html">Register</a></p></div></div>`);
+  // Two champions wore different colours the year they won: St. Andrew were in
+  // white in Season 1 and St. Maximus in lime green in Season 2. The champion
+  // cards show the title-year colours; everywhere else uses today's colours.
+  const ERA = {"1|St. Andrew":{bg:"#ffffff",fg:"#141414"}, "2|St. Maximus":{bg:"#b2d034",fg:"#141414"}};
+  const pill = (team, n, size) => {
+    const c = ERA[n+"|"+team]; if(!c) return CS.team(team, size);
+    return `<span class="tpill${size?" "+size:""} light" style="background:${c.bg};color:${c.fg}">${team}</span>`;
+  };
+  [...all.done].reverse().forEach(n=>{
+    const d = all.seasons[all.done.indexOf(n)], h = CS.history[n] || {}, fg = CS.finalGame(d);
+    const sc = fg ? (fg.team1===d.champion ? [fg.score1,fg.score2] : [fg.score2,fg.score1]) : null;
+    cards.push(`<div class="scard reveal"><div class="sn"><b>${n}</b><span>${h.year||""}</span></div>
+      <div class="ph"><img src="assets/img/photos/champs-s${n}.jpg" alt="${d.champion}, Season ${n} champions" loading="lazy"></div>
+      <div class="tx"><div class="yr">Season ${n} champions</div><div>${pill(d.champion,n,"lg")}</div>
+        <p>${h.blurb||""}</p>
+        ${sc && d.runnerUp ? `<div class="finalline"><span class="banner">Finals</span><span class="ft">${pill(d.champion,n,"sm")}<span class="sc w">${sc[0]}</span></span>
+           <span class="dash">–</span><span class="ft rev">${CS.team(d.runnerUp,"sm")}<span class="sc">${sc[1]}</span></span></div>`
+          : `<div class="finalline"><span class="banner">Finals</span><span style="color:var(--ink-faint);font-size:13px">Score not recorded</span></div>`}
+        <div class="facts"><div><b>${h.hoopers||"—"}</b><span>Hoopers</span></div>
+          <div><b>${(meta.find(m=>m.id===n)||{}).teams||8}</b><span>Teams</span></div>
+          <div><b>${d.games.filter(g=>g.status==="F").length}</b><span>Games</span></div></div></div></div>`);
+  });
+  document.getElementById("tl").innerHTML = cards.join("");
+  // ---- single-game records ----
+  const top = k => [...all.highs].sort((a,b)=>(b[k]||0)-(a[k]||0))[0];
+  const rec = [["pts","Points"],["reb","Rebounds"],["ast","Assists"],["fg3m","Threes"]].map(([k,l])=>{
+    const r = top(k); if(!r) return "";
+    return `<div class="rec reveal"><i>${l} · single game</i><b>${r[k]}</b>
+      <div class="who">${r.name}</div><span>${r.team} vs ${r.opp||"—"} · Season ${r.season}, ${r.stage}</span></div>`;
+  });
+  document.getElementById("records").innerHTML = rec.join("");
+  // ---- career leaders ----
+  const cats = [["pts","Career points","PTS"],["reb","Career rebounds","REB"],["ast","Career assists","AST"]];
+  document.getElementById("career").innerHTML = cats.map(([k,label,u])=>{
+    const t = [...all.players].sort((a,b)=>b[k]-a[k]).slice(0,8);
+    return `<div class="card reveal"><h3>${label}</h3>`+t.map((p,i)=>
+      `<div class="leader"><span class="n">${i+1}</span><div class="who"><b>${p.name}</b>
+        <span>${p.seasons.length} season${p.seasons.length>1?"s":""} · ${p.gp} games</span></div>
+        <div class="val"><b>${p[k]}</b><span>${u}</span></div></div>`).join("")+"</div>";
+  }).join("");
+  // ---- team records ----
+  const rows = Object.values(all.teams).sort((a,b)=> b.titles.length-a.titles.length || (b.w/(b.w+b.l))-(a.w/(a.w+a.l)));
+  document.querySelector("#trec tbody").innerHTML = rows.map(t=>{
+    const pct = t.w+t.l ? (t.w/(t.w+t.l)) : 0;
+    return `<tr><td><a href="teams.html?t=${encodeURIComponent(t.team)}">${CS.team(t.team,"sm")}</a></td><td class="num x">${t.seasons}</td>
+      <td class="num">${t.w}</td><td class="num">${t.l}</td><td class="num">${pct.toFixed(3).replace(/^0/,"")}</td>
+      <td class="num x">${t.finals.length}</td><td>${t.titles.map(s=>`<span class="banner">★ S${s}</span>`).join(" ")||"<span style='color:var(--ink-faint)'>—</span>"}</td></tr>`;
+  }).join("");
+})();
+</script>
+</body></html>

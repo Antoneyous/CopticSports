@@ -266,31 +266,57 @@ const CS = {
     teams:'M15.5 20.5v-1.4a3.8 3.8 0 0 0-3.8-3.8H6.3a3.8 3.8 0 0 0-3.8 3.8v1.4M9 11.9a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2M21.5 20.5v-1.4a3.8 3.8 0 0 0-2.9-3.7M15.8 4.9a3.6 3.6 0 0 1 0 7',
     stats:'M3 20.5h18M6.5 20.5v-6.4M11.5 20.5V7.6M16.5 20.5v-4M21 20.5V4',
     standings:'M7 3.8h10v5.1a5 5 0 0 1-10 0zM7 5.8H4.2v1a3 3 0 0 0 2.9 3M17 5.8h2.8v1a3 3 0 0 1-2.9 3M9 20.2h6M12 14v6.2',
+    history:'M3.5 12a8.5 8.5 0 1 0 2.6-6.1M3.5 4.5v3.9h3.9M12 7.6V12l3 1.8',
+    gallery:'M4 5.5h16v13H4zM4 15.2l4.3-4.1 4.2 4.1 2.9-2.8 4.6 4.4M15.6 9.3h.01',
+    more:'M5 12h.01M12 12h.01M19 12h.01',
+    register:'M12 20.5h8.5M16.6 4a2.1 2.1 0 0 1 3 3L7.5 19.1l-4 1 1-4z',
+    statportal:'M4 20h16M7 16V9M12 16V5M17 16v-4',
     calendar:'M3.2 8.6h17.6M7.6 3.4v3.2M16.4 3.4v3.2M4.4 6.2h15.2a1.2 1.2 0 0 1 1.2 1.2v12.4a1.2 1.2 0 0 1-1.2 1.2H4.4a1.2 1.2 0 0 1-1.2-1.2V7.4a1.2 1.2 0 0 1 1.2-1.2z'
   },
+  // social + contact, used by the footer and the mobile "More" sheet
+  social:{ instagram:"https://www.instagram.com/coptichoops/", youtube:"https://www.youtube.com/@Coptichoops",
+           email:"coptichoops@gmail.com" },
   nav(active){
     const links = [["index.html","Home"],["schedule.html","Schedule"],["teams.html","Teams"],
-      ["stats.html","Stats"],["standings.html","Standings"],["calendar.html","Calendar"]];
+      ["stats.html","Stats"],["standings.html","Standings"],["history.html","History"],
+      ["gallery.html","Gallery"],["calendar.html","Calendar"]];
     const onPortal = /upload\.html$/.test(location.pathname);
-    // ---- desktop top bar + mobile-only brand & portal link ----
+    // ---- top bar: brand, links, register + portal ----
     document.getElementById("topbar").innerHTML = `<div class="wrap">
-      <a class="brand m-only" href="index.html" aria-label="TCBL home"><img src="assets/img/logo-mini.png" alt=""></a>
-      <a class="m-only m-portal${onPortal?" on":""}" href="upload.html">Stat Portal</a>
+      <a class="brand" href="index.html" aria-label="TCBL home"><img src="assets/img/logo-mini.png" alt=""><span>TCBL</span></a>
+      <a class="m-only m-portal${onPortal?" on":""}" href="register.html">Register</a>
       <nav class="nav">${links.map(([h,l])=>
         `<a href="${h}" class="${l.toLowerCase()===active?"on":""}">${l}</a>`).join("")}
-        <a class="cta spacer" href="upload.html">Stat Portal</a></nav></div>`;
-    // ---- mobile bottom tab bar ----
+        <a class="spacer ghost-cta${active==="register"?" on":""}" href="register.html">Register</a>
+        <a class="cta" href="upload.html">Stat Portal</a></nav></div>`;
+    // ---- mobile bottom tab bar: 4 main tabs + a "More" sheet ----
+    const main = links.slice(0,4), extra = [["standings.html","Standings"],["history.html","History"],
+      ["gallery.html","Gallery"],["calendar.html","Calendar"],["register.html","Register"],["upload.html","Stat Portal"]];
+    const inMore = extra.some(([,l])=>l.toLowerCase()===active) || onPortal;
+    const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${this.icons[k]}"/></svg>`;
     const tabs = document.createElement("nav");
     tabs.className = "tabbar";
     tabs.setAttribute("aria-label","Primary");
-    tabs.innerHTML = links.map(([h,l])=>{
+    tabs.innerHTML = main.map(([h,l])=>{
       const k = l.toLowerCase(), cur = k===active;
-      return `<a href="${h}" class="${cur?"on":""}"${cur?' aria-current="page"':""}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${this.icons[k]}"/></svg>
-        <span>${l}</span></a>`;
-    }).join("");
+      return `<a href="${h}" class="${cur?"on":""}"${cur?' aria-current="page"':""}>${icon(k)}<span>${l}</span></a>`;
+    }).join("") + `<button type="button" class="more-btn${inMore?" on":""}" aria-haspopup="true" aria-expanded="false">${icon("more")}<span>More</span></button>`;
     document.body.appendChild(tabs);
+    const sheet = document.createElement("div");
+    sheet.className = "sheet"; sheet.setAttribute("role","dialog"); sheet.setAttribute("aria-label","More pages");
+    sheet.innerHTML = `<div class="sheet-scrim"></div><div class="sheet-card">
+      <div class="sheet-grab"></div>
+      <div class="sheet-grid">${extra.map(([h,l])=>{ const k=l.toLowerCase().replace(" ","");
+        return `<a href="${h}" class="${(l.toLowerCase()===active||(onPortal&&k==="statportal"))?"on":""}">${icon(this.icons[k]?k:"more")}<span>${l}</span></a>`;}).join("")}</div>
+      <div class="sheet-social"><a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} @coptichoops</a>
+        <a href="${this.social.youtube}" target="_blank" rel="noopener">${this.glyph.yt} Live on YouTube</a></div></div>`;
+    document.body.appendChild(sheet);
+    const btn = tabs.querySelector(".more-btn");
+    const toggle = open => { sheet.classList.toggle("open", open); btn.setAttribute("aria-expanded", open); };
+    btn.onclick = ()=> toggle(!sheet.classList.contains("open"));
+    sheet.querySelector(".sheet-scrim").onclick = ()=> toggle(false);
+    document.addEventListener("keydown", e=>{ if(e.key==="Escape") toggle(false); });
     this.liveBar();
   },
   // "Show all stats" control for wide tables on small screens
@@ -308,14 +334,106 @@ const CS = {
     host.insertAdjacentElement("beforebegin", b);
   },
 
+  glyph:{
+    ig:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r=".9" fill="currentColor"/></svg>',
+    yt:'<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M22 8.2a3 3 0 0 0-2.1-2.1C18 5.6 12 5.6 12 5.6s-6 0-7.9.5A3 3 0 0 0 2 8.2 31 31 0 0 0 1.6 12 31 31 0 0 0 2 15.8a3 3 0 0 0 2.1 2.1c1.9.5 7.9.5 7.9.5s6 0 7.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .4-3.8 31 31 0 0 0-.4-3.8zM10 15.2V8.8l5.2 3.2z"/></svg>',
+    mail:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>'
+  },
+  // Season-by-season facts the data files don't carry. Registration counts come
+  // from the league's own @coptichoops announcements.
+  history:{
+    1:{ year:"Winter 2023", hoopers:70, blurb:"The first-ever season. 70 hoopers, 8 teams, four pairs of brothers — and St. Andrew lifted the first trophy." },
+    2:{ year:"Fall 2023",   hoopers:85, blurb:"The league grew to 10 teams with St. Cosmas & St. Damian, added a play-in and a 3-point contest. St. Maximus went 6–1 and won it all." },
+    3:{ year:"Winter 2025", hoopers:80, blurb:"Sold out in hours. St. James lost once all season, then beat 7th-seed Cinderella St. Andrew in the Finals." },
+    4:{ year:"Winter 2026", hoopers:72, blurb:"St. Andrew went 7–0. St. Gregory went 1–6 — then won the whole thing as the 7th seed. March doesn’t care about your record." }
+  },
+  // the saints behind the eight teams, paired as brothers
+  saints:{
+    "St. Andrew":{ full:"St. Andrew the Apostle", brother:"St. Peter", bio:"The First-Called. A fisherman of Galilee who heard John the Baptist, followed Christ, and went to bring his brother Peter." },
+    "St. Peter":{ full:"St. Peter the Apostle", brother:"St. Andrew", bio:"The fisherman Christ called the rock. Brother of St. Andrew and first among the Twelve." },
+    "St. James":{ full:"St. James the Apostle", brother:"St. John", bio:"Son of Zebedee, one of the “sons of thunder,” and the first of the Twelve to be martyred for Christ." },
+    "St. John":{ full:"St. John the Apostle", brother:"St. James", bio:"The Beloved Disciple — evangelist and theologian — who stood at the Cross. Brother of St. James." },
+    "St. Basil":{ full:"St. Basil the Great", brother:"St. Gregory", bio:"Bishop of Caesarea, a father of communal monastic life, and the voice behind the Liturgy of St. Basil prayed in our churches every week." },
+    "St. Gregory":{ full:"St. Gregory of Nyssa", brother:"St. Basil", bio:"Bishop and theologian who defended the Nicene faith. Younger brother of St. Basil the Great." },
+    "St. Maximus":{ full:"St. Maximus", brother:"St. Dometius", bio:"Son of a Roman emperor who left the palace for the desert of Scetis with his brother, under St. Macarius the Great." },
+    "St. Dometius":{ full:"St. Dometius", brother:"St. Maximus", bio:"With his brother St. Maximus, gave up a royal life for the desert. Baramous — “of the Romans” — remembers them." },
+    "St. Cosmas":{ full:"St. Cosmas", brother:"St. Damian", bio:"Twin physician and martyr who healed without charge. Season 2 club." },
+    "St. Damian":{ full:"St. Damian", brother:"St. Cosmas", bio:"Twin physician and martyr who healed without charge. Season 2 club." }
+  },
+  // All-time numbers across every completed season, built from the season files.
+  async allTime(){
+    if(this._all) return this._all;
+    const meta = await this.data("seasons");
+    const done = meta.filter(s=>s.champion).map(s=>s.id);
+    const seasons = await Promise.all(done.map(n=>this.data("season"+n)));
+    const players = {}, teams = {}, games = {n:0, pts:0}, highs = [];
+    seasons.forEach((d,i)=>{
+      const sn = done[i];
+      (d.players||[]).forEach(p=>{
+        const a = players[p.name] = players[p.name] || {name:p.name, gp:0, pts:0, reb:0, ast:0, fg3m:0, stl:0, blk:0, seasons:[], teams:[]};
+        ["gp","pts","reb","ast","fg3m","stl","blk"].forEach(k=>a[k]+= (p[k]||0));
+        if(!a.seasons.includes(sn)) a.seasons.push(sn);
+        if(!a.teams.includes(p.team)) a.teams.push(p.team);
+        a.team = p.team;
+      });
+      (d.standings||[]).forEach(s=>{
+        const t = teams[s.team] = teams[s.team] || {team:s.team, w:0, l:0, titles:[], finals:[], seasons:0};
+        t.w += s.w; t.l += s.l; t.seasons++;
+      });
+      (d.games||[]).forEach(g=>{ if(g.status==="F" && g.score1!=null){ games.n++; games.pts += g.score1+g.score2; } });
+      (d.playerLines||[]).forEach(l=>{ if(l.gp) highs.push({...l, season:sn}); });
+      if(d.champion){ (teams[d.champion]=teams[d.champion]||{team:d.champion,w:0,l:0,titles:[],finals:[],seasons:0}).titles.push(sn); }
+      const fin = this.finalGame(d);
+      if(fin) [fin.team1, fin.team2].forEach(t=>{ if(teams[t]) teams[t].finals.push(sn); });
+      else if(d.champion) teams[d.champion].finals.push(sn);
+    });
+    Object.values(players).forEach(p=>{ p.ppg = p.gp ? p.pts/p.gp : 0; });
+    return this._all = { done, seasons, players:Object.values(players), teams, games, highs,
+      hoopers: Object.keys(players).length };
+  },
+  // the championship game: the last Finals-stage game between champion and runner-up
+  finalGame(d){
+    if(!d.champion) return null;
+    const fs = (d.games||[]).filter(g=>/Final/.test(g.stage) && !/Semi/.test(g.stage) && g.status==="F"
+      && [g.team1,g.team2].includes(d.champion) && (!d.runnerUp || [g.team1,g.team2].includes(d.runnerUp)));
+    return fs[fs.length-1] || null;
+  },
+  // Fades sections in as they scroll into view. Anything with .reveal, including
+  // elements rendered later, is picked up; reduced-motion users see it all at once.
+  reveal(){
+    if(this._rv) return;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(reduce || !("IntersectionObserver" in window)){
+      const show = ()=>document.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));
+      show(); new MutationObserver(show).observe(document.body,{childList:true,subtree:true}); this._rv=1; return;
+    }
+    const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }),
+      {rootMargin:"0px 0px -8% 0px", threshold:.08});
+    const scan = ()=>document.querySelectorAll(".reveal:not(.in):not([data-rv])").forEach(e=>{ e.dataset.rv=1; io.observe(e); });
+    scan(); new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+    this._rv = 1;
+  },
+  photo(id, thumb){ return `assets/img/photos/${thumb?"thumb/":""}${id}.jpg`; },
+
   footer(){
     const f = document.createElement("footer");
-    f.innerHTML = `<div class="wrap">
-      <div><div class="verse">"Honor all people. Love the brotherhood. Fear God…" (1 Peter 2:17)</div>
-        <div>Faith · Fellowship · Fitness</div></div>
-      <div class="right">Tampa Bay Coptic Basketball League<br>
-        Sanctioned under the Coptic Orthodox Diocese of the Southern United States</div></div>`;
+    const col = (t, items)=>`<div class="fcol"><h4>${t}</h4>${items.map(([h,l,ext])=>
+      `<a href="${h}"${ext?' target="_blank" rel="noopener"':""}>${l}</a>`).join("")}</div>`;
+    f.innerHTML = `<div class="wrap fgrid">
+      <div class="fbrand"><img src="assets/img/logo-white.png" alt="TCBL">
+        <p class="verse">"Honor all people. Love the brotherhood. Fear God…" <span>1 Peter 2:17</span></p>
+        <p class="fpillars">Faith · Fellowship · Fitness</p></div>
+      ${col("League",[["schedule.html","Schedule"],["standings.html","Standings"],["stats.html","Stats"],["teams.html","Teams"]])}
+      ${col("Story",[["history.html","History"],["gallery.html","Gallery"],["calendar.html","Coptic calendar"],["register.html","Register"]])}
+      <div class="fcol"><h4>Follow</h4>
+        <a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} Instagram</a>
+        <a href="${this.social.youtube}" target="_blank" rel="noopener">${this.glyph.yt} YouTube</a>
+        <a href="mailto:${this.social.email}">${this.glyph.mail} Email us</a></div>
+    </div>
+    <div class="wrap fbottom"><span>Tampa Bay Coptic Basketball League · Sanctioned under the Coptic Orthodox Diocese of the Southern United States</span>
+      <a href="upload.html">Stat Portal</a></div>`;
     document.body.appendChild(f);
+    this.reveal();
   },
   // Ticks every second; when it reaches zero it stops and calls onDone, which
   // the page uses to swap in whatever comes next.

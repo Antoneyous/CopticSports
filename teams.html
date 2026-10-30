@@ -9,56 +9,99 @@
 <link rel="icon" href="assets/img/logo-mini.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<meta name="description" content="Eight teams named for four pairs of brother saints. Records, titles, rosters and history.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
+<meta property="og:title" content="Teams · TCBL"><meta property="og:description" content="Eight teams named for four pairs of brother saints. Records, titles, rosters and history.">
+<meta property="og:url" content="https://coptichoops.com/teams.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
 <link rel="stylesheet" href="assets/css/style.css"></head><body>
 <header id="topbar" class="topbar"></header>
+<section class="page-hero" id="thero" style="--hero-pos:center 40%"><div class="hero-bg" style="background-image:url(assets/img/photos/s4-102.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s4-103.jpg);background-position:50% 40%"></div><div class="wrap">
+  <div class="kicker">Eight teams · four pairs of brothers</div>
+  <h1>The <em>teams</em></h1>
+  <p>Every TCBL team is named for a saint, and every saint has a brother in the league: Peter &amp; Andrew, James &amp; John, Basil &amp; Gregory, Maximus &amp; Dometius.</p>
+</div></section>
 <section class="section"><div class="wrap">
-  <div class="sec-head"><h2 id="title">The Teams</h2></div>
+  <div class="sec-head" id="headrow"><h2 id="title">Season 5 teams</h2></div>
   <div id="content"></div>
 </div></section>
 <script src="assets/js/app.js"></script>
 <script>
 CS.nav("teams"); CS.footer();
-const CHAMPS = {"St. Andrew":["Season 1"],"St. Maximus":["Season 2"],"St. James":["Season 3"],"St. Gregory":["Season 4"]};
 (async()=>{
-  const teams = await CS.data("teams");
+  const teams = await CS.data("teams"), all = await CS.allTime();
   const params = new URLSearchParams(location.search);
   const pick = params.get("t");
-  if(pick && teams[pick]) return detail(pick, teams);
+  if(pick && teams[pick]) return detail(pick, teams, all);
   const core = Object.keys(teams).filter(t=>teams[t].seasons["5"]);
   const legacy = Object.keys(teams).filter(t=>!teams[t].seasons["5"]);
-  const card = t => {
-    const c = CS.colors[t]||{bg:"#334",fg:"#fff"};
-    return `<a class="team-card" href="teams.html?t=${encodeURIComponent(t)}">
-      <div class="swatch" style="background:${c.bg}">
-        <span style="font-family:var(--font-disp);font-size:19px;letter-spacing:.6px;color:${c.fg};text-transform:uppercase">${t}</span></div>
-      <div class="body">
-        <p>${teams[t].seasons["5"] ? (teams[t].seasons["5"].captain || "Captain named on Draft Night") : "Alumni club, Season 2 era"}</p>
-        <div class="banner-row">${(CHAMPS[t]||[]).map(s=>`<span class="banner">★ ${s}</span>`).join("")}</div>
-      </div></a>`;
+  const lm = fg => fg.toLowerCase()==="#141414" ? "logo-black.png" : "logo-white.png";
+  const card = (t,i) => {
+    const c = CS.colors[t]||{bg:"#334",fg:"#fff"}, st = CS.saints[t]||{}, r = all.teams[t]||{w:0,l:0,titles:[],finals:[]};
+    const cap = teams[t].seasons["5"] ? (teams[t].seasons["5"].captain || "Captain named Nov 22") : "Season 2 club";
+    return `<a class="team-card2 reveal d${i%4}" href="teams.html?t=${encodeURIComponent(t)}">
+      <div class="top" style="background:${c.bg};color:${c.fg}"><img src="assets/img/${lm(c.fg)}" alt="">
+        <small>${st.full||t}</small><h3>${t}</h3>
+        <div class="rec2">${r.w}–${r.l} all-time${r.titles.length?` · ${r.titles.length} title`:""}</div></div>
+      <div class="bot"><p>${st.bio||""}</p>
+        ${st.brother?`<span class="bro">Brother team: ${st.brother}</span>`:""}
+        <div class="banner-row">${r.titles.map(s=>`<span class="banner">★ Season ${s} champs</span>`).join("")}</div>
+        <span class="bro" style="color:var(--ink-dim)">${cap}</span></div></a>`;
   };
   document.getElementById("content").innerHTML =
-    `<div class="grid4">${core.map(card).join("")}</div>
-     ${legacy.length?`<div class="sec-head" style="margin-top:40px"><h2>Season 2 Alumni Clubs</h2></div>
-     <div class="grid4">${legacy.map(card).join("")}</div>`:""}`;
+    `<div class="grid4 tgrid">${core.map(card).join("")}</div>
+     ${legacy.length?`<div class="sec-head" style="margin-top:44px"><h2>Season 2 clubs</h2></div>
+     <div class="grid4 tgrid">${legacy.map(card).join("")}</div>`:""}`;
 })();
-async function detail(t, teams){
-  document.getElementById("title").innerHTML = CS.team(t,"lg");
-  const info = teams[t]; const c = CS.colors[t];
+async function detail(t, teams, all){
+  const info = teams[t], c = CS.colors[t], st = CS.saints[t]||{}, r = all.teams[t]||{w:0,l:0,titles:[],finals:[],seasons:0};
+  document.getElementById("thero").remove();
+  document.title = `${t} | CopticSports`;
+  document.getElementById("headrow").innerHTML = `<a class="more" style="margin-left:0" href="teams.html">← All teams</a>`;
+  // season-by-season: record, seed and how the year ended
+  const rows = all.done.map(n=>{
+    const d = all.seasons[all.done.indexOf(n)], s = (d.standings||[]).find(x=>x.team===t);
+    if(!s) return "";
+    const fg = CS.finalGame(d);
+    const end = d.champion===t ? "🏆 Champions" : (d.runnerUp===t ? "Finals" :
+      (d.games.some(g=>/Semi/.test(g.stage) && [g.team1,g.team2].includes(t)) ? "Semifinals" :
+      (d.games.some(g=>/Playoff/.test(g.stage) && [g.team1,g.team2].includes(t)) ? "Playoffs" : "—")));
+    const seed = (d.standings||[]).indexOf(s)+1;
+    return `<tr><td>Season ${n}</td><td class="num">${s.w}–${s.l}</td><td class="num">${seed}</td><td>${end}</td></tr>`;
+  }).join("");
+  const players = all.players.filter(p=>p.teams.includes(t));
+  const lead = (k,u) => { const p = [...players].sort((a,b)=>b[k]-a[k])[0]; return p ? `<div class="leader"><div class="who"><b>${p.name}</b><span>Career total, all teams</span></div><div class="val"><b>${p[k]}</b><span>${u}</span></div></div>` : ""; };
   const secs = Object.entries(info.seasons).sort((a,b)=>b[0]-a[0]).map(([sn,d])=>{
     const roster = (d.roster && d.roster.length)
       ? `<table class="tbl"><thead><tr><th>Player</th><th class="num">#</th></tr></thead><tbody>
-          ${d.roster.map(p=>`<tr><td>${p.name}${d.captain===p.name?' <span class="banner">C</span>':""}</td>
+          ${[...d.roster].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<tr><td>${p.name}${d.captain===p.name?' <span class="banner">C</span>':""}</td>
           <td class="num">${p.num??""}</td></tr>`).join("")}</tbody></table>`
       : `<p class="note">${d.note || "Roster not on record for this season."}</p>`;
-    return `<div class="card"><h3>Season ${sn}${d.jerseyColor?`: ${d.jerseyColor} jerseys`:""}</h3>
+    return `<details class="card reveal roster" open><summary><h3>Season ${sn}${d.jerseyColor?`: ${d.jerseyColor} jerseys`:""}</h3></summary>
       ${d.captain?`<p style="color:var(--ink-dim);font-size:13px;margin-bottom:10px">Captain: <b style="color:var(--ink)">${d.captain}</b></p>`:""}
-      ${roster}</div>`;
+      ${roster}</details>`;
   }).join("");
-  const chs = {"St. Andrew":"Season 1","St. Maximus":"Season 2","St. James":"Season 3","St. Gregory":"Season 4"}[t];
-  const note = info.note ? `<p class="note" style="margin-bottom:18px">${info.note}</p>` : "";
-  document.getElementById("content").innerHTML =
-    note + `<p style="margin:-8px 0 20px"><a class="more" href="teams.html">← All teams</a>
-      ${chs?`&nbsp; <span class="banner">★ ${chs} Champions</span>`:""}</p>
-     <div class="grid3">${secs}</div>`;
+  const lm = c.fg.toLowerCase()==="#141414" ? "logo-black.png" : "logo-white.png";
+  document.getElementById("content").innerHTML = `
+    <div class="team-hero reveal" style="background:${c.bg};color:${c.fg};${c.bg.toLowerCase()==="#ffffff"?"border:1px solid #ddd;":""}">
+      <img class="wm" src="assets/img/${lm}" alt="">
+      <small>${st.full||t}${st.brother?` · brother of ${st.brother}`:""}</small>
+      <h2>${t}</h2><p>${st.bio||""}</p>
+      <div class="tstats"><div><b>${r.w}–${r.l}</b><span>Record</span></div>
+        <div><b>${r.titles.length}</b><span>Titles</span></div><div><b>${r.finals.length}</b><span>Finals</span></div>
+        <div><b>${r.seasons}</b><span>Seasons</span></div></div>
+      ${r.titles.length?`<div class="banner-row" style="margin-top:16px">${r.titles.map(s=>`<span class="banner" style="background:rgba(0,0,0,.25)">★ Season ${s} champions</span>`).join("")}</div>`:""}
+    </div>
+    <div class="grid3 tdetail" style="grid-template-columns:1.2fr 1fr;margin-bottom:22px">
+      <div class="card reveal"><h3>Season by season</h3><table class="tbl"><thead><tr><th>Season</th><th class="num">Record</th><th class="num">Seed</th><th>Finish</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="card reveal"><h3>Best ever in ${t} colors</h3>${lead("pts","PTS")}${lead("reb","REB")}${lead("ast","AST")}
+        <p class="note" style="margin-top:10px;font-size:12px">Career totals of players who have worn ${t} colors, across every team they played for.</p></div>
+    </div>
+    <div class="sec-head"><h2>Rosters</h2></div>
+    <div class="grid3">${secs}</div>`;
+  // phones: newest two seasons open, older rosters tucked away until tapped
+  if(matchMedia("(max-width:780px)").matches)
+    document.querySelectorAll("details.roster").forEach((d,i)=>{ if(i>1) d.open = false; });
 }
 </script></body></html>

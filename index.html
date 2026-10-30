@@ -10,10 +10,16 @@
 <link rel="icon" href="assets/img/logo-mini.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<meta name="description" content="Season 5 tips off Jan 3, 2027. Schedule, live games, stats, standings and registration for the Tampa Bay Coptic Basketball League.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
+<meta property="og:title" content="CopticSports · Tampa Bay Coptic Basketball League"><meta property="og:description" content="Season 5 tips off Jan 3, 2027. Schedule, live games, stats, standings and registration for the Tampa Bay Coptic Basketball League.">
+<meta property="og:url" content="https://coptichoops.com/"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
 <link rel="stylesheet" href="assets/css/style.css"></head><body>
 <header id="topbar" class="topbar"></header>
 
-<section class="hero"><div class="wrap hero-grid">
+<section class="hero photo" style="--hero-pos:72% 35%"><div class="hero-bg" style="background-image:url(assets/img/photos/s1-015.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s1-016.jpg);background-position:46% 40%"></div><div class="wrap hero-grid">
   <div>
     <div class="kicker">Tampa Bay Coptic Basketball League</div>
     <h1><span>Season 5</span><span class="accent">Tips Off</span><span>Jan 3, 2027</span></h1>
@@ -26,6 +32,10 @@
   <img class="hero-logo" src="assets/img/logo-white.png" alt="TCBL logo">
 </div></section>
 
+<section class="section" style="padding-top:10px"><div class="wrap">
+  <div class="numbers reveal" id="numbers" aria-label="The league by the numbers"></div>
+</div></section>
+
 <section class="section" id="live"><div class="wrap">
   <div class="sec-head"><h2>Watch Live</h2>
     <a class="more" href="https://www.youtube.com/@Coptichoops" target="_blank" rel="noopener">Our YouTube channel →</a></div>
@@ -33,26 +43,51 @@
 </div></section>
 
 <section class="section"><div class="wrap">
+  <div class="sec-head reveal"><h2>More than a league</h2>
+    <a class="more" href="gallery.html">See the gallery →</a></div>
+  <div class="pillar-grid m-swipe">
+    <a class="pcard reveal" href="gallery.html#faith"><img src="assets/img/photos/s1-020.jpg" alt="Abouna with a TCBL player on the court" loading="lazy">
+      <div class="pc"><i>✚ Faith</i><h3>Christ at the center</h3><p>Every game starts with prayer. The fathers are courtside, and the season opens with the Liturgy.</p></div></a>
+    <a class="pcard reveal d1" href="gallery.html#brotherhood"><img src="assets/img/photos/s1-039.jpg" alt="A TCBL team huddled before tip-off" loading="lazy">
+      <div class="pc"><i>✚ Fellowship</i><h3>One brotherhood</h3><p>Men from every Coptic church in Tampa Bay, drafted together into eight teams named for brother saints.</p></div></a>
+    <a class="pcard reveal d2" href="gallery.html#gameday"><img src="assets/img/photos/s1-033.jpg" alt="Players battle for a rebound" loading="lazy">
+      <div class="pc"><i>✚ Fitness</i><h3>Real hoops</h3><p>Pro refs, 40-minute games, full stats and a March Madness bracket. Every game live on YouTube.</p></div></a>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
   <div class="sec-head"><h2>Road to Season 5</h2>
     <a class="more" href="calendar.html">Full calendar →</a></div>
   <div class="grid3" style="grid-template-columns:1.1fr .9fr 1fr">
     <div class="card"><h3>Milestones</h3><div class="timeline" id="miles"></div></div>
-    <div class="card"><span class="tag">Defending Champs</span><h3 id="champ-name" style="margin-top:12px"></h3>
+    <div class="card m-hide"><span class="tag">Defending Champs</span><h3 id="champ-name" style="margin-top:12px"></h3>
       <div id="champ-body"></div></div>
     <div class="card"><h3>On the Coptic Calendar</h3><div id="feast-strip"></div></div>
   </div>
 </div></section>
 
 <section class="section"><div class="wrap">
+  <div class="sec-head reveal"><h2>Defending champions</h2>
+    <a class="more" href="history.html">Every champion →</a></div>
+  <div class="champ-spot reveal" id="champ-spot"></div>
+</div></section>
+
+<section class="section"><div class="wrap">
   <div class="sec-head"><h2>Season 4 Finals</h2>
     <a class="more" href="schedule.html">All results →</a></div>
-  <div class="score-strip" id="latest"></div>
+  <div class="score-strip m-swipe" id="latest"></div>
 </div></section>
 
 <section class="section"><div class="wrap">
   <div class="sec-head"><h2>Season 4 Leaders</h2>
     <a class="more" href="stats.html">Full stats →</a></div>
-  <div class="grid3" id="leaders"></div>
+  <div class="grid3 m-swipe" id="leaders"></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="sec-head reveal"><h2>From the gym</h2>
+    <a class="more ig-follow" href="https://www.instagram.com/coptichoops/" target="_blank" rel="noopener">Follow @coptichoops →</a></div>
+  <div class="ig-strip reveal" id="strip"></div>
 </div></section>
 
 <script src="assets/js/app.js"></script>
@@ -99,6 +134,25 @@ CS.regWatch(async s=>{
   // latest games: playoffs onward
   const post = s4.games.filter(g=>!g.stage.startsWith("Week"));
   document.getElementById("latest").innerHTML = post.map(g=>CS.gameCard(g)).join("");
+  // by the numbers + champion spotlight + photo strip
+  const all = await CS.allTime();
+  const nf = n => n.toLocaleString("en-US");
+  document.getElementById("numbers").innerHTML = [[all.done.length,"Seasons"],[all.hoopers,"Hoopers"],[all.games.n,"Games played"],
+    [nf(all.games.pts),"Points scored"],[new Set(all.seasons.map(d=>d.champion)).size,"Different champions"]]
+    .map(([v,l])=>`<div class="n"><b>${v}</b><span>${l}</span></div>`).join("");
+  const fg = CS.finalGame(s4);
+  const cs = fg ? (fg.team1===s4.champion ? [fg.score1,fg.score2] : [fg.score2,fg.score1]) : null;
+  document.getElementById("champ-spot").innerHTML = `
+    <div class="ph"><img src="assets/img/photos/champs-s4.jpg" alt="${s4.champion}, Season 4 champions" loading="lazy"></div>
+    <div class="tx"><img class="trophy-mark" src="assets/img/logo-finals.png" alt="">
+      <div class="k">Season 4 champions</div><h3>${s4.champion}</h3>
+      <p>1–6 in the regular season. Seventh seed in the bracket. Then they won three straight in March to take the trophy.</p>
+      ${cs?`<div class="score"><span class="sg">${CS.team(s4.champion)} ${cs[0]}</span><small>def.</small><span class="sg">${CS.team(s4.runnerUp)} ${cs[1]}</span></div>`:""}
+      <p style="font-size:13px"><a class="more" href="teams.html?t=${encodeURIComponent(s4.champion)}">Team page →</a></p></div>`;
+  const gal = await CS.data("gallery");
+  const pick = ["s4-111","s1-000","s1-015","s2-063","s4-102","s1-020"].map(id=>gal.find(g=>g.id===id)).filter(Boolean);
+  document.getElementById("strip").innerHTML = pick.map(g=>
+    `<a href="gallery.html" aria-label="${g.caption}"><img src="${CS.photo(g.id,1)}" alt="${g.caption}" loading="lazy"></a>`).join("");
   // leaders
   const cats = [["ppg","Points Per Game"],["rpg","Rebounds Per Game"],["apg","Assists Per Game"]];
   document.getElementById("leaders").innerHTML = cats.map(([k,label])=>{

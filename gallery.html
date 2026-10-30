@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="en"><head><title>Gallery | CopticSports · TCBL</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1a28">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CopticSports">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/img/icon-512.png">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<meta name="description" content="Media Days, Draft Night, game days and champions from the Tampa Bay Coptic Basketball League.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
+<meta property="og:title" content="Gallery · TCBL"><meta property="og:description" content="Media Days, Draft Night, game days and champions from the Tampa Bay Coptic Basketball League.">
+<meta property="og:url" content="https://coptichoops.com/gallery.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<header id="topbar" class="topbar"></header>
+<header id="topbar" class="topbar"></header>
+
+<section class="page-hero" style="--hero-pos:center 30%"><div class="hero-bg" style="background-image:url(assets/img/photos/s2-063.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s2-061.jpg);background-position:50% 28%"></div><div class="wrap">
+  <div class="kicker">The TCBL gallery</div>
+  <h1>Faith. Fellowship.<br><em>Fitness.</em></h1>
+  <p>Media Days, Draft Night, game days and champions, from the very first season to now.</p>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="gfilters" id="cats" role="toolbar" aria-label="Filter by moment"></div>
+  <div class="gfilters seasons" id="seas" role="toolbar" aria-label="Filter by season"></div>
+  <div class="gcount" id="gcount"></div>
+  <div class="masonry" id="grid"></div>
+  <p style="margin-top:26px;text-align:center"><a class="btn ghost" href="https://www.instagram.com/coptichoops/" target="_blank" rel="noopener">More on Instagram @coptichoops</a></p>
+</div></section>
+
+<div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="x" aria-label="Close">✕</button><button class="pv" aria-label="Previous photo">‹</button><button class="nx" aria-label="Next photo">›</button>
+  <img alt=""><div class="cap"></div></div>
+
+<script src="assets/js/app.js"></script>
+<script>
+CS.nav("gallery"); CS.footer();
+(async()=>{
+  const all = await CS.data("gallery");
+  const CATS = [["all","All"],["gameday","Game Day"],["mediaday","Media Day"],["draftnight","Draft Night"],["champions","Champions"],["brotherhood","Brotherhood"],["faith","Faith"]];
+  const key = c => c.toLowerCase().replace(/\s/g,"");
+  let cat = (location.hash||"#all").slice(1), season = 0, shown = [];
+  if(!CATS.some(([k])=>k===cat)) cat = "all";
+  const seasons = [...new Set(all.map(p=>p.season))].sort();
+  const bar = (el, items, cur, on) => {
+    el.innerHTML = items.map(([k,l])=>`<button data-k="${k}" class="${k==cur?"on":""}">${l}</button>`).join("");
+    el.querySelectorAll("button").forEach(b=>b.onclick=()=>{ on(b.dataset.k); });
+  };
+  const draw = () => {
+    bar(document.getElementById("cats"), CATS, cat, k=>{ cat=k; history.replaceState(null,"","#"+k); draw(); });
+    bar(document.getElementById("seas"), [[0,"All seasons"],...seasons.map(s=>[s,"Season "+s])], season, k=>{ season=+k; draw(); });
+    shown = all.filter(p=>(cat==="all"||key(p.cat)===cat) && (!season||p.season===season));
+    // brotherhood includes the faith moments so the filter never feels thin
+    if(cat==="brotherhood") shown = all.filter(p=>["brotherhood","faith"].includes(key(p.cat)) && (!season||p.season===season));
+    document.getElementById("gcount").textContent = `${shown.length} photo${shown.length===1?"":"s"}`;
+    document.getElementById("grid").innerHTML = shown.map((p,i)=>
+      `<figure class="reveal" data-i="${i}"><img src="${CS.photo(p.id,1)}" width="${p.w}" height="${p.h}" alt="${p.caption}" loading="lazy"><figcaption>${p.caption}</figcaption></figure>`).join("");
+    document.querySelectorAll("#grid figure").forEach(f=>f.onclick=()=>open(+f.dataset.i));
+  };
+  // ---- lightbox: arrows, keyboard and swipe ----
+  const lb = document.getElementById("lb"), img = lb.querySelector("img"), cap = lb.querySelector(".cap");
+  let at = 0;
+  const open = i => { at = (i+shown.length)%shown.length; const p = shown[at];
+    img.src = CS.photo(p.id); img.alt = p.caption; cap.textContent = `${p.caption}  ·  ${at+1} / ${shown.length}`;
+    lb.classList.add("open"); document.body.style.overflow="hidden"; };
+  const close = () => { lb.classList.remove("open"); document.body.style.overflow=""; };
+  lb.querySelector(".x").onclick = close; lb.querySelector(".pv").onclick = ()=>open(at-1); lb.querySelector(".nx").onclick = ()=>open(at+1);
+  lb.onclick = e => { if(e.target===lb) close(); };
+  document.addEventListener("keydown", e=>{ if(!lb.classList.contains("open")) return;
+    if(e.key==="Escape") close(); if(e.key==="ArrowLeft") open(at-1); if(e.key==="ArrowRight") open(at+1); });
+  let x0 = null; lb.addEventListener("touchstart", e=>x0=e.touches[0].clientX, {passive:true});
+  lb.addEventListener("touchend", e=>{ if(x0===null) return; const dx=e.changedTouches[0].clientX-x0; if(Math.abs(dx)>50) open(at+(dx<0?1:-1)); x0=null; });
+  draw();
+})();
+</script>
+</body></html>
