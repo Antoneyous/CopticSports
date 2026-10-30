@@ -63,6 +63,16 @@
 <script src="assets/js/app.js"></script>
 <script>
 CS.nav(""); CS.footer();
+// Locked: hide the tool and say so. Set portalLocked to false in app.js to reopen.
+if(CS.portalLocked){
+  const sec = document.querySelector("section.section");
+  sec.style.display = "none";
+  sec.insertAdjacentHTML("afterend", `<section class="section"><div class="wrap" style="max-width:640px">
+    <div class="card" style="text-align:center;padding:40px 26px">
+      <h3 style="font-size:22px">The Stat Portal is locked</h3>
+      <p class="cardp" style="margin:10px auto 22px;max-width:440px">Stat uploads are closed for now. They'll reopen once Season 5 is underway.</p>
+      <a class="btn" href="index.html">Back to home</a></div></div></section>`);
+}
 const CANON={"st. andrew":"St. Andrew","st. basil":"St. Basil","st. domatius":"St. Dometius","st. dometius":"St. Dometius",
 "st. gregory":"St. Gregory","st. james":"St. James","st. john":"St. John","st. maximus":"St. Maximus","st. peter":"St. Peter",
 "st. cosmas":"St. Cosmas","st. damian":"St. Damian"};

@@ -273,6 +273,14 @@ const CS = {
     statportal:'M4 20h16M7 16V9M12 16V5M17 16v-4',
     calendar:'M3.2 8.6h17.6M7.6 3.4v3.2M16.4 3.4v3.2M4.4 6.2h15.2a1.2 1.2 0 0 1 1.2 1.2v12.4a1.2 1.2 0 0 1-1.2 1.2H4.4a1.2 1.2 0 0 1-1.2-1.2V7.4a1.2 1.2 0 0 1 1.2-1.2z'
   },
+  // Stat Portal switch. While true the portal shows as locked everywhere and
+  // upload.html refuses to load the tool. Flip to false to open it back up.
+  portalLocked: true,
+  // what every Stat Portal entry point renders: a link, or a locked label
+  portalLink(cls){
+    if(!this.portalLocked) return `<a class="${cls||""}" href="upload.html">Stat Portal</a>`;
+    return `<span class="${cls||""} locked" aria-disabled="true" title="The Stat Portal is locked for now"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Stat Portal</span>`;
+  },
   // social + contact, used by the footer and the mobile "More" sheet
   social:{ instagram:"https://www.instagram.com/coptichoops/", youtube:"https://www.youtube.com/@Coptichoops",
            email:"coptichoops@gmail.com" },
@@ -288,10 +296,13 @@ const CS = {
       <nav class="nav">${links.map(([h,l])=>
         `<a href="${h}" class="${l.toLowerCase()===active?"on":""}">${l}</a>`).join("")}
         <a class="spacer ghost-cta${active==="register"?" on":""}" href="register.html">Register</a>
-        <a class="cta" href="upload.html">Stat Portal</a></nav></div>`;
+        ${this.portalLink("cta")}</nav></div>`;
     // ---- mobile bottom tab bar: 4 main tabs + a "More" sheet ----
     const main = links.slice(0,4), extra = [["standings.html","Standings"],["history.html","History"],
       ["gallery.html","Gallery"],["calendar.html","Calendar"],["register.html","Register"],["upload.html","Stat Portal"]];
+    const tile = (h,l,k,on) => (k==="statportal" && this.portalLocked)
+      ? `<span class="locked" aria-disabled="true">${icon(k)}<span>${l} · Locked</span></span>`
+      : `<a href="${h}" class="${on?"on":""}">${icon(this.icons[k]?k:"more")}<span>${l}</span></a>`;
     const inMore = extra.some(([,l])=>l.toLowerCase()===active) || onPortal;
     const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${this.icons[k]}"/></svg>`;
@@ -308,7 +319,7 @@ const CS = {
     sheet.innerHTML = `<div class="sheet-scrim"></div><div class="sheet-card">
       <div class="sheet-grab"></div>
       <div class="sheet-grid">${extra.map(([h,l])=>{ const k=l.toLowerCase().replace(" ","");
-        return `<a href="${h}" class="${(l.toLowerCase()===active||(onPortal&&k==="statportal"))?"on":""}">${icon(this.icons[k]?k:"more")}<span>${l}</span></a>`;}).join("")}</div>
+        return tile(h,l,k,l.toLowerCase()===active||(onPortal&&k==="statportal"));}).join("")}</div>
       <div class="sheet-social"><a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} @coptichoops</a>
         <a href="${this.social.youtube}" target="_blank" rel="noopener">${this.glyph.yt} Live on YouTube</a></div></div>`;
     document.body.appendChild(sheet);
@@ -431,7 +442,7 @@ const CS = {
         <a href="mailto:${this.social.email}">${this.glyph.mail} Email us</a></div>
     </div>
     <div class="wrap fbottom"><span>Tampa Bay Coptic Basketball League · Sanctioned under the Coptic Orthodox Diocese of the Southern United States</span>
-      <a href="upload.html">Stat Portal</a></div>`;
+      ${this.portalLink()}</div>`;
     document.body.appendChild(f);
     this.reveal();
   },

@@ -828,3 +828,15 @@ details.roster>summary h3{display:block}
   .hero.photo{padding-top:min(58vw,270px)}
   .team-card2 .bot>.bro:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
+
+/* ---- locked Stat Portal ---- */
+.nav .cta.locked{display:inline-flex;align-items:center;gap:7px;background:var(--navy-800);color:var(--ink-faint);
+  border:1px solid var(--line);cursor:not-allowed;padding:8px 12px;border-radius:8px;font-weight:700;font-size:12.5px;
+  letter-spacing:.8px;text-transform:uppercase;margin-left:6px}
+footer .fbottom .locked{display:inline-flex;align-items:center;gap:6px;color:var(--ink-faint);opacity:.7;cursor:not-allowed}
+@media(max-width:780px){
+  .sheet-grid span.locked{display:flex;flex-direction:column;align-items:center;gap:7px;padding:16px 6px;border-radius:14px;
+    background:transparent;border:1px dashed var(--line);font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+    color:var(--ink-faint);opacity:.75;cursor:not-allowed;text-align:center}
+  .sheet-grid span.locked svg{width:22px;height:22px}
+}
