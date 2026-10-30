@@ -451,14 +451,30 @@ const CS = {
   countdown(el, target, label, onDone){
     if(!el) return;
     clearInterval(el._cd);
+    const units = [["d","Days"],["h","Hours"],["m","Min"],["s","Sec"]];
+    el.classList.add("sb");
+    el.innerHTML = `<div class="count-label"><i class="dot"></i>${label}</div>
+      <div class="sb-row">${units.map(([k,l],i)=>`${i?'<i class="sb-colon">:</i>':""}<div class="cell" data-u="${k}">
+        <div class="dg"><em>88</em><b>00</b></div><span>${l}</span></div>`).join("")}</div>
+      <div class="sb-clock" aria-hidden="true"><i></i></div>`;
+    const B = {}, G = {};
+    units.forEach(([k])=>{ B[k] = el.querySelector(`[data-u="${k}"] b`); G[k] = el.querySelector(`[data-u="${k}"] em`); });
+    const bar = el.querySelector(".sb-clock i");
     const tick = ()=>{
       const ms = new Date(target) - new Date();
-      if(ms<=0){ clearInterval(el._cd); el.innerHTML = ""; if(onDone) onDone(); return; }
-      const d = Math.floor(ms/864e5), h = Math.floor(ms%864e5/36e5),
-            m = Math.floor(ms%36e5/6e4), s = Math.floor(ms%6e4/1e3);
-      el.innerHTML = `<div class="count-label">${label}</div>` +
-        [[d,"Days"],[h,"Hours"],[m,"Min"],[s,"Sec"]].map(([v,l])=>
-          `<div class="cell"><b>${v}</b><span>${l}</span></div>`).join("");
+      if(ms<=0){ clearInterval(el._cd); el.classList.remove("sb"); el.innerHTML = ""; if(onDone) onDone(); return; }
+      const v = { d:Math.floor(ms/864e5), h:Math.floor(ms%864e5/36e5), m:Math.floor(ms%36e5/6e4), s:Math.floor(ms%6e4/1e3) };
+      for(const k in v){
+        const t = String(v[k]).padStart(2,"0");
+        if(B[k].textContent !== t){
+          B[k].textContent = t; G[k].textContent = "8".repeat(t.length);
+          B[k].classList.remove("tick"); void B[k].offsetWidth; B[k].classList.add("tick");
+        }
+      }
+      // shot-clock bar: drains with the seconds, snaps back full each minute
+      const w = v.s/59*100;
+      bar.classList.toggle("reset", v.s===59);
+      bar.style.width = w + "%";
     };
     el._cd = setInterval(tick, 1000); tick();
   },
