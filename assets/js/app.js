@@ -502,3 +502,30 @@ const CS = {
     });
   }
 };
+
+// Rotating hero photos: sections with data-rotate crossfade between the
+// photo in the markup and the extra slides listed in the attribute.
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.querySelectorAll("[data-rotate]").forEach(sec=>{
+    let slides; try{ slides = JSON.parse(sec.dataset.rotate); }catch(e){ return; }
+    const d0 = sec.querySelector(":scope > .hero-bg:not(.m)"), m0 = sec.querySelector(":scope > .hero-bg.m");
+    if(!d0 || !m0 || !slides.length) return;
+    const groups = [[d0, m0]];
+    let last = m0;
+    slides.forEach(s=>{
+      const d = d0.cloneNode(), m = m0.cloneNode();
+      d.style.backgroundImage = `url(${s.d})`; if(s.dp) d.style.backgroundPosition = s.dp;
+      m.style.backgroundImage = `url(${s.m})`; if(s.mp) m.style.backgroundPosition = s.mp;
+      d.classList.add("off"); m.classList.add("off");
+      last.after(d, m); last = m; groups.push([d, m]);
+    });
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let i = 0;
+    setInterval(()=>{
+      if(document.hidden) return;
+      groups[i].forEach(e=>e.classList.add("off"));
+      i = (i+1) % groups.length;
+      groups[i].forEach(e=>e.classList.remove("off"));
+    }, 7000);
+  });
+});

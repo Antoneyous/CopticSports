@@ -20,7 +20,7 @@
 <header id="topbar" class="topbar"></header>
 <header id="topbar" class="topbar"></header>
 
-<section class="page-hero" style="--hero-pos:center 30%"><div class="hero-bg" style="background-image:url(assets/img/photos/s2-063.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s2-061.jpg);background-position:50% 28%"></div><div class="wrap">
+<section class="page-hero" data-rotate='[{"d": "assets/img/photos/s2-063.jpg", "dp": "center 30%", "m": "assets/img/photos/s2-061.jpg", "mp": "50% 28%"}]' style="--hero-pos:62% 18%"><div class="hero-bg" style="background-image:url(assets/img/photos/hero-gallery.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/hero-gallery-m.jpg);background-position:55% 30%"></div><div class="wrap">
   <div class="kicker">The TCBL gallery</div>
   <h1>Faith. Fellowship.<br><em>Fitness.</em></h1>
   <p>Media Days, Draft Night, game days and champions, from the very first season to now.</p>
@@ -31,6 +31,7 @@
   <div class="gfilters seasons" id="seas" role="toolbar" aria-label="Filter by season"></div>
   <div class="gcount" id="gcount"></div>
   <div class="masonry" id="grid"></div>
+  <div style="text-align:center;margin:26px 0 8px"><button class="btn ghost" id="more" hidden>Show more photos</button></div>
   <p style="margin-top:26px;text-align:center"><a class="btn ghost" href="https://www.instagram.com/coptichoops/" target="_blank" rel="noopener">More on Instagram @coptichoops</a></p>
 </div></section>
 
@@ -42,7 +43,7 @@
 <script>
 CS.nav("gallery"); CS.footer();
 (async()=>{
-  const all = await CS.data("gallery");
+  const all = (await CS.data("gallery")).map((p,i)=>({...p,_i:i})).sort((a,b)=>(b.season-a.season)||(a._i-b._i));
   const CATS = [["all","All"],["gameday","Game Day"],["mediaday","Media Day"],["draftnight","Draft Night"],["champions","Champions"],["brotherhood","Brotherhood"],["faith","Faith"]];
   const key = c => c.toLowerCase().replace(/\s/g,"");
   let cat = (location.hash||"#all").slice(1), season = 0, shown = [];
@@ -59,10 +60,18 @@ CS.nav("gallery"); CS.footer();
     // brotherhood includes the faith moments so the filter never feels thin
     if(cat==="brotherhood") shown = all.filter(p=>["brotherhood","faith"].includes(key(p.cat)) && (!season||p.season===season));
     document.getElementById("gcount").textContent = `${shown.length} photo${shown.length===1?"":"s"}`;
-    document.getElementById("grid").innerHTML = shown.map((p,i)=>
-      `<figure class="reveal" data-i="${i}"><img src="${CS.photo(p.id,1)}" width="${p.w}" height="${p.h}" alt="${p.caption}" loading="lazy"><figcaption>${p.caption}</figcaption></figure>`).join("");
-    document.querySelectorAll("#grid figure").forEach(f=>f.onclick=()=>open(+f.dataset.i));
+    limit = 60; paint();
   };
+  let limit = 60;
+  const more = document.getElementById("more");
+  const paint = () => {
+    document.getElementById("grid").innerHTML = shown.slice(0,limit).map((p,i)=>
+      `<figure class="reveal in" data-i="${i}"><img src="${CS.photo(p.id,1)}" width="${p.w}" height="${p.h}" alt="${p.caption}" loading="lazy"><figcaption>${p.caption}</figcaption></figure>`).join("");
+    document.querySelectorAll("#grid figure").forEach(f=>f.onclick=()=>open(+f.dataset.i));
+    more.hidden = shown.length <= limit;
+    more.textContent = `Show more photos (${shown.length-limit} more)`;
+  };
+  more.onclick = () => { limit += 60; paint(); };
   // ---- lightbox: arrows, keyboard and swipe ----
   const lb = document.getElementById("lb"), img = lb.querySelector("img"), cap = lb.querySelector(".cap");
   let at = 0;

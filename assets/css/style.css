@@ -888,3 +888,7 @@ footer .fbottom .locked{display:inline-flex;align-items:center;gap:6px;color:var
 }
 @media(max-width:380px){ .count.sb .dg em,.count.sb .dg b{font-size:27px} .sb-colon{font-size:16px;padding-top:13px} }
 @media(prefers-reduced-motion:reduce){ .count.sb .dot,.sb-colon,.count.sb .dg b.tick{animation:none} .sb-clock i{transition:none} }
+
+/* ---- rotating hero photos (crossfade) ---- */
+[data-rotate] .hero-bg{transition:opacity 1.6s ease}
+[data-rotate] .hero-bg.off{opacity:0}
