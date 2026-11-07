@@ -526,6 +526,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
       groups[i].forEach(e=>e.classList.add("off"));
       i = (i+1) % groups.length;
       groups[i].forEach(e=>e.classList.remove("off"));
-    }, 7000);
+    }, 6000);
   });
 });
