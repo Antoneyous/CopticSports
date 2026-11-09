@@ -123,7 +123,7 @@ const CS = {
      and anything added later can never disagree. */
   // Times carry Tampa's UTC offset (EST, -05:00) so every visitor gets the same
   // moment, wherever their device's clock is set.
-  reg:{ open:"2026-11-08T19:00:00-05:00", close:"2026-11-08T19:45:00-05:00",
+  reg:{ open:"2026-11-09T19:00:00-05:00", close:"2026-11-22T00:00:00-05:00",
         form:"https://pci.jotform.com/form/253064435211144" },
   regState(now){
     now = now || new Date();
@@ -139,11 +139,11 @@ const CS = {
       el.innerHTML = `<a class="btn" href="${href||this.reg.form}">Register for Season 5</a>`;
     } else if(s==="soon"){
       el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link"
-        title="Registration opens November 8, 2026 at 7:00 PM Eastern">
+        title="8 expansion spots open November 9, 2026 at 7:00 PM Eastern">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
-        Registration opens Nov 8</span>`;
+        8 spots open tonight · 7 PM</span>`;
     } else {
       el.innerHTML = "";   // registration over: no button at all
     }
@@ -439,7 +439,7 @@ const CS = {
       <div class="fbrand"><img src="assets/img/logo-white.png" alt="TCBL">
         <p class="verse">"Honor all people. Love the brotherhood. Fear God…" <span>1 Peter 2:17</span></p>
         <p class="fpillars">Faith · Fellowship · Fitness</p></div>
-      ${col("League",[["schedule.html","Schedule"],["standings.html","Standings"],["stats.html","Stats"],["teams.html","Teams"]])}
+      ${col("League",[["schedule.html","Schedule"],["standings.html","Standings"],["stats.html","Stats"],["teams.html","Teams"],["assets/docs/TCBL-Rulebook.pdf","Rulebook",1]])}
       ${col("Story",[["history.html","History"],["gallery.html","Gallery"],["calendar.html","Coptic calendar"]].concat(this.regLocked?[]:[["register.html","Register"]]))}
       <div class="fcol"><h4>Follow</h4>
         <a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} Instagram</a>
