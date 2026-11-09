@@ -123,7 +123,7 @@ const CS = {
      and anything added later can never disagree. */
   // Times carry Tampa's UTC offset (EST, -05:00) so every visitor gets the same
   // moment, wherever their device's clock is set.
-  reg:{ open:"2026-11-09T19:00:00-05:00", close:"2026-11-22T00:00:00-05:00",
+  reg:{ open:"2026-11-09T10:45:00-05:00", close:"2026-11-22T00:00:00-05:00",
         form:"https://pci.jotform.com/form/253064435211144" },
   regState(now){
     now = now || new Date();
