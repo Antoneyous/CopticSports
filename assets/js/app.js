@@ -136,7 +136,7 @@ const CS = {
     if(!el) return;
     const s = this.regState();
     if(s==="open"){
-      el.innerHTML = `<a class="btn" href="${href||this.reg.form}">Register for Season 5</a>`;
+      el.innerHTML = `<a class="btn" href="${href||this.reg.form}">Register Now</a>`;
     } else if(s==="soon"){
       el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link"
         title="8 expansion spots open November 9, 2026 at 7:00 PM Eastern">

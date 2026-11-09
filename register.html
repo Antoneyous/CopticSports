@@ -16,7 +16,7 @@
 <meta property="og:url" content="https://coptichoops.com/register.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261109"></head><body>
 <header id="topbar" class="topbar"></header>
 
 <section class="hero photo" data-rotate='[{"d": "assets/img/photos/hero-register-2.jpg", "m": "assets/img/photos/hero-register-2-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-register-3.jpg", "m": "assets/img/photos/hero-register-3-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-register-4.jpg", "m": "assets/img/photos/hero-register-4-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-register-5.jpg", "m": "assets/img/photos/hero-register-5-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}]' style="--hero-pos:85% 45%"><div class="hero-bg" style="background-image:url(assets/img/photos/hero-register.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/hero-register-m.jpg);background-position:55% 40%"></div><div class="wrap hero-grid">
@@ -95,7 +95,7 @@
   and a dedicated team of servants.</p>
 </div></section>
 
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=20261109"></script>
 <script>
 CS.nav("register"); CS.footer();
 // Locked once registration closes, same as the Stat Portal.
@@ -115,8 +115,7 @@ CS.regButton(document.getElementById("hero-reg"));
 (function(){
   const el = document.getElementById("regcount");
   if(state==="soon")      CS.countdown(el, CS.reg.open,  "8 expansion spots open Nov 9 · 7 PM");
-  else if(state==="open") { clearInterval(el._cd); el.innerHTML = `<div class="count-label">Expansion registration is live</div>
-    <div class="cell wide"><b style="font-size:19px">8 spots · open until filled</b><span>First come, first served</span></div>`; }
+  else if(state==="open") { clearInterval(el._cd); el.innerHTML = ""; }
   else { clearInterval(el._cd); el.innerHTML = `<div class="count-label">Season 5 registration is closed</div>
     <div class="cell wide"><b style="font-size:19px">Email us about the waitlist</b>
     <span>coptichoops@gmail.com</span></div>`; }
@@ -125,9 +124,7 @@ CS.regButton(document.getElementById("hero-reg"));
 (function(){
   const go = document.getElementById("signup-go");
   if(state==="open"){
-    go.innerHTML = `<a class="btn big" href="${CS.reg.form}" target="_blank" rel="noopener">Open Registration Form</a>
-      <span class="signup-sub">Opens in a new tab</span>
-      <span class="signup-sub">Players only. Coaches &amp; volunteers: email coptichoops@gmail.com</span>`;
+    go.innerHTML = `<a class="btn big" href="${CS.reg.form}" target="_blank" rel="noopener">Register Now</a>`;
   } else if(state==="soon"){
     go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Opens tonight · 7 PM</span>
       <span class="signup-sub">This button unlocks by itself at 7:00 PM Eastern</span>

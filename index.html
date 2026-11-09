@@ -16,7 +16,7 @@
 <meta property="og:url" content="https://coptichoops.com/"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261109"></head><body>
 <header id="topbar" class="topbar"></header>
 
 <section class="hero photo" data-rotate='[{"d": "assets/img/photos/hero-home-2.jpg", "m": "assets/img/photos/hero-home-2-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-home-3.jpg", "m": "assets/img/photos/hero-home-3-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-home-4.jpg", "m": "assets/img/photos/hero-home-4-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-home-5.jpg", "m": "assets/img/photos/hero-home-5-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}]' style="--hero-pos:85% 45%"><div class="hero-bg" style="background-image:url(assets/img/photos/hero-home.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/hero-home-m.jpg);background-position:55% 35%"></div><div class="wrap hero-grid">
@@ -90,7 +90,7 @@
   <div class="ig-strip reveal" id="strip"></div>
 </div></section>
 
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=20261109"></script>
 <script>
 CS.nav("home"); CS.footer();
 CS.liveSection(document.getElementById("livehost"));
@@ -99,8 +99,7 @@ CS.regWatch(async s=>{
   const el = document.getElementById("countdown");
   CS.regButton(document.getElementById("hero-reg"), "register.html");
   if(s==="soon")      CS.countdown(el, CS.reg.open,  "8 expansion spots open Nov 9 · 7 PM");
-  else if(s==="open") { clearInterval(el._cd); el.innerHTML = `<div class="count-label">Expansion registration is live</div>
-    <div class="cell wide"><b style="font-size:19px">8 spots · open until filled</b><span>First come, first served</span></div>`; }
+  else if(s==="open") { clearInterval(el._cd); el.innerHTML = ""; }
   else {
     const g = (await CS.data("season5")).games.find(g=>g.date && g.time);
     if(g) CS.countdown(el, CS.et(g.date, g.time), "Season 5 tips off " + CS.fmtDate(g.date,{month:"short",day:"numeric"}));
