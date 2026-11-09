@@ -123,7 +123,7 @@ const CS = {
      and anything added later can never disagree. */
   // Times carry Tampa's UTC offset (EST, -05:00) so every visitor gets the same
   // moment, wherever their device's clock is set.
-  reg:{ open:"2026-11-08T19:00:00-05:00", close:"2026-11-15T23:59:00-05:00",
+  reg:{ open:"2026-11-08T19:00:00-05:00", close:"2026-11-08T19:45:00-05:00",
         form:"https://pci.jotform.com/form/253064435211144" },
   regState(now){
     now = now || new Date();
@@ -145,8 +145,7 @@ const CS = {
           <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
         Registration opens Nov 8</span>`;
     } else {
-      el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link">
-        Registration closed for Season 5</span>`;
+      el.innerHTML = "";   // registration over: no button at all
     }
     return s;
   },
@@ -281,6 +280,12 @@ const CS = {
     if(!this.portalLocked) return `<a class="${cls||""}" href="upload.html">Stat Portal</a>`;
     return `<span class="${cls||""} locked" aria-disabled="true" title="The Stat Portal is locked for now"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Stat Portal</span>`;
   },
+  // Register switch: locked everywhere (like the Stat Portal) once registration closes.
+  get regLocked(){ return this.regState()==="closed"; },
+  regLink(cls){
+    if(!this.regLocked) return `<a class="${cls||""}" href="register.html">Register</a>`;
+    return `<span class="${cls||""} locked" aria-disabled="true" title="Season 5 registration is closed"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Register</span>`;
+  },
   // social + contact, used by the footer and the mobile "More" sheet
   social:{ instagram:"https://www.instagram.com/coptichoops/", youtube:"https://www.youtube.com/@Coptichoops",
            email:"coptichoops@gmail.com" },
@@ -292,15 +297,15 @@ const CS = {
     // ---- top bar: brand, links, register + portal ----
     document.getElementById("topbar").innerHTML = `<div class="wrap">
       <a class="brand" href="index.html" aria-label="TCBL home"><img src="assets/img/logo-mini.png" alt=""><span>TCBL</span></a>
-      <a class="m-only m-portal${onPortal?" on":""}" href="register.html">Register</a>
+      ${this.regLocked ? "" : `<a class="m-only m-portal${onPortal?" on":""}" href="register.html">Register</a>`}
       <nav class="nav">${links.map(([h,l])=>
         `<a href="${h}" class="${l.toLowerCase()===active?"on":""}">${l}</a>`).join("")}
-        <a class="spacer ghost-cta${active==="register"?" on":""}" href="register.html">Register</a>
+        ${this.regLocked ? `<span class="spacer"></span>`+this.regLink("cta") : `<a class="spacer ghost-cta${active==="register"?" on":""}" href="register.html">Register</a>`}
         ${this.portalLink("cta")}</nav></div>`;
     // ---- mobile bottom tab bar: 4 main tabs + a "More" sheet ----
     const main = links.slice(0,4), extra = [["standings.html","Standings"],["history.html","History"],
       ["gallery.html","Gallery"],["calendar.html","Calendar"],["register.html","Register"],["upload.html","Stat Portal"]];
-    const tile = (h,l,k,on) => (k==="statportal" && this.portalLocked)
+    const tile = (h,l,k,on) => ((k==="statportal" && this.portalLocked) || (k==="register" && this.regLocked))
       ? `<span class="locked" aria-disabled="true">${icon(k)}<span>${l} · Locked</span></span>`
       : `<a href="${h}" class="${on?"on":""}">${icon(this.icons[k]?k:"more")}<span>${l}</span></a>`;
     const inMore = extra.some(([,l])=>l.toLowerCase()===active) || onPortal;
@@ -435,14 +440,14 @@ const CS = {
         <p class="verse">"Honor all people. Love the brotherhood. Fear God…" <span>1 Peter 2:17</span></p>
         <p class="fpillars">Faith · Fellowship · Fitness</p></div>
       ${col("League",[["schedule.html","Schedule"],["standings.html","Standings"],["stats.html","Stats"],["teams.html","Teams"]])}
-      ${col("Story",[["history.html","History"],["gallery.html","Gallery"],["calendar.html","Coptic calendar"],["register.html","Register"]])}
+      ${col("Story",[["history.html","History"],["gallery.html","Gallery"],["calendar.html","Coptic calendar"]].concat(this.regLocked?[]:[["register.html","Register"]]))}
       <div class="fcol"><h4>Follow</h4>
         <a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} Instagram</a>
         <a href="${this.social.youtube}" target="_blank" rel="noopener">${this.glyph.yt} YouTube</a>
         <a href="mailto:${this.social.email}">${this.glyph.mail} Email us</a></div>
     </div>
     <div class="wrap fbottom"><span>Tampa Bay Coptic Basketball League · Sanctioned under the Coptic Orthodox Diocese of the Southern United States</span>
-      ${this.portalLink()}</div>`;
+      <span>${this.regLocked?this.regLink():""} ${this.portalLink()}</span></div>`;
     document.body.appendChild(f);
     this.reveal();
   },

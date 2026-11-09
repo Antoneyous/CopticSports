@@ -59,7 +59,7 @@ CS.nav("history"); CS.footer();
     <div class="ph"><img src="assets/img/logo-finals.png" alt=""></div>
     <div class="tx"><div class="yr">Up next · tips off Jan 3, 2027</div><h3 style="font-family:var(--font-disp);text-transform:uppercase;font-size:28px">Your name here?</h3>
       <p>Eight teams. One trophy. Nobody has ever won back-to-back — St. Gregory gets the first shot.</p>
-      <p><a class="btn" href="register.html">Register</a></p></div></div>`);
+      ${CS.regLocked?"":`<p><a class="btn" href="register.html">Register</a></p>`}</div></div>`);
   // Two champions wore different colours the year they won: St. Andrew were in
   // white in Season 1 and St. Maximus in lime green in Season 2. The champion
   // cards show the title-year colours; everywhere else uses today's colours.

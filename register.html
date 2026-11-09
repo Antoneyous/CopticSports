@@ -98,6 +98,15 @@
 <script src="assets/js/app.js"></script>
 <script>
 CS.nav("register"); CS.footer();
+// Locked once registration closes, same as the Stat Portal.
+if(CS.regLocked){
+  document.querySelectorAll("section").forEach(x=>x.style.display="none");
+  document.getElementById("topbar").insertAdjacentHTML("afterend", `<section class="section" style="padding-top:120px"><div class="wrap" style="max-width:640px">
+    <div class="card" style="text-align:center;padding:40px 26px">
+      <h3 style="font-size:22px">Registration is locked</h3>
+      <p class="cardp" style="margin:10px auto 22px;max-width:440px">Season 5 sold out. All 72 spots are taken. Want to help as a coach or volunteer? Email coptichoops@gmail.com.</p>
+      <a class="btn" href="index.html">Back to home</a></div></div></section>`);
+}
 
 // Everything below re-renders by itself at 7 PM Nov 8 and again when registration
 // closes, so nobody has to refresh.
