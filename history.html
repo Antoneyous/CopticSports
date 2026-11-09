@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><title>History | CopticSports · TCBL</title>
+<!DOCTYPE html><html lang="en"><head><title>History | TCBL</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1a28">
 <meta name="mobile-web-app-capable" content="yes">
@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <meta name="description" content="Four seasons, four champions. Every Finals, record and all-time leader in Tampa Bay Coptic Basketball League history.">
-<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
-<meta property="og:title" content="History · TCBL"><meta property="og:description" content="Four seasons, four champions. Every Finals, record and all-time leader in Tampa Bay Coptic Basketball League history.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
+<meta property="og:title" content="TCBL History"><meta property="og:description" content="Four seasons, four champions. Every Finals, record and all-time leader in Tampa Bay Coptic Basketball League history.">
 <meta property="og:url" content="https://coptichoops.com/history.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
@@ -20,7 +20,7 @@
 <header id="topbar" class="topbar"></header>
 
 <section class="page-hero" style="--hero-pos:center 35%"><div class="hero-bg" style="background-image:url(assets/img/photos/s1-000.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s4-111.jpg);background-position:50% 30%"></div><div class="wrap">
-  <div class="kicker">TCBL · Since 2023</div>
+  <div class="kicker">Since 2023</div>
   <h1>Four seasons.<br><em>Four champions.</em></h1>
   <p>Nobody has ever repeated. Every banner, every Finals, every record since the first tip-off in January 2023.</p>
 </div></section>
@@ -57,7 +57,7 @@ CS.nav("history"); CS.footer();
   const cards = [];
   if(cur) cards.push(`<div class="scard next reveal"><div class="sn"><b>${cur.id}</b><span>${cur.year}</span></div>
     <div class="ph"><img src="assets/img/logo-finals.png" alt=""></div>
-    <div class="tx"><div class="yr">Up next · tips off Jan 3, 2027</div><h3 style="font-family:var(--font-disp);text-transform:uppercase;font-size:28px">Your name here?</h3>
+    <div class="tx"><div class="yr">Tips off Jan 3, 2027</div><h3 style="font-family:var(--font-disp);text-transform:uppercase;font-size:28px">Your name here?</h3>
       <p>Eight teams. One trophy. Nobody has ever won back-to-back — St. Gregory gets the first shot.</p>
       ${CS.regLocked?"":`<p><a class="btn" href="register.html">Register</a></p>`}</div></div>`);
   // Two champions wore different colours the year they won: St. Andrew were in
@@ -87,8 +87,8 @@ CS.nav("history"); CS.footer();
   const top = k => [...all.highs].sort((a,b)=>(b[k]||0)-(a[k]||0))[0];
   const rec = [["pts","Points"],["reb","Rebounds"],["ast","Assists"],["fg3m","Threes"]].map(([k,l])=>{
     const r = top(k); if(!r) return "";
-    return `<div class="rec reveal"><i>${l} · single game</i><b>${r[k]}</b>
-      <div class="who">${r.name}</div><span>${r.team} vs ${r.opp||"—"} · Season ${r.season}, ${r.stage}</span></div>`;
+    return `<div class="rec reveal"><i>${l}, single game</i><b>${r[k]}</b>
+      <div class="who">${r.name}</div><span>${r.team} vs ${r.opp||"—"}, Season ${r.season}, ${r.stage}</span></div>`;
   });
   document.getElementById("records").innerHTML = rec.join("");
   // ---- career leaders ----
@@ -97,7 +97,7 @@ CS.nav("history"); CS.footer();
     const t = [...all.players].sort((a,b)=>b[k]-a[k]).slice(0,8);
     return `<div class="card reveal"><h3>${label}</h3>`+t.map((p,i)=>
       `<div class="leader"><span class="n">${i+1}</span><div class="who"><b>${p.name}</b>
-        <span>${p.seasons.length} season${p.seasons.length>1?"s":""} · ${p.gp} games</span></div>
+        <span>${p.seasons.length} season${p.seasons.length>1?"s":""}, ${p.gp} games</span></div>
         <div class="val"><b>${p[k]}</b><span>${u}</span></div></div>`).join("")+"</div>";
   }).join("");
   // ---- team records ----

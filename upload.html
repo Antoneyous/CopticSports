@@ -51,11 +51,11 @@
       <b>A. Direct (recommended):</b> paste a GitHub fine-grained token with <i>Contents: read & write</i> on the
       site repo, and this page commits the updated stats. The site republishes automatically.<br>
       <b>B. Manual:</b> download the updated JSON and replace <code>data/season5.js</code> in the repo.</div>
-    <div class="card"><h3>A · Publish via GitHub</h3>
+    <div class="card"><h3>Publish via GitHub</h3>
       <div class="field"><label>Repository (owner/name)</label><input type="text" id="repo" placeholder="tcbl/copticsports"></div>
       <div class="field"><label>Fine-grained token (never stored)</label><input type="password" id="token" placeholder="github_pat_…"></div>
       <button class="btn" id="publish">Publish to site</button> <span id="pubmsg"></span></div>
-    <div class="card" style="margin-top:16px"><h3>B · Manual download</h3>
+    <div class="card" style="margin-top:16px"><h3>Manual download</h3>
       <p style="color:var(--ink-dim);font-size:13.5px;margin-bottom:12px">Replace <code>data/season5.js</code> with this file and push.</p>
       <button class="btn ghost" id="download">Download updated season JSON</button></div>
   </div>
@@ -138,7 +138,7 @@ function validate(games){
     if(g.blocks.length!==2){msgs.push(`<li class="err">${g.sheet}: found ${g.blocks.length} team blocks (need 2)</li>`);errs++;return;}
     g.blocks.forEach(b=>{
       b.players.forEach(p=>{
-        if(p.fg2m>p.fg2a||p.fg3m>p.fg3a||p.ftm>p.fta){msgs.push(`<li class="err">${g.sheet} · ${b.team} · ${p.name}: makes exceed attempts</li>`);errs++;}
+        if(p.fg2m>p.fg2a||p.fg3m>p.fg3a||p.ftm>p.fta){msgs.push(`<li class="err">${g.sheet}, ${b.team}, ${p.name}: makes exceed attempts</li>`);errs++;}
       });
       const pts=b.players.reduce((s,p)=>s+p.pts,0);
       msgs.push(`<li class="ok">${g.sheet}: ${b.team}: ${b.players.filter(p=>p.gp).length} played, ${pts} pts</li>`);
@@ -171,7 +171,7 @@ async function handle(f){
      <ul style="margin:8px 0 0 18px">${msgs.join("")}</ul></div>`;
   document.getElementById("preview").innerHTML=games.filter(g=>g.blocks.length===2).map((g,i)=>{
     const [a,b]=g.blocks, pa=a.players.reduce((s,p)=>s+p.pts,0), pb=b.players.reduce((s,p)=>s+p.pts,0);
-    return `<div class="game" style="margin-bottom:10px"><div class="meta"><span>${g.sheet} · ${parsed.week} · ${parsed.venue}</span><span>PREVIEW</span></div>
+    return `<div class="game" style="margin-bottom:10px"><div class="meta"><span>${g.sheet}, ${parsed.week}, ${parsed.venue}</span><span>PREVIEW</span></div>
       <div class="row ${pa>pb?"win":"dim"}">${CS.team(a.team)}<span class="score">${pa}</span></div>
       <div class="row ${pb>pa?"win":"dim"}">${CS.team(b.team)}<span class="score">${pb}</span></div></div>`;
   }).join("");

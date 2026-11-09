@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <meta name="description" content="TCBL games alongside the Coptic Orthodox calendar of feasts and fasts.">
-<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
-<meta property="og:title" content="Calendar · TCBL"><meta property="og:description" content="TCBL games alongside the Coptic Orthodox calendar of feasts and fasts.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
+<meta property="og:title" content="TCBL Calendar"><meta property="og:description" content="TCBL games alongside the Coptic Orthodox calendar of feasts and fasts.">
 <meta property="og:url" content="https://coptichoops.com/calendar.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
@@ -48,7 +48,7 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
   s5.games.forEach(g=>{
     if(g.status==="BYE") add(g.date,{type:"league",label:"Bye Week"});
     else if(g.team1) add(g.date,{type:"game",teams:[g.team1,g.team2],label:CS.fmtTime(g.time)});
-    else add(g.date,{type:"game",label:`${g.stage} · ${g.venue}`});
+    else add(g.date,{type:"game",label:`${g.stage}, ${g.venue}`});
   });
   s5.milestones.forEach(m=>add(m.date,{type:"league",label:m.label}));
   // ---- fasting days ----
@@ -114,7 +114,7 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
     document.getElementById("agenda").innerHTML = agenda ||
       `<p class="ag-empty">Nothing on the calendar this month.</p>`;
     const monthFasts=cal.fasts.filter(f=>new Date(f.end+"T00:00")>=cur && new Date(f.start+"T00:00")<=new Date(cur.getFullYear(),cur.getMonth()+1,0));
-    const fastLine = monthFasts.map(f=>`${f.name}: ${CS.fmtDate(f.start,{month:"short",day:"numeric"})} to ${CS.fmtDate(f.end,{month:"short",day:"numeric"})}`).join("   ·   ");
+    const fastLine = monthFasts.map(f=>`${f.name}: ${CS.fmtDate(f.start,{month:"short",day:"numeric"})} to ${CS.fmtDate(f.end,{month:"short",day:"numeric"})}`).join(",   ");
     document.getElementById("fastnote").textContent = fastLine;
     document.getElementById("ag-fastnote").textContent = fastLine;
     document.getElementById("prev").disabled = cur<=MIN;

@@ -85,8 +85,8 @@ const CS = {
     if(w.live){
       // switch back to "off air" by itself once the day's games are over
       host._liveT = setTimeout(()=>this.liveSection(host), Math.min(w.live.end - new Date() + 1000, 2**31-1));
-      host.innerHTML = `<div class="livenow"><span class="ldot"></span>Live now ·
-        ${this.fmtDate(w.live.date)}${w.live.games[0].venue?" · "+w.live.games[0].venue:""}</div>
+      host.innerHTML = `<div class="livenow"><span class="ldot"></span>Live now
+        ${this.fmtDate(w.live.date)}${w.live.games[0].venue?", "+w.live.games[0].venue:""}</div>
         ${this.liveEmbed()}${this.matchups(w.live.games)}`;
     } else if(w.next){
       host.innerHTML = `<div class="card offair"><h3>Off air right now</h3>
@@ -98,7 +98,7 @@ const CS = {
           target="_blank" rel="noopener">Past broadcasts on YouTube</a></p></div>`;
       // when the countdown runs out, re-render so the player appears without a refresh
       this.countdown(document.getElementById("live-count"), w.next.start.toISOString(),
-        `Next tip-off · ${this.fmtDate(w.next.date)}`, ()=>this.liveSection(host));
+        `Next tip-off ${this.fmtDate(w.next.date)}`, ()=>this.liveSection(host));
     } else {
       host.innerHTML = `<div class="card offair"><h3>That's a wrap on the season</h3>
         <p class="cardp">Every game from the season is up on our YouTube channel.</p>
@@ -143,7 +143,7 @@ const CS = {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
-        8 spots open tonight · 7 PM</span>`;
+        Opens at 7 PM</span>`;
     } else {
       el.innerHTML = "";   // registration over: no button at all
     }
@@ -252,7 +252,7 @@ const CS = {
         <span class="score">${score??""}</span></div>` : "";
     const label = g.status==="FFT" ? "FORFEIT" : g.status==="BYE" ? "BYE WEEK" : g.status==="NR" ? "NOT REPORTED" : done ? "FINAL" : this.fmtTime(g.time);
     return `<div class="game">
-      <div class="meta"><span>${g.stage}${g.venue?" · "+g.venue:""}</span>
+      <div class="meta"><span>${g.stage}${g.venue?", "+g.venue:""}</span>
       <span class="status-${g.status}">${label}</span></div>
       ${g.status==="BYE" ? `<div class="row"><span class="tname" style="color:var(--ink-dim)">No games. Rest & fellowship</span></div>`
         : line(g.team1,g.score1,w1,w2)+line(g.team2,g.score2,w2,w1)}
@@ -306,7 +306,7 @@ const CS = {
     const main = links.slice(0,4), extra = [["standings.html","Standings"],["history.html","History"],
       ["gallery.html","Gallery"],["calendar.html","Calendar"],["register.html","Register"],["upload.html","Stat Portal"]];
     const tile = (h,l,k,on) => ((k==="statportal" && this.portalLocked) || (k==="register" && this.regLocked))
-      ? `<span class="locked" aria-disabled="true">${icon(k)}<span>${l} · Locked</span></span>`
+      ? `<span class="locked" aria-disabled="true">${icon(k)}<span>${l}</span></span>`
       : `<a href="${h}" class="${on?"on":""}">${icon(this.icons[k]?k:"more")}<span>${l}</span></a>`;
     const inMore = extra.some(([,l])=>l.toLowerCase()===active) || onPortal;
     const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
@@ -438,7 +438,7 @@ const CS = {
     f.innerHTML = `<div class="wrap fgrid">
       <div class="fbrand"><img src="assets/img/logo-white.png" alt="TCBL">
         <p class="verse">"Honor all people. Love the brotherhood. Fear God…" <span>1 Peter 2:17</span></p>
-        <p class="fpillars">Faith · Fellowship · Fitness</p></div>
+        <p class="fpillars">Faith. Fellowship. Fitness.</p></div>
       ${col("League",[["schedule.html","Schedule"],["standings.html","Standings"],["stats.html","Stats"],["teams.html","Teams"],["assets/docs/TCBL-Rulebook.pdf","Rulebook",1]])}
       ${col("Story",[["history.html","History"],["gallery.html","Gallery"],["calendar.html","Coptic calendar"]].concat(this.regLocked?[]:[["register.html","Register"]]))}
       <div class="fcol"><h4>Follow</h4>
@@ -446,7 +446,7 @@ const CS = {
         <a href="${this.social.youtube}" target="_blank" rel="noopener">${this.glyph.yt} YouTube</a>
         <a href="mailto:${this.social.email}">${this.glyph.mail} Email us</a></div>
     </div>
-    <div class="wrap fbottom"><span>Tampa Bay Coptic Basketball League · Sanctioned under the Coptic Orthodox Diocese of the Southern United States</span>
+    <div class="wrap fbottom"><span>Tampa Bay Coptic Basketball League. Sanctioned under the Coptic Orthodox Diocese of the Southern United States</span>
       <span>${this.regLocked?this.regLink():""} ${this.portalLink()}</span></div>`;
     document.body.appendChild(f);
     this.reveal();

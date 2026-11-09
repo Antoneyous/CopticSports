@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><title>Gallery | CopticSports · TCBL</title>
+<!DOCTYPE html><html lang="en"><head><title>Gallery | TCBL</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1a28">
 <meta name="mobile-web-app-capable" content="yes">
@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <meta name="description" content="Media Days, Draft Night, game days and champions from the Tampa Bay Coptic Basketball League.">
-<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
-<meta property="og:title" content="Gallery · TCBL"><meta property="og:description" content="Media Days, Draft Night, game days and champions from the Tampa Bay Coptic Basketball League.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
+<meta property="og:title" content="TCBL Gallery"><meta property="og:description" content="Media Days, Draft Night, game days and champions from the Tampa Bay Coptic Basketball League.">
 <meta property="og:url" content="https://coptichoops.com/gallery.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
@@ -76,7 +76,7 @@ CS.nav("gallery"); CS.footer();
   const lb = document.getElementById("lb"), img = lb.querySelector("img"), cap = lb.querySelector(".cap");
   let at = 0;
   const open = i => { at = (i+shown.length)%shown.length; const p = shown[at];
-    img.src = CS.photo(p.id); img.alt = p.caption; cap.textContent = `${p.caption}  ·  ${at+1} / ${shown.length}`;
+    img.src = CS.photo(p.id); img.alt = p.caption; cap.textContent = `${p.caption}   ${at+1} / ${shown.length}`;
     lb.classList.add("open"); document.body.style.overflow="hidden"; };
   const close = () => { lb.classList.remove("open"); document.body.style.overflow=""; };
   lb.querySelector(".x").onclick = close; lb.querySelector(".pv").onclick = ()=>open(at-1); lb.querySelector(".nx").onclick = ()=>open(at+1);

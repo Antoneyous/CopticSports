@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <meta name="description" content="8 expansion spots open Mon, Nov 9 at 7 PM ET. $100, men 18+. Open until filled. Faith, Fellowship, Fitness.">
-<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
-<meta property="og:title" content="Register for Season 5 · TCBL"><meta property="og:description" content="8 expansion spots open Mon, Nov 9 at 7 PM ET. $100, men 18+. Open until filled. Faith, Fellowship, Fitness.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
+<meta property="og:title" content="Register for TCBL Season 5"><meta property="og:description" content="8 expansion spots open Mon, Nov 9 at 7 PM ET. $100, men 18+. Open until filled. Faith, Fellowship, Fitness.">
 <meta property="og:url" content="https://coptichoops.com/register.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
@@ -114,7 +114,7 @@ CS.regWatch(state=>{
 CS.regButton(document.getElementById("hero-reg"));
 (function(){
   const el = document.getElementById("regcount");
-  if(state==="soon")      CS.countdown(el, CS.reg.open,  "8 expansion spots open Nov 9 · 7 PM");
+  if(state==="soon")      CS.countdown(el, CS.reg.open,  "Opens at 7 PM");
   else if(state==="open") { clearInterval(el._cd); el.innerHTML = ""; }
   else { clearInterval(el._cd); el.innerHTML = `<div class="count-label">Season 5 registration is closed</div>
     <div class="cell wide"><b style="font-size:19px">Email us about the waitlist</b>
@@ -126,9 +126,8 @@ CS.regButton(document.getElementById("hero-reg"));
   if(state==="open"){
     go.innerHTML = `<a class="btn big" href="${CS.reg.form}" target="_blank" rel="noopener">Register Now</a>`;
   } else if(state==="soon"){
-    go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Opens tonight · 7 PM</span>
-      <span class="signup-sub">This button unlocks by itself at 7:00 PM Eastern</span>
-      <span class="signup-sub">8 spots · open until filled</span>`;
+    go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Opens at 7 PM</span>
+      <span class="signup-sub">This button unlocks by itself at 7:00 PM Eastern</span>`;
   } else {
     go.innerHTML = `<span class="btn big locked" aria-disabled="true" role="link">Registration closed</span>
       <span class="signup-sub">Email coptichoops@gmail.com about the waitlist</span>`;

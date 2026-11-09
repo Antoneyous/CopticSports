@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <meta name="description" content="Every Season 5 game: dates, times and gyms at St. Reweis and St. Verena.">
-<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
-<meta property="og:title" content="Schedule · TCBL"><meta property="og:description" content="Every Season 5 game: dates, times and gyms at St. Reweis and St. Verena.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
+<meta property="og:title" content="TCBL Schedule"><meta property="og:description" content="Every Season 5 game: dates, times and gyms at St. Reweis and St. Verena.">
 <meta property="og:url" content="https://coptichoops.com/schedule.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
@@ -39,7 +39,7 @@ async function show(n){
     <div style="margin-bottom:30px">
       <div class="sec-head" style="margin-bottom:12px">
         <h2 style="font-size:18px">${stage}</h2>
-        <span style="color:var(--ink-faint);font-size:13px">${CS.fmtDate(w.date)}${w.venue?" · "+w.venue:""}</span>
+        <span style="color:var(--ink-faint);font-size:13px">${CS.fmtDate(w.date)}${w.venue?", "+w.venue:""}</span>
       </div>
       <div class="score-strip">${w.games.map(g=>CS.gameCard(g)).join("")}</div>
     </div>`).join("") || "<p class='note'>No games recorded for this season yet.</p>";

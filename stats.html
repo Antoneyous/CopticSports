@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <meta name="description" content="Player stats and leaders for every TCBL season.">
-<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
-<meta property="og:title" content="Stats · TCBL"><meta property="og:description" content="Player stats and leaders for every TCBL season.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
+<meta property="og:title" content="TCBL Stats"><meta property="og:description" content="Player stats and leaders for every TCBL season.">
 <meta property="og:url" content="https://coptichoops.com/stats.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
@@ -43,8 +43,8 @@ function render(list){
     <td class="num x">${p.gp}</td><td class="num hot">${p.pts}</td><td class="num">${p.ppg.toFixed(1)}</td>
     <td class="num x">${p.reb}</td><td class="num x">${p.rpg.toFixed(1)}</td>
     <td class="num x">${p.ast}</td><td class="num x">${p.apg.toFixed(1)}</td>
-    <td class="num x">${p.fgp!=null?p.fgp.toFixed(1):"·"}</td><td class="num x">${p.fg3m}</td>
-    <td class="num x">${p.ftp!=null?p.ftp.toFixed(1):"·"}</td><td class="num x">${p.pf}</td></tr>`).join("")
+    <td class="num x">${p.fgp!=null?p.fgp.toFixed(1):"—"}</td><td class="num x">${p.fg3m}</td>
+    <td class="num x">${p.ftp!=null?p.ftp.toFixed(1):"—"}</td><td class="num x">${p.pf}</td></tr>`).join("")
     || `<tr><td colspan="13" style="text-align:center;color:var(--ink-dim);padding:30px">
         Stats land here after Week 1. Statisticians upload straight from the Stat Portal.</td></tr>`;
 }

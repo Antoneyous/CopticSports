@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
 <meta name="description" content="Season 5 tips off Jan 3, 2027. Schedule, live games, stats, standings and registration for the Tampa Bay Coptic Basketball League.">
-<meta property="og:type" content="website"><meta property="og:site_name" content="CopticSports · TCBL">
-<meta property="og:title" content="CopticSports · Tampa Bay Coptic Basketball League"><meta property="og:description" content="Season 5 tips off Jan 3, 2027. Schedule, live games, stats, standings and registration for the Tampa Bay Coptic Basketball League.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
+<meta property="og:title" content="Tampa Bay Coptic Basketball League"><meta property="og:description" content="Season 5 tips off Jan 3, 2027. Schedule, live games, stats, standings and registration for the Tampa Bay Coptic Basketball League.">
 <meta property="og:url" content="https://coptichoops.com/"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
@@ -98,7 +98,7 @@ CS.liveSection(document.getElementById("livehost"));
 CS.regWatch(async s=>{
   const el = document.getElementById("countdown");
   CS.regButton(document.getElementById("hero-reg"), "register.html");
-  if(s==="soon")      CS.countdown(el, CS.reg.open,  "8 expansion spots open Nov 9 · 7 PM");
+  if(s==="soon")      CS.countdown(el, CS.reg.open,  "Opens at 7 PM");
   else if(s==="open") { clearInterval(el._cd); el.innerHTML = ""; }
   else {
     const g = (await CS.data("season5")).games.find(g=>g.date && g.time);
