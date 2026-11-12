@@ -16,7 +16,7 @@
 <meta property="og:url" content="https://coptichoops.com/"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261109"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261111"></head><body>
 <header id="topbar" class="topbar"></header>
 
 <section class="hero photo" data-rotate='[{"d": "assets/img/photos/hero-home-2.jpg", "m": "assets/img/photos/hero-home-2-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-home-3.jpg", "m": "assets/img/photos/hero-home-3-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-home-4.jpg", "m": "assets/img/photos/hero-home-4-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-home-5.jpg", "m": "assets/img/photos/hero-home-5-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}]' style="--hero-pos:85% 45%"><div class="hero-bg" style="background-image:url(assets/img/photos/hero-home.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/hero-home-m.jpg);background-position:55% 35%"></div><div class="wrap hero-grid">
@@ -90,7 +90,7 @@
   <div class="ig-strip reveal" id="strip"></div>
 </div></section>
 
-<script src="assets/js/app.js?v=20261109"></script>
+<script src="assets/js/app.js?v=20261111"></script>
 <script>
 CS.nav("home"); CS.footer();
 CS.liveSection(document.getElementById("livehost"));
@@ -161,7 +161,7 @@ CS.regWatch(async s=>{
     const top = [...s4.players].sort((a,b)=>b[k]-a[k]).slice(0,5);
     return `<div class="card"><h3>${label}</h3>`+top.map((p,i)=>
       `<div class="leader"><span class="n">${i+1}</span>
-        <div class="who"><b>${p.name}</b>${CS.team(p.team,"sm")}</div>
+        <div class="who"><b>${CS.pLink(p.name)}</b>${CS.team(p.team,"sm")}</div>
         <div class="val"><b>${p[k].toFixed(1)}</b><span>${k}</span></div></div>`).join("")+"</div>";
   }).join("");
 })();

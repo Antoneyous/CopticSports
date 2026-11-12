@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="en"><head><title>Players | CopticSports</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1a28">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CopticSports">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/img/icon-512.png">
+<link rel="icon" href="assets/img/logo-mini.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
+<meta name="description" content="Every TCBL player, with photos and career stats from every season.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
+<meta property="og:title" content="TCBL Players"><meta property="og:description" content="Every TCBL player, with photos and career stats from every season.">
+<meta property="og:url" content="https://coptichoops.com/players.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
+<link rel="stylesheet" href="assets/css/style.css?v=20261111"></head><body>
+<header id="topbar" class="topbar"></header>
+<section class="section"><div class="wrap">
+  <div class="sec-head"><h2>Players</h2></div>
+  <div class="tabs" id="ptabs">
+    <span class="tabwrap"><button data-f="s5" class="on">Season 5</button></span>
+    <span class="tabwrap"><button data-f="all">All-time</button></span></div>
+  <div class="p-tools"><input class="p-search" id="q" type="search" placeholder="Search players" autocomplete="off" aria-label="Search players">
+    <select class="p-search" id="sort" style="flex:0 0 auto" aria-label="Sort players">
+      <option value="name">A–Z</option><option value="pts">Career points</option><option value="ppg">Career PPG</option><option value="seasons">Most seasons</option></select>
+    <span class="p-count" id="count"></span></div>
+  <div class="pgrid" id="grid"></div>
+</div></section>
+<script src="assets/js/app.js?v=20261111"></script>
+<script>
+CS.nav("players"); CS.footer();
+(async()=>{
+  const P = Object.values(await CS.players());
+  const last = n => n.replace(/\(.*?\)/g,"").trim().split(/\s+/).pop();
+  let filter = "s5";
+  const q = document.getElementById("q"), sort = document.getElementById("sort");
+  const render = ()=>{
+    const s = q.value.trim().toLowerCase();
+    let list = P.filter(p=> (filter==="all" ? p.seasonList.length : p.s5) && (!s || p.name.toLowerCase().includes(s)));
+    const k = sort.value;
+    list.sort((a,b)=> k==="name" ? last(a.name).localeCompare(last(b.name)) || a.name.localeCompare(b.name)
+      : k==="seasons" ? b.seasonList.length-a.seasonList.length || b.tot.pts-a.tot.pts
+      : (b.tot[k]||0)-(a.tot[k]||0));
+    document.getElementById("count").textContent = `${list.length} player${list.length===1?"":"s"}`;
+    document.getElementById("grid").innerHTML = list.map(p=>`<a class="pcard2" href="player.html?p=${p.slug}">
+      ${p.seasonList.length?"":'<span class="new">New</span>'}
+      ${CS.avatar(p,"lg")}<b>${p.name}</b>
+      ${p.team?CS.teamShort(p.team,"sm"):""}
+      <span class="ps">${p.seasonList.length?p.seasonList.map(n=>"S"+n).join(" · "):"Season 5 rookie"}</span>
+      ${p.tot.gp?`<span class="pv">${k==="ppg"?p.tot.ppg.toFixed(1):p.tot.pts}<small>${k==="ppg"?"Career PPG":"Career PTS"}</small></span>`:""}
+    </a>`).join("") || `<p class="note">No players match “${q.value}”.</p>`;
+  };
+  document.querySelectorAll("#ptabs button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#ptabs button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+    filter = b.dataset.f; render(); });
+  q.oninput = render; sort.onchange = render;
+  render();
+})();
+</script></body></html>

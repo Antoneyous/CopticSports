@@ -123,7 +123,7 @@ const CS = {
      and anything added later can never disagree. */
   // Times carry Tampa's UTC offset (EST, -05:00) so every visitor gets the same
   // moment, wherever their device's clock is set.
-  reg:{ open:"2026-11-09T10:45:00-05:00", close:"2026-11-22T00:00:00-05:00",
+  reg:{ open:"2026-11-09T10:45:00-05:00", close:"2026-11-09T23:59:00-05:00",
         form:"https://pci.jotform.com/form/253064435211144" },
   regState(now){
     now = now || new Date();
@@ -263,6 +263,7 @@ const CS = {
     home:'M3 10.6 12 3.2l9 7.4M5.6 9.4V20.8h12.8V9.4',
     schedule:'M8 6h12M8 12h12M8 18h12M3.6 6h.01M3.6 12h.01M3.6 18h.01',
     teams:'M15.5 20.5v-1.4a3.8 3.8 0 0 0-3.8-3.8H6.3a3.8 3.8 0 0 0-3.8 3.8v1.4M9 11.9a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2M21.5 20.5v-1.4a3.8 3.8 0 0 0-2.9-3.7M15.8 4.9a3.6 3.6 0 0 1 0 7',
+    players:'M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2M4.5 20.5v-.9a5.6 5.6 0 0 1 5.6-5.6h3.8a5.6 5.6 0 0 1 5.6 5.6v.9',
     stats:'M3 20.5h18M6.5 20.5v-6.4M11.5 20.5V7.6M16.5 20.5v-4M21 20.5V4',
     standings:'M7 3.8h10v5.1a5 5 0 0 1-10 0zM7 5.8H4.2v1a3 3 0 0 0 2.9 3M17 5.8h2.8v1a3 3 0 0 1-2.9 3M9 20.2h6M12 14v6.2',
     history:'M3.5 12a8.5 8.5 0 1 0 2.6-6.1M3.5 4.5v3.9h3.9M12 7.6V12l3 1.8',
@@ -291,7 +292,7 @@ const CS = {
            email:"coptichoops@gmail.com" },
   nav(active){
     const links = [["index.html","Home"],["schedule.html","Schedule"],["teams.html","Teams"],
-      ["stats.html","Stats"],["standings.html","Standings"],["history.html","History"],
+      ["stats.html","Stats"],["players.html","Players"],["standings.html","Standings"],["history.html","History"],
       ["gallery.html","Gallery"],["calendar.html","Calendar"]];
     const onPortal = /upload\.html$/.test(location.pathname);
     // ---- top bar: brand, links, register + portal ----
@@ -303,7 +304,7 @@ const CS = {
         ${this.regLocked ? `<span class="spacer"></span>`+this.regLink("cta") : `<a class="spacer ghost-cta${active==="register"?" on":""}" href="register.html">Register</a>`}
         ${this.portalLink("cta")}</nav></div>`;
     // ---- mobile bottom tab bar: 4 main tabs + a "More" sheet ----
-    const main = links.slice(0,4), extra = [["standings.html","Standings"],["history.html","History"],
+    const main = links.slice(0,4), extra = [["players.html","Players"],["standings.html","Standings"],["history.html","History"],
       ["gallery.html","Gallery"],["calendar.html","Calendar"],["register.html","Register"],["upload.html","Stat Portal"]];
     const tile = (h,l,k,on) => ((k==="statportal" && this.portalLocked) || (k==="register" && this.regLocked))
       ? `<span class="locked" aria-disabled="true">${icon(k)}<span>${l}</span></span>`
@@ -429,6 +430,72 @@ const CS = {
     scan(); new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
     this._rv = 1;
   },
+  /* ---- player profiles ----
+     Every name in the season files and rosters gets a profile at
+     player.html?p=<slug>. data/players.js adds headshots and Season 5 sign-ups.
+     Names were cleaned up across seasons so one person = one slug. */
+  slug(name){
+    return String(name||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+      .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  },
+  pLink(name, cls){
+    if(!name) return "";
+    return `<a class="plink${cls?" "+cls:""}" href="player.html?p=${this.slug(name)}">${name}</a>`;
+  },
+  initials(name){
+    return String(name||"").replace(/\(.*?\)/g,"").replace(/^Fr\.\s*/,"").trim().split(/\s+/)
+      .map(w=>w[0]).slice(0,2).join("").toUpperCase();
+  },
+  // round headshot, or the player's initials on their latest team colour
+  avatar(p, cls){
+    const c = this.colors[p.team] || {bg:"#1b405e",fg:"#ffffff"};
+    return p.photo
+      ? `<span class="pav${cls?" "+cls:""}"><img src="${p.photo}" alt="${p.name}" loading="lazy"></span>`
+      : `<span class="pav ini${cls?" "+cls:""}" style="background:${c.bg};color:${c.fg}" aria-hidden="true">${this.initials(p.name)}</span>`;
+  },
+  async players(){
+    if(this._players) return this._players;
+    const [meta, teams, reg] = await Promise.all([this.data("seasons"), this.data("teams"),
+      this.data("players").catch(()=>({}))]);
+    const ids = meta.map(s=>s.id);
+    const seasons = await Promise.all(ids.map(n=>this.data("season"+n)));
+    const P = {};
+    const get = name => P[this.slug(name)] ||= {name, slug:this.slug(name), seasons:{}, lines:[], titles:[], captain:[]};
+    seasons.forEach((d,i)=>{
+      const sn = ids[i];
+      (d.players||[]).forEach(p=>{ get(p.name).seasons[sn] = {...p, season:sn}; });
+      (d.playerLines||[]).forEach(l=>{ get(l.name).lines.push({...l, season:sn}); });
+    });
+    // a roster spot counts as a season even before any stats are in
+    Object.entries(teams).forEach(([tn,t])=>Object.entries(t.seasons||{}).forEach(([sn,sd])=>{
+      (sd.roster||[]).forEach(r=>{
+        const x = get(r.name);
+        if(!x.seasons[sn]) x.seasons[sn] = {name:r.name, team:tn, num:r.num, season:+sn, rosterOnly:true};
+      });
+      if(sd.captain) get(sd.captain).captain.push(+sn);
+    }));
+    seasons.forEach((d,i)=>{
+      if(!d.champion) return;
+      Object.values(P).forEach(p=>{ const s = p.seasons[ids[i]]; if(s && s.team===d.champion) p.titles.push(ids[i]); });
+    });
+    Object.entries(reg).forEach(([slug,r])=>{
+      const x = P[slug] ||= {name:r.name, slug, seasons:{}, lines:[], titles:[], captain:[]};
+      x.name = r.name; x.photo = r.photo || null; x.s5 = !!r.s5;
+    });
+    const K = ["gp","gs","pts","reb","ast","fg2m","fg2a","fg3m","fg3a","ftm","fta","pf","stl","blk","to"];
+    Object.values(P).forEach(p=>{
+      const t = p.tot = Object.fromEntries(K.map(k=>[k,0]));
+      const list = Object.values(p.seasons).sort((a,b)=>a.season-b.season);
+      list.forEach(s=>{ if(!s.rosterOnly) K.forEach(k=>t[k]+= (s[k]||0)); });
+      t.ppg = t.gp ? t.pts/t.gp : 0; t.rpg = t.gp ? t.reb/t.gp : 0; t.apg = t.gp ? t.ast/t.gp : 0;
+      const fa = t.fg2a+t.fg3a; t.fgp = fa ? (t.fg2m+t.fg3m)/fa*100 : null; t.ftp = t.fta ? t.ftm/t.fta*100 : null;
+      const last = list[list.length-1];
+      p.team = last ? last.team : null; p.num = last ? last.num : null;
+      p.seasonList = list.map(s=>s.season);
+      p.lines.sort((a,b)=> a.date<b.date?-1:1);
+    });
+    return this._players = P;
+  },
   photo(id, thumb){ return `assets/img/photos/${thumb?"thumb/":""}${id}.jpg`; },
 
   footer(){
@@ -439,7 +506,7 @@ const CS = {
       <div class="fbrand"><img src="assets/img/logo-white.png" alt="TCBL">
         <p class="verse">"Honor all people. Love the brotherhood. Fear God…" <span>1 Peter 2:17</span></p>
         <p class="fpillars">Faith. Fellowship. Fitness.</p></div>
-      ${col("League",[["schedule.html","Schedule"],["standings.html","Standings"],["stats.html","Stats"],["teams.html","Teams"],["assets/docs/TCBL-Rulebook.pdf","Rulebook",1]])}
+      ${col("League",[["schedule.html","Schedule"],["standings.html","Standings"],["stats.html","Stats"],["players.html","Players"],["teams.html","Teams"],["assets/docs/TCBL-Rulebook.pdf","Rulebook",1]])}
       ${col("Story",[["history.html","History"],["gallery.html","Gallery"],["calendar.html","Coptic calendar"]].concat(this.regLocked?[]:[["register.html","Register"]]))}
       <div class="fcol"><h4>Follow</h4>
         <a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} Instagram</a>

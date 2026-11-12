@@ -892,3 +892,81 @@ footer .fbottom .locked{display:inline-flex;align-items:center;gap:6px;color:var
 /* ---- rotating hero photos (crossfade) ---- */
 [data-rotate] .hero-bg{transition:opacity 1.6s ease}
 [data-rotate] .hero-bg.off{opacity:0}
+
+/* ============ player profiles ============ */
+a.plink{color:inherit;text-decoration:none;background-image:linear-gradient(currentColor,currentColor);
+  background-size:0 1.5px;background-repeat:no-repeat;background-position:0 100%;transition:background-size .2s,color .15s}
+a.plink:hover,a.plink:focus-visible{color:var(--orange);background-size:100% 1.5px}
+.pav{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:44px;height:44px;border-radius:50%;
+  overflow:hidden;background:var(--navy-700);font-family:var(--font-disp);font-size:15px;letter-spacing:.5px;
+  box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.pav img{width:100%;height:100%;object-fit:cover;display:block}
+.pav.xl{width:168px;height:168px;font-size:54px;box-shadow:0 0 0 5px rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.45)}
+.pav.lg{width:84px;height:84px;font-size:28px}
+
+.p-hero{border-radius:var(--radius);padding:34px;position:relative;overflow:hidden;margin-bottom:24px;
+  display:grid;grid-template-columns:auto 1fr;gap:34px;align-items:center}
+.p-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.28));pointer-events:none}
+.p-hero img.wm{position:absolute;right:-50px;bottom:-60px;width:320px;opacity:.12;pointer-events:none}
+.p-hero .bignum{position:absolute;right:26px;top:6px;font-family:var(--font-disp);font-size:150px;line-height:1;opacity:.13;pointer-events:none}
+.p-hero > *{position:relative}
+.p-hero small{font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;opacity:.85}
+.p-hero h1{font-family:var(--font-disp);text-transform:uppercase;font-size:clamp(32px,5vw,58px);line-height:1;margin:8px 0 12px}
+.p-hero .chips{display:flex;gap:8px;flex-wrap:wrap}
+.p-hero .chip{background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 12px;
+  font-size:11.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}
+.p-hero.light .chip{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.18)}
+.p-hero .tstats{display:flex;gap:28px;flex-wrap:wrap;margin-top:20px}
+.p-hero .tstats b{display:block;font-family:var(--font-disp);font-size:30px;line-height:1}
+.p-hero .tstats span{font-size:10.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.75}
+.p-share{position:absolute;top:16px;right:16px;z-index:2;background:rgba(0,0,0,.25);color:inherit;border:1px solid rgba(255,255,255,.25);
+  border-radius:999px;padding:6px 13px;font:800 11px var(--font-body);letter-spacing:1.4px;text-transform:uppercase;cursor:pointer}
+.p-share:hover{background:rgba(0,0,0,.4)}
+.p-hero.light .p-share{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.2)}
+.tbl tr.career td{font-weight:800;border-top:2px solid var(--line);background:rgba(255,113,16,.05)}
+.highs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.highs .h{background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.highs .h b{display:block;font-family:var(--font-disp);font-size:30px;color:var(--orange);line-height:1.05}
+.highs .h i{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--ink-faint)}
+.highs .h span{display:block;font-size:12px;color:var(--ink-dim);margin-top:2px}
+details.glog{margin-bottom:12px}
+details.glog summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px}
+details.glog summary::-webkit-details-marker{display:none}
+details.glog summary:after{content:"+";margin-left:auto;font-family:var(--font-disp);color:var(--ink-faint);font-size:20px}
+details.glog[open] summary:after{content:"–"}
+details.glog .tbl-scroll{margin-top:12px}
+
+/* directory */
+.p-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.p-search{flex:1 1 260px;background:var(--navy-800);border:1px solid var(--line);border-radius:12px;color:#fff;
+  padding:12px 16px;font:600 15px var(--font-body);outline:none}
+.p-search:focus{border-color:var(--orange)}
+.p-count{color:var(--ink-faint);font-size:12.5px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px}
+.pcard2{background:linear-gradient(180deg,var(--navy-800),var(--navy-900));border:1px solid var(--line);border-radius:16px;
+  padding:20px 14px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;transition:.18s;position:relative}
+.pcard2:hover{transform:translateY(-3px);border-color:var(--orange);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.pcard2 b{font-size:15px;line-height:1.2}
+.pcard2 .ps{font-size:11.5px;color:var(--ink-dim);letter-spacing:.4px}
+.pcard2 .new{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(255,189,89,.45);border-radius:999px;padding:2px 7px}
+.pcard2 .pv{font-family:var(--font-disp);font-size:18px;color:var(--orange);line-height:1}
+.pcard2 .pv small{display:block;font-family:var(--font-body);font-size:9.5px;letter-spacing:1.5px;color:var(--ink-faint);font-weight:800;margin-top:3px}
+.leader .pav{width:38px;height:38px;font-size:13px}
+
+@media(max-width:780px){
+  .p-hero{grid-template-columns:1fr;justify-items:center;text-align:center;padding:30px 18px 24px;gap:18px}
+  .p-hero .chips,.p-hero .tstats{justify-content:center}
+  .p-hero .tstats{gap:20px}
+  .p-hero .bignum{font-size:110px;right:12px}
+  .pav.xl{width:132px;height:132px;font-size:42px}
+  .highs{grid-template-columns:1fr 1fr}
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .pcard2{padding:16px 10px 14px}
+  .pav.lg{width:72px;height:72px}
+}
+
+/* nav fits nine links + two buttons */
+.nav .cta,.nav .ghost-cta{white-space:nowrap}
+@media(max-width:1320px) and (min-width:781px){ .nav a,.nav span.cta{padding:8px 8px;font-size:12px;letter-spacing:.5px} .topbar .wrap{gap:16px} }
+@media(max-width:1080px) and (min-width:781px){ .nav a,.nav span.cta{padding:8px 6px;font-size:11px;letter-spacing:.3px} }

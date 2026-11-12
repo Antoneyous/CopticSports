@@ -15,7 +15,7 @@
 <meta property="og:url" content="https://coptichoops.com/teams.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261109"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261111"></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="page-hero" id="thero" style="--hero-pos:center 40%"><div class="hero-bg" style="background-image:url(assets/img/photos/s4-102.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s4-103.jpg);background-position:50% 40%"></div><div class="wrap">
   <div class="kicker">Eight teams, four pairs of brothers</div>
@@ -26,7 +26,7 @@
   <div class="sec-head" id="headrow"><h2 id="title">Season 5 teams</h2></div>
   <div id="content"></div>
 </div></section>
-<script src="assets/js/app.js?v=20261109"></script>
+<script src="assets/js/app.js?v=20261111"></script>
 <script>
 CS.nav("teams"); CS.footer();
 (async()=>{
@@ -71,11 +71,11 @@ async function detail(t, teams, all){
     return `<tr><td>Season ${n}</td><td class="num">${s.w}–${s.l}</td><td class="num">${seed}</td><td>${end}</td></tr>`;
   }).join("");
   const players = all.players.filter(p=>p.teams.includes(t));
-  const lead = (k,u) => { const p = [...players].sort((a,b)=>b[k]-a[k])[0]; return p ? `<div class="leader"><div class="who"><b>${p.name}</b><span>Career total, all teams</span></div><div class="val"><b>${p[k]}</b><span>${u}</span></div></div>` : ""; };
+  const lead = (k,u) => { const p = [...players].sort((a,b)=>b[k]-a[k])[0]; return p ? `<div class="leader"><div class="who"><b>${CS.pLink(p.name)}</b><span>Career total, all teams</span></div><div class="val"><b>${p[k]}</b><span>${u}</span></div></div>` : ""; };
   const secs = Object.entries(info.seasons).sort((a,b)=>b[0]-a[0]).map(([sn,d])=>{
     const roster = (d.roster && d.roster.length)
       ? `<table class="tbl"><thead><tr><th>Player</th><th class="num">#</th></tr></thead><tbody>
-          ${[...d.roster].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<tr><td>${p.name}${d.captain===p.name?' <span class="banner">C</span>':""}</td>
+          ${[...d.roster].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<tr><td>${CS.pLink(p.name)}${d.captain===p.name?' <span class="banner">C</span>':""}</td>
           <td class="num">${p.num??""}</td></tr>`).join("")}</tbody></table>`
       : `<p class="note">${d.note || "Roster not on record for this season."}</p>`;
     return `<details class="card reveal roster" open><summary><h3>Season ${sn}${d.jerseyColor?`: ${d.jerseyColor} jerseys`:""}</h3></summary>
