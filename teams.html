@@ -39,7 +39,7 @@ CS.nav("teams"); CS.footer();
   const lm = fg => fg.toLowerCase()==="#141414" ? "logo-black.png" : "logo-white.png";
   const card = (t,i) => {
     const c = CS.colors[t]||{bg:"#334",fg:"#fff"}, st = CS.saints[t]||{}, r = all.teams[t]||{w:0,l:0,titles:[],finals:[]};
-    const cap = teams[t].seasons["5"] ? (teams[t].seasons["5"].captain || "Captain named Nov 22") : "Season 2 club";
+    const cap = teams[t].seasons["5"] ? (teams[t].seasons["5"].captain ? `Season 5 captain: ${teams[t].seasons["5"].captain}` : "Captain named Nov 22") : "Season 2 club";
     return `<a class="team-card2 reveal d${i%4}" href="teams.html?t=${encodeURIComponent(t)}">
       <div class="top" style="background:${c.bg};color:${c.fg}"><img src="assets/img/${lm(c.fg)}" alt="">
         <small>${st.full||t}</small><h3>${t}</h3>
@@ -80,7 +80,7 @@ async function detail(t, teams, all){
       : `<p class="note">${d.note || "Roster not on record for this season."}</p>`;
     return `<details class="card reveal roster" open><summary><h3>Season ${sn}${d.jerseyColor?`: ${d.jerseyColor} jerseys`:""}</h3></summary>
       ${d.captain?`<p style="color:var(--ink-dim);font-size:13px;margin-bottom:10px">Captain: <b style="color:var(--ink)">${d.captain}</b></p>`:""}
-      ${roster}</details>`;
+      ${roster}${d.roster && d.roster.length===1 && d.note ? `<p class="note" style="margin-top:10px">${d.note}</p>` : ""}</details>`;
   }).join("");
   const lm = c.fg.toLowerCase()==="#141414" ? "logo-black.png" : "logo-white.png";
   document.getElementById("content").innerHTML = `

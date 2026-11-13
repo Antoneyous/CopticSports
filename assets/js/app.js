@@ -480,7 +480,7 @@ const CS = {
     });
     Object.entries(reg).forEach(([slug,r])=>{
       const x = P[slug] ||= {name:r.name, slug, seasons:{}, lines:[], titles:[], captain:[]};
-      x.name = r.name; x.photo = r.photo || null; x.s5 = !!r.s5;
+      x.name = r.name; x.photo = r.photo || null; x.s5 = !!r.s5; x.cap5 = !!r.captain;
     });
     const K = ["gp","gs","pts","reb","ast","fg2m","fg2a","fg3m","fg3a","ftm","fta","pf","stl","blk","to"];
     Object.values(P).forEach(p=>{

@@ -43,9 +43,10 @@ const pct = (m,a) => a ? (m/a*100).toFixed(1) : "—";
   const t = p.tot, played = p.seasonList.length;
   const cur = (meta.find(s=>s.current)||{}).id;
   const chips = [];
+  if(p.cap5 && !p.captain.includes(cur)) chips.push(`Season ${cur} captain`);
   if(p.s5 && !p.seasons[cur]) chips.push(played ? `Season ${cur} · Draft Night Nov 22` : `Draft Night · Nov 22`);
   p.titles.forEach(s=>chips.push(`★ Season ${s} champion`));
-  p.captain.forEach(s=>chips.push(`Captain · Season ${s}`));
+  p.captain.forEach(s=>chips.push(s===cur ? `Season ${s} captain` : `Captain · Season ${s}`));
   const teamsPlayed = [...new Set(Object.values(p.seasons).map(s=>s.team))];
 
   // season-by-season

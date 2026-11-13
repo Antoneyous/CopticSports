@@ -45,7 +45,7 @@ CS.nav("players"); CS.footer();
       : (b.tot[k]||0)-(a.tot[k]||0));
     document.getElementById("count").textContent = `${list.length} player${list.length===1?"":"s"}`;
     document.getElementById("grid").innerHTML = list.map(p=>`<a class="pcard2" href="player.html?p=${p.slug}">
-      ${p.seasonList.length?"":'<span class="new">New</span>'}
+      ${p.cap5?'<span class="new">Captain</span>':p.seasonList.length?"":'<span class="new">New</span>'}
       ${CS.avatar(p,"lg")}<b>${p.name}</b>
       ${p.team?CS.teamShort(p.team,"sm"):""}
       <span class="ps">${p.seasonList.length?p.seasonList.map(n=>"S"+n).join(" · "):"Season 5 rookie"}</span>
