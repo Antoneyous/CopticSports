@@ -12,20 +12,20 @@
 <meta name="description" content="Player profile: stats from every TCBL season.">
 <meta property="og:type" content="website"><meta property="og:site_name" content="TCBL">
 <meta property="og:title" content="TCBL Player Profile"><meta property="og:description" content="Player profile: stats from every TCBL season.">
-<meta property="og:url" content="https://coptichoops.com/player.html"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
+<meta property="og:url" content="https://coptichoops.com/player"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261111"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261114"></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="section"><div class="wrap">
-  <div class="sec-head"><a class="more" style="margin-left:0" href="players.html">← All players</a></div>
-  <div id="content"><p class="note">Loading player…</p></div>
+  <div class="sec-head"><a class="more" style="margin-left:0" href="players">← All players</a></div>
+  <div id="content"><div class="skel" style="height:260px;margin-bottom:24px"></div><div class="skel" style="height:44px;width:360px;margin-bottom:16px"></div><div class="skel" style="height:110px"></div></div>
 </div></section>
-<script src="assets/js/app.js?v=20261111"></script>
+<script src="assets/js/app.js?v=20261114"></script>
 <script>
 CS.nav("players"); CS.footer();
-const f1 = v => v==null ? "—" : v.toFixed(1);
-const pct = (m,a) => a ? (m/a*100).toFixed(1) : "—";
+const f1 = v => v==null ? "-" : v.toFixed(1);
+const pct = (m,a) => a ? (m/a*100).toFixed(1) : "-";
 (async()=>{
   const P = await CS.players(), meta = await CS.data("seasons");
   const slug = new URLSearchParams(location.search).get("p") || "";
@@ -33,83 +33,66 @@ const pct = (m,a) => a ? (m/a*100).toFixed(1) : "—";
   const el = document.getElementById("content");
   if(!p){
     el.innerHTML = `<div class="card"><h3>Player not found</h3><p class="cardp">We couldn't find that player.
-      Try the <a class="plink" href="players.html" style="color:var(--orange)">player directory</a>.</p></div>`;
+      Try the <a class="plink" href="players" style="color:var(--orange)">player directory</a>.</p></div>`;
     return;
   }
   document.title = `${p.name} | CopticSports`;
   const c = CS.colors[p.team] || {bg:"#1b405e",fg:"#ffffff"};
   const light = ["#ffffff","#ccba92","#67aade"].includes(c.bg.toLowerCase());
   const lm = c.fg.toLowerCase()==="#141414" ? "logo-black.png" : "logo-white.png";
-  const t = p.tot, played = p.seasonList.length;
-  const cur = (meta.find(s=>s.current)||{}).id;
+  const t = p.tot, cur = (meta.find(s=>s.current)||{}).id;
+  const stats = Object.values(p.seasons).filter(s=>!s.rosterOnly && s.gp).sort((a,b)=>b.season-a.season);
+  // at most two badges: captain and titles
   const chips = [];
-  if(p.cap5 && !p.captain.includes(cur)) chips.push(`Season ${cur} captain`);
-  if(p.s5 && !p.seasons[cur]) chips.push(played ? `Season ${cur} · Draft Night Nov 22` : `Draft Night · Nov 22`);
-  p.titles.forEach(s=>chips.push(`★ Season ${s} champion`));
-  p.captain.forEach(s=>chips.push(s===cur ? `Season ${s} captain` : `Captain · Season ${s}`));
-  const teamsPlayed = [...new Set(Object.values(p.seasons).map(s=>s.team))];
+  if(p.cap5 || p.captain.includes(cur)) chips.push(CS.badge("cap", `Season ${cur} captain`));
+  if(p.titles.length) chips.push(CS.badge("champ", p.titles.length>1 ? `${p.titles.length}× champion` : `Season ${p.titles[0]} champion`));
+  if(!stats.length && !p.cap5) chips.push(CS.badge("new", "New this season"));
 
-  // season-by-season
-  const rows = Object.values(p.seasons).sort((a,b)=>b.season-a.season).map(s=> s.rosterOnly
-    ? `<tr><td>Season ${s.season}</td><td>${CS.teamShort(s.team,"sm")}</td><td class="num">${s.num??""}</td>
-        <td colspan="9" style="color:var(--ink-faint)">${s.season===cur?"Stats start Week 1":"No stats recorded"}</td></tr>`
-    : `<tr><td>Season ${s.season}${p.titles.includes(s.season)?' <span class="banner">★</span>':""}</td>
-      <td>${CS.teamShort(s.team,"sm")}</td><td class="num">${s.num??""}</td>
-      <td class="num">${s.gp}</td><td class="num hot">${s.pts}</td><td class="num">${f1(s.ppg)}</td>
-      <td class="num x">${f1(s.rpg)}</td><td class="num x">${f1(s.apg)}</td><td class="num x">${s.fgp!=null?f1(s.fgp):"—"}</td>
-      <td class="num x">${s.fg3m}</td><td class="num x">${s.ftp!=null?f1(s.ftp):"—"}</td><td class="num x">${s.pf}</td></tr>`).join("");
-  const career = t.gp ? `<tr class="career"><td>Career</td><td>${teamsPlayed.length} team${teamsPlayed.length>1?"s":""}</td><td></td>
-      <td class="num">${t.gp}</td><td class="num hot">${t.pts}</td><td class="num">${f1(t.ppg)}</td><td class="num x">${f1(t.rpg)}</td>
-      <td class="num x">${f1(t.apg)}</td><td class="num x">${t.fgp!=null?f1(t.fgp):"—"}</td><td class="num x">${t.fg3m}</td>
-      <td class="num x">${t.ftp!=null?f1(t.ftp):"—"}</td><td class="num x">${t.pf}</td></tr>` : "";
+  // one season at a time: pick a season (or career) and the panel swaps
+  const tile = (v,l)=>`<div class="st-tile"><b>${v}</b><span>${l}</span></div>`;
+  const panel = key=>{
+    if(key==="career") return `<div class="st-meta">All seasons combined</div>
+      <div class="st-row">${tile(t.gp,"Games")}${tile(f1(t.ppg),"Points / game")}${tile(f1(t.rpg),"Rebounds / game")}${tile(f1(t.apg),"Assists / game")}</div>`;
+    const s = stats.find(x=>String(x.season)===key);
+    const L = p.lines.filter(l=>l.season===s.season && l.gp);
+    return `<div class="st-meta">${CS.team(s.team,"sm")}<span>${s.num!=null?`#${s.num} · `:""}Season ${s.season}</span>${p.titles.includes(s.season)?CS.badge("champ","Champions"):""}</div>
+      <div class="st-row">${tile(s.gp,"Games")}${tile(f1(s.ppg),"Points / game")}${tile(f1(s.rpg),"Rebounds / game")}${tile(f1(s.apg),"Assists / game")}</div>
+      ${L.length?`<details class="card glog glog-toggle"><summary><h3 style="margin:0">Game log</h3></summary><div class="tbl-scroll"><table class="tbl"><thead><tr><th>Date</th><th>Opponent</th>
+        <th class="num">PTS</th><th class="num">REB</th><th class="num">AST</th></tr></thead><tbody>
+        ${L.map(l=>`<tr><td>${CS.fmtDate(l.date,{month:"short",day:"numeric"})}</td><td>${CS.teamShort(l.opp,"sm")}</td>
+          <td class="num hot">${l.pts}</td><td class="num">${l.reb}</td><td class="num">${l.ast}</td></tr>`).join("")}</tbody></table></div></details>`:""}`;
+  };
 
   // career highs
   const games = p.lines.filter(l=>l.gp);
   const high = (k,l) => { const g = [...games].sort((a,b)=>(b[k]||0)-(a[k]||0))[0];
-    return g && g[k] ? `<div class="h"><i>${l}</i><b>${g[k]}</b><span>vs ${g.opp||"—"}, S${g.season} ${g.stage}</span></div>` : ""; };
+    return g && g[k] ? `<div class="h"><i>${l}</i><b>${g[k]}</b><span>vs ${(g.opp||"").replace("St. ","")}, Season ${g.season}</span></div>` : ""; };
   const highs = games.length ? [["pts","Points"],["reb","Rebounds"],["ast","Assists"],["fg3m","Threes"]].map(([k,l])=>high(k,l)).join("") : "";
-
-  // game logs
-  const logs = Object.values(p.seasons).filter(s=>!s.rosterOnly).sort((a,b)=>b.season-a.season).map((s,i)=>{
-    const L = p.lines.filter(l=>l.season===s.season);
-    if(!L.length) return "";
-    return `<details class="card glog reveal"${i===0?" open":""}><summary><h3 style="margin:0">Season ${s.season} game log</h3>
-      ${CS.teamShort(s.team,"sm")}</summary><div class="tbl-scroll"><table class="tbl"><thead><tr><th>Date</th><th>Game</th><th>Opponent</th>
-      <th class="num">PTS</th><th class="num">REB</th><th class="num">AST</th><th class="num x">FG</th><th class="num x">3PT</th><th class="num x">FT</th><th class="num x">PF</th></tr></thead><tbody>
-      ${L.map(l=>`<tr${l.gp?"":' style="opacity:.5"'}><td>${CS.fmtDate(l.date,{month:"short",day:"numeric"})}</td><td>${l.stage}</td><td>${CS.teamShort(l.opp,"sm")}</td>
-        <td class="num hot">${l.gp?l.pts:"DNP"}</td><td class="num">${l.gp?l.reb:""}</td><td class="num">${l.gp?l.ast:""}</td>
-        <td class="num x">${l.gp?`${l.fg2m+l.fg3m}-${l.fg2a+l.fg3a}`:""}</td><td class="num x">${l.gp?`${l.fg3m}-${l.fg3a}`:""}</td>
-        <td class="num x">${l.gp?`${l.ftm}-${l.fta}`:""}</td><td class="num x">${l.gp?l.pf:""}</td></tr>`).join("")}</tbody></table></div></details>`;
-  }).join("");
 
   el.innerHTML = `
     <div class="p-hero reveal${light?" light":""}" style="background:${c.bg};color:${c.fg};${c.bg.toLowerCase()==="#ffffff"?"border:1px solid #ddd;":""}">
       <img class="wm" src="assets/img/${lm}" alt="">${p.num!=null?`<span class="bignum">${p.num}</span>`:""}
       <button class="p-share" type="button" id="share">Share</button>
       ${CS.avatar(p,"xl")}
-      <div><small>${p.team?`${p.team}${p.num!=null?` · #${p.num}`:""}`:`Season ${cur} rookie`}</small>
+      <div><small>${p.team||"TCBL"}</small>
         <h1>${p.name}</h1>
-        ${chips.length?`<div class="chips">${chips.map(x=>`<span class="chip">${x}</span>`).join("")}</div>`:""}
-        ${played?`<div class="tstats"><div><b>${played}</b><span>Season${played===1?"":"s"}</span></div>
-          <div><b>${t.gp}</b><span>Games</span></div><div><b>${t.pts}</b><span>Points</span></div>
-          <div><b>${f1(t.ppg)}</b><span>PPG</span></div><div><b>${f1(t.rpg)}</b><span>RPG</span></div>
-          <div><b>${f1(t.apg)}</b><span>APG</span></div></div>`:""}</div>
+        ${chips.length?`<div class="chips">${chips.join("")}</div>`:""}
+        ${t.gp?`<div class="tstats"><div><b data-count="${t.ppg.toFixed(1)}" data-dec="1">0</b><span>PPG</span></div>
+          <div><b data-count="${t.rpg.toFixed(1)}" data-dec="1">0</b><span>RPG</span></div>
+          <div><b data-count="${t.apg.toFixed(1)}" data-dec="1">0</b><span>APG</span></div></div>`:""}</div>
     </div>
-    ${t.gp || played ? `<div class="sec-head"><h2 style="font-size:19px">Season by season</h2></div>
-    <div class="tbl-scroll reveal" style="margin-bottom:26px"><table class="tbl" id="stbl"><thead><tr><th>Season</th><th>Team</th><th class="num">#</th>
-      <th class="num">GP</th><th class="num">PTS</th><th class="num">PPG</th><th class="num x">RPG</th><th class="num x">APG</th>
-      <th class="num x">FG%</th><th class="num x">3PM</th><th class="num x">FT%</th><th class="num x">PF</th></tr></thead>
-      <tbody>${rows}${career}</tbody></table></div>`
+    ${stats.length ? `<div class="sec-head"><h2 style="font-size:19px">Stats</h2></div>
+      <div class="seg" id="seg">${stats.map((s,i)=>`<button type="button" data-k="${s.season}" class="${i?"":"on"}">Season ${s.season}</button>`).join("")}
+        ${stats.length>1?`<button type="button" data-k="career">Career</button>`:""}</div>
+      <div id="panel" style="margin-bottom:28px">${panel(String(stats[0].season))}</div>`
     : `<div class="card reveal" style="margin-bottom:26px"><h3>Welcome to the TCBL</h3>
-        <p class="cardp">${p.name.split(" ")[0]} is new to the league in Season ${cur}. Stats show up here after Week 1.</p></div>`}
-    ${highs?`<div class="grid3 tdetail" style="grid-template-columns:1fr 1.4fr;margin-bottom:26px;align-items:start">
-      <div class="card reveal"><h3>Career highs</h3><div class="highs">${highs}</div></div>
-      <div class="card reveal"><h3>Teams</h3>${Object.values(p.seasons).sort((a,b)=>a.season-b.season).map(s=>
-        `<div class="leader"><div class="who"><b><a class="plink" href="teams.html?t=${encodeURIComponent(s.team)}">${s.team}</a></b>
-          <span>Season ${s.season}${s.num!=null?`, #${s.num}`:""}${p.captain.includes(s.season)?", captain":""}</span></div>
-          <div class="val">${CS.teamShort(s.team,"sm")}</div></div>`).join("")}</div></div>`:""}
-    ${logs}`;
-  const tb = document.getElementById("stbl"); if(tb) CS.colToggle(tb);
+        <p class="cardp">${p.name.split(" ")[0]}'s stats show up here once Season ${cur} tips off.</p></div>`}
+    ${highs?`<div class="card reveal" style="margin-bottom:26px"><h3>Career highs</h3><div class="highs" style="grid-template-columns:repeat(4,1fr)">${highs}</div></div>`:""}`;
+  const seg = document.getElementById("seg");
+  if(seg) seg.onclick = e=>{ const b = e.target.closest("button"); if(!b || b.classList.contains("on")) return;
+    seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
+    const pn = document.getElementById("panel"); pn.innerHTML = panel(b.dataset.k);
+    pn.classList.remove("swap"); void pn.offsetWidth; pn.classList.add("swap"); };
   document.getElementById("share").onclick = async ()=>{
     const data = {title:`${p.name} | TCBL`, url:location.href};
     try{ if(navigator.share) return await navigator.share(data);

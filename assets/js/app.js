@@ -1,4 +1,7 @@
 /* ============ CopticSports shared app ============ */
+// clean addresses: /players instead of /players.html (GitHub Pages serves both)
+if(/^https?:/.test(location.protocol) && /\.html$/.test(location.pathname))
+  history.replaceState(null, "", location.pathname.replace(/index\.html$/,"").replace(/\.html$/,"") + location.search + location.hash);
 const CS = {
   teams: null, seasons: null, cache: {},
   // official team colours
@@ -89,16 +92,14 @@ const CS = {
         ${this.fmtDate(w.live.date)}${w.live.games[0].venue?", "+w.live.games[0].venue:""}</div>
         ${this.liveEmbed()}${this.matchups(w.live.games)}`;
     } else if(w.next){
-      host.innerHTML = `<div class="card offair"><h3>Off air right now</h3>
-        <p class="cardp">Every TCBL game is streamed on our YouTube channel. This player switches
-        itself on when the first ball tips — no need to go looking for the link.</p>
-        <div class="count" id="live-count"></div>
-        ${this.matchups(w.next.games)}
-        <p style="margin-top:16px"><a class="btn ghost" href="${this.yt.url}"
-          target="_blank" rel="noopener">Past broadcasts on YouTube</a></p></div>`;
-      // when the countdown runs out, re-render so the player appears without a refresh
-      this.countdown(document.getElementById("live-count"), w.next.start.toISOString(),
-        `Next tip-off ${this.fmtDate(w.next.date)}`, ()=>this.liveSection(host));
+      const g0 = w.next.games[0]||{};
+      host.innerHTML = `<div class="card offair live-next">
+        <div class="ln-head"><div><i class="k">Next broadcast</i><h3>${this.fmtDate(w.next.date)}</h3>
+          <span class="cardp">${g0.venue?g0.venue+" · ":""}First tip ${this.fmtTime(g0.time)}</span></div>
+          <a class="btn ghost" href="${this.yt.url}" target="_blank" rel="noopener">${this.glyph.yt} YouTube</a></div>
+        ${this.matchups(w.next.games)}</div>`;
+      // flip to the live player by itself when the first game tips
+      host._liveT = setTimeout(()=>this.liveSection(host), Math.min(w.next.start - new Date() + 1000, 2**31-1));
     } else {
       host.innerHTML = `<div class="card offair"><h3>That's a wrap on the season</h3>
         <p class="cardp">Every game from the season is up on our YouTube channel.</p>
@@ -112,7 +113,7 @@ const CS = {
     const w = this.liveWindow((await this.data("season5")).games);
     if(!w.live) return;
     const a = document.createElement("a");
-    a.className = "livebar"; a.href = "index.html#live";
+    a.className = "livebar"; a.href = "./#live";
     a.innerHTML = `<span class="ldot"></span><b>We're live now</b>
       <span>Watch today's games →</span>`;
     document.body.insertBefore(a, document.body.firstChild);
@@ -139,7 +140,7 @@ const CS = {
       el.innerHTML = `<a class="btn" href="${href||this.reg.form}">Register Now</a>`;
     } else if(s==="soon"){
       el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link"
-        title="8 expansion spots open November 9, 2026 at 7:00 PM Eastern">
+        title="Registration opens at 7:00 PM Eastern">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
@@ -169,6 +170,7 @@ const CS = {
     const now = new Date();
     if(/^Registration Opens/i.test(m.label))  return now >= new Date(this.reg.open);
     if(/^Registration Closes/i.test(m.label)) return now >= new Date(this.reg.close);
+    if(!m.date) return false;
     return m.date < this.todayET();
   },
 
@@ -278,34 +280,34 @@ const CS = {
   portalLocked: true,
   // what every Stat Portal entry point renders: a link, or a locked label
   portalLink(cls){
-    if(!this.portalLocked) return `<a class="${cls||""}" href="upload.html">Stat Portal</a>`;
+    if(!this.portalLocked) return `<a class="${cls||""}" href="upload">Stat Portal</a>`;
     return `<span class="${cls||""} locked" aria-disabled="true" title="The Stat Portal is locked for now"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Stat Portal</span>`;
   },
   // Register switch: locked everywhere (like the Stat Portal) once registration closes.
   get regLocked(){ return this.regState()==="closed"; },
   regLink(cls){
-    if(!this.regLocked) return `<a class="${cls||""}" href="register.html">Register</a>`;
+    if(!this.regLocked) return `<a class="${cls||""}" href="register">Register</a>`;
     return `<span class="${cls||""} locked" aria-disabled="true" title="Season 5 registration is closed"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Register</span>`;
   },
   // social + contact, used by the footer and the mobile "More" sheet
   social:{ instagram:"https://www.instagram.com/coptichoops/", youtube:"https://www.youtube.com/@Coptichoops",
            email:"coptichoops@gmail.com" },
   nav(active){
-    const links = [["index.html","Home"],["schedule.html","Schedule"],["teams.html","Teams"],
-      ["stats.html","Stats"],["players.html","Players"],["standings.html","Standings"],["history.html","History"],
-      ["gallery.html","Gallery"],["calendar.html","Calendar"]];
-    const onPortal = /upload\.html$/.test(location.pathname);
+    const links = [["./","Home"],["schedule","Schedule"],["teams","Teams"],
+      ["players","Players"],["stats","Stats"],["standings","Standings"],["history","History"],
+      ["gallery","Gallery"],["calendar","Calendar"]];
+    const onPortal = /upload(\.html)?$/.test(location.pathname);
     // ---- top bar: brand, links, register + portal ----
     document.getElementById("topbar").innerHTML = `<div class="wrap">
-      <a class="brand" href="index.html" aria-label="TCBL home"><img src="assets/img/logo-mini.png" alt=""><span>TCBL</span></a>
-      ${this.regLocked ? "" : `<a class="m-only m-portal${onPortal?" on":""}" href="register.html">Register</a>`}
+      <a class="brand" href="./" aria-label="TCBL home"><img src="assets/img/logo-mini.png" alt=""><span>TCBL</span></a>
+      ${this.regLocked ? "" : `<a class="m-only m-portal${onPortal?" on":""}" href="register">Register</a>`}
       <nav class="nav">${links.map(([h,l])=>
         `<a href="${h}" class="${l.toLowerCase()===active?"on":""}">${l}</a>`).join("")}
-        ${this.regLocked ? `<span class="spacer"></span>`+this.regLink("cta") : `<a class="spacer ghost-cta${active==="register"?" on":""}" href="register.html">Register</a>`}
+        ${this.regLocked ? `<span class="spacer"></span>`+this.regLink("cta") : `<a class="spacer ghost-cta${active==="register"?" on":""}" href="register">Register</a>`}
         ${this.portalLink("cta")}</nav></div>`;
     // ---- mobile bottom tab bar: 4 main tabs + a "More" sheet ----
-    const main = links.slice(0,4), extra = [["players.html","Players"],["standings.html","Standings"],["history.html","History"],
-      ["gallery.html","Gallery"],["calendar.html","Calendar"],["register.html","Register"],["upload.html","Stat Portal"]];
+    const main = links.slice(0,4), extra = [["stats","Stats"],["standings","Standings"],["history","History"],
+      ["gallery","Gallery"],["calendar","Calendar"],["register","Register"],["upload","Stat Portal"]];
     const tile = (h,l,k,on) => ((k==="statportal" && this.portalLocked) || (k==="register" && this.regLocked))
       ? `<span class="locked" aria-disabled="true">${icon(k)}<span>${l}</span></span>`
       : `<a href="${h}" class="${on?"on":""}">${icon(this.icons[k]?k:"more")}<span>${l}</span></a>`;
@@ -335,6 +337,7 @@ const CS = {
     sheet.querySelector(".sheet-scrim").onclick = ()=> toggle(false);
     document.addEventListener("keydown", e=>{ if(e.key==="Escape") toggle(false); });
     this.liveBar();
+    this.fx();
   },
   // "Show all stats" control for wide tables on small screens
   colToggle(tbl){
@@ -359,21 +362,21 @@ const CS = {
   // Season-by-season facts the data files don't carry. Registration counts come
   // from the league's own @coptichoops announcements.
   history:{
-    1:{ year:"Winter 2023", hoopers:70, blurb:"The first-ever season. 70 hoopers, 8 teams, four pairs of brothers — and St. Andrew lifted the first trophy." },
+    1:{ year:"Winter 2023", hoopers:70, blurb:"The first-ever season. 70 hoopers, 8 teams, four pairs of brothers, and St. Andrew lifted the first trophy." },
     2:{ year:"Fall 2023",   hoopers:85, blurb:"The league grew to 10 teams with St. Cosmas & St. Damian, added a play-in and a 3-point contest. St. Maximus went 6–1 and won it all." },
-    3:{ year:"Winter 2025", hoopers:80, blurb:"Sold out in hours. St. James lost once all season, then beat 7th-seed Cinderella St. Andrew in the Finals." },
-    4:{ year:"Winter 2026", hoopers:72, blurb:"St. Andrew went 7–0. St. Gregory went 1–6 — then won the whole thing as the 7th seed. March doesn’t care about your record." }
+    3:{ year:"Winter 2025", hoopers:80, blurb:"St. James lost once all season, then beat 7th-seed Cinderella St. Andrew in the Finals." },
+    4:{ year:"Winter 2026", hoopers:72, blurb:"St. Andrew went 7–0. St. Gregory went 1–6, then won the whole thing as the 7th seed. March doesn’t care about your record." }
   },
   // the saints behind the eight teams, paired as brothers
   saints:{
     "St. Andrew":{ full:"St. Andrew the Apostle", brother:"St. Peter", bio:"The First-Called. A fisherman of Galilee who heard John the Baptist, followed Christ, and went to bring his brother Peter." },
     "St. Peter":{ full:"St. Peter the Apostle", brother:"St. Andrew", bio:"The fisherman Christ called the rock. Brother of St. Andrew and first among the Twelve." },
     "St. James":{ full:"St. James the Apostle", brother:"St. John", bio:"Son of Zebedee, one of the “sons of thunder,” and the first of the Twelve to be martyred for Christ." },
-    "St. John":{ full:"St. John the Apostle", brother:"St. James", bio:"The Beloved Disciple — evangelist and theologian — who stood at the Cross. Brother of St. James." },
+    "St. John":{ full:"St. John the Apostle", brother:"St. James", bio:"The Beloved Disciple, evangelist and theologian, who stood at the Cross. Brother of St. James." },
     "St. Basil":{ full:"St. Basil the Great", brother:"St. Gregory", bio:"Bishop of Caesarea, a father of communal monastic life, and the voice behind the Liturgy of St. Basil prayed in our churches every week." },
     "St. Gregory":{ full:"St. Gregory of Nyssa", brother:"St. Basil", bio:"Bishop and theologian who defended the Nicene faith. Younger brother of St. Basil the Great." },
     "St. Maximus":{ full:"St. Maximus", brother:"St. Dometius", bio:"Son of a Roman emperor who left the palace for the desert of Scetis with his brother, under St. Macarius the Great." },
-    "St. Dometius":{ full:"St. Dometius", brother:"St. Maximus", bio:"With his brother St. Maximus, gave up a royal life for the desert. Baramous — “of the Romans” — remembers them." },
+    "St. Dometius":{ full:"St. Dometius", brother:"St. Maximus", bio:"With his brother St. Maximus, gave up a royal life for the desert. Baramous, “of the Romans,” remembers them." },
     "St. Cosmas":{ full:"St. Cosmas", brother:"St. Damian", bio:"Twin physician and martyr who healed without charge. Season 2 club." },
     "St. Damian":{ full:"St. Damian", brother:"St. Cosmas", bio:"Twin physician and martyr who healed without charge. Season 2 club." }
   },
@@ -424,7 +427,7 @@ const CS = {
       const show = ()=>document.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));
       show(); new MutationObserver(show).observe(document.body,{childList:true,subtree:true}); this._rv=1; return;
     }
-    const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }),
+    const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const t=e.target; t.classList.add("in"); io.unobserve(t); if(t.dataset.st) setTimeout(()=>t.style.transitionDelay="",1300);} }),
       {rootMargin:"0px 0px -8% 0px", threshold:.08});
     const scan = ()=>document.querySelectorAll(".reveal:not(.in):not([data-rv])").forEach(e=>{ e.dataset.rv=1; io.observe(e); });
     scan(); new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
@@ -434,13 +437,78 @@ const CS = {
      Every name in the season files and rosters gets a profile at
      player.html?p=<slug>. data/players.js adds headshots and Season 5 sign-ups.
      Names were cleaned up across seasons so one person = one slug. */
+  // solid badges: captain (gold, "C" mark), new (orange), champion (navy + gold star)
+  badge(kind, text){
+    const m = {cap:["bdg-cap","C",text||"Captain"], new:["bdg-new","",text||"New"], champ:["bdg-champ","★",text||"Champion"]}[kind];
+    return m ? `<span class="bdg ${m[0]}">${m[1]?`<i>${m[1]}</i>`:""}${m[2]}</span>` : "";
+  },
+  // motion layer: cursor spotlight on cards, button ripples, count-ups, staggered grids
+  fx(){
+    if(this._fx) return; this._fx = 1;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const SPOT = ".card,.pcard2,.team-card2,.game,.capcard,.rec,.scard,.numbers .n,.st-tile";
+    document.addEventListener("pointermove", e=>{
+      const c = e.target.closest && e.target.closest(SPOT); if(!c) return;
+      const r = c.getBoundingClientRect();
+      c.style.setProperty("--mx", (e.clientX-r.left)+"px"); c.style.setProperty("--my", (e.clientY-r.top)+"px");
+    }, {passive:true});
+    document.addEventListener("pointerdown", e=>{
+      const b = e.target.closest && e.target.closest(".btn,.tabs button,.seg button,.gfilters button");
+      if(!b || reduce) return;
+      const r = b.getBoundingClientRect(), d = Math.max(r.width,r.height)*2.2, i = document.createElement("i");
+      i.className = "ripple"; i.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+      b.appendChild(i); setTimeout(()=>i.remove(), 650);
+    });
+    const bar = document.getElementById("topbar");
+    const prog = document.createElement("div"); prog.className = "progress"; document.body.appendChild(prog);
+    const heroes = [...document.querySelectorAll(".hero .hero-bg,.page-hero .hero-bg")];
+    let ticking = false;
+    const onScroll = ()=>{ if(ticking) return; ticking = true; requestAnimationFrame(()=>{ ticking = false;
+      const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
+      if(bar) bar.classList.toggle("scrolled", y > 8);
+      prog.style.setProperty("--p", max>0 ? Math.min(1, y/max) : 0);
+      if(!reduce && y < innerHeight*1.2) heroes.forEach(h=>h.style.setProperty("--py", (y*0.28)+"px"));
+    }); };
+    addEventListener("scroll", onScroll, {passive:true}); onScroll();
+    // big photo cards tilt toward the cursor
+    if(!reduce && matchMedia("(hover:hover)").matches){
+      document.addEventListener("pointermove", e=>{
+        const c = e.target.closest && e.target.closest(".capcard,.pcard"); if(!c) return;
+        const r = c.getBoundingClientRect(), x = (e.clientX-r.left)/r.width-.5, y = (e.clientY-r.top)/r.height-.5;
+        c.classList.add("tilting"); c.style.setProperty("--ry", (x*10)+"deg"); c.style.setProperty("--rx", (-y*8)+"deg");
+      }, {passive:true});
+      document.addEventListener("pointerout", e=>{
+        const c = e.target.closest && e.target.closest(".capcard,.pcard");
+        if(c && !c.contains(e.relatedTarget)){ c.classList.remove("tilting"); c.style.setProperty("--ry","0deg"); c.style.setProperty("--rx","0deg"); }
+      });
+    }
+    // numbers roll up from zero the first time they scroll into view
+    const run = el=>{
+      const end = +el.dataset.count, dec = +(el.dataset.dec||0), t0 = performance.now(), dur = 1400;
+      const fmt = v => dec ? v.toFixed(dec) : Math.round(v).toLocaleString("en-US");
+      if(reduce){ el.textContent = fmt(end); return; }
+      const step = now=>{ const k = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-k,4);
+        el.textContent = fmt(end*e); if(k<1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    };
+    const io = "IntersectionObserver" in window ? new IntersectionObserver(es=>es.forEach(x=>{
+      if(x.isIntersecting){ io.unobserve(x.target); run(x.target); } }),{threshold:.4}) : null;
+    const scan = ()=>{
+      document.querySelectorAll("[data-count]:not([data-cv])").forEach(el=>{ el.dataset.cv=1; io ? io.observe(el) : run(el); });
+      // grids cascade in, card by card
+      document.querySelectorAll(".pgrid,.grid3,.grid4,.score-strip,.capgrid,.rgrid,.pillar-grid").forEach(g=>{
+        [...g.children].forEach((c,i)=>{ if(!c.dataset.st){ c.dataset.st=1; c.classList.add("reveal"); c.style.transitionDelay = (Math.min(i,8)*55)+"ms"; } });
+      });
+    };
+    scan(); new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+  },
   slug(name){
     return String(name||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
       .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
   },
   pLink(name, cls){
     if(!name) return "";
-    return `<a class="plink${cls?" "+cls:""}" href="player.html?p=${this.slug(name)}">${name}</a>`;
+    return `<a class="plink${cls?" "+cls:""}" href="player?p=${this.slug(name)}">${name}</a>`;
   },
   initials(name){
     return String(name||"").replace(/\(.*?\)/g,"").replace(/^Fr\.\s*/,"").trim().split(/\s+/)
@@ -506,8 +574,8 @@ const CS = {
       <div class="fbrand"><img src="assets/img/logo-white.png" alt="TCBL">
         <p class="verse">"Honor all people. Love the brotherhood. Fear God…" <span>1 Peter 2:17</span></p>
         <p class="fpillars">Faith. Fellowship. Fitness.</p></div>
-      ${col("League",[["schedule.html","Schedule"],["standings.html","Standings"],["stats.html","Stats"],["players.html","Players"],["teams.html","Teams"],["assets/docs/TCBL-Rulebook.pdf","Rulebook",1]])}
-      ${col("Story",[["history.html","History"],["gallery.html","Gallery"],["calendar.html","Coptic calendar"]].concat(this.regLocked?[]:[["register.html","Register"]]))}
+      ${col("League",[["schedule","Schedule"],["teams","Teams"],["players","Players"],["stats","Stats"],["standings","Standings"],["assets/docs/TCBL-Rulebook.pdf","Rulebook",1]])}
+      ${col("Story",[["history","History"],["gallery","Gallery"],["calendar","Coptic calendar"]].concat(this.regLocked?[]:[["register","Register"]]))}
       <div class="fcol"><h4>Follow</h4>
         <a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} Instagram</a>
         <a href="${this.social.youtube}" target="_blank" rel="noopener">${this.glyph.yt} YouTube</a>
@@ -525,7 +593,7 @@ const CS = {
     clearInterval(el._cd);
     const units = [["d","Days"],["h","Hours"],["m","Min"],["s","Sec"]];
     el.classList.add("sb");
-    el.innerHTML = `<div class="count-label"><i class="dot"></i>${label}</div>
+    el.innerHTML = `<div class="count-label">${label}</div>
       <div class="sb-row">${units.map(([k,l],i)=>`${i?'<i class="sb-colon">:</i>':""}<div class="cell" data-u="${k}">
         <div class="dg"><em>88</em><b>00</b></div><span>${l}</span></div>`).join("")}</div>
       <div class="sb-clock" aria-hidden="true"><i></i></div>`;

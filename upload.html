@@ -9,7 +9,7 @@
 <link rel="icon" href="assets/img/logo-mini.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Archivo+Black&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261111">
+<link rel="stylesheet" href="assets/css/style.css?v=20261114">
 <script src="assets/js/xlsx.full.min.js"></script></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="section"><div class="wrap" style="max-width:900px">
@@ -60,7 +60,7 @@
       <button class="btn ghost" id="download">Download updated season JSON</button></div>
   </div>
 </div></section>
-<script src="assets/js/app.js?v=20261111"></script>
+<script src="assets/js/app.js?v=20261114"></script>
 <script>
 CS.nav(""); CS.footer();
 // Locked: hide the tool and say so. Set portalLocked to false in app.js to reopen.
@@ -71,7 +71,7 @@ if(CS.portalLocked){
     <div class="card" style="text-align:center;padding:40px 26px">
       <h3 style="font-size:22px">The Stat Portal is locked</h3>
       <p class="cardp" style="margin:10px auto 22px;max-width:440px">Stat uploads are closed for now. They'll reopen once Season 5 is underway.</p>
-      <a class="btn" href="index.html">Back to home</a></div></div></section>`);
+      <a class="btn" href="./">Back to home</a></div></div></section>`);
 }
 const CANON={"st. andrew":"St. Andrew","st. basil":"St. Basil","st. domatius":"St. Dometius","st. dometius":"St. Dometius",
 "st. gregory":"St. Gregory","st. james":"St. James","st. john":"St. John","st. maximus":"St. Maximus","st. peter":"St. Peter",
@@ -160,9 +160,9 @@ async function handle(f){
   const season=+document.getElementById("season").value;
   const {unknown,conflict}=await canonize(games,season);
   const {msgs,errs}=validate(games);
-  if(conflict.length) msgs.unshift(`<li class="err">${conflict.length} jersey number conflict(s) — `+
+  if(conflict.length) msgs.unshift(`<li class="err">${conflict.length} jersey number conflict(s): `+
     `left as typed rather than merged into the wrong player. Fix the sheet or add them to the roster: ${conflict.join("; ")}</li>`);
-  if(unknown.length) msgs.unshift(`<li class="err">${unknown.length} name(s) not on the roster — `+
+  if(unknown.length) msgs.unshift(`<li class="err">${unknown.length} name(s) not on the roster: `+
     `they will be saved exactly as typed: ${unknown.join(", ")}</li>`);
   parsed={games,week:document.getElementById("week").value,date:document.getElementById("gdate").value,
           venue:document.getElementById("venue").value,season:+document.getElementById("season").value};
@@ -203,7 +203,7 @@ document.getElementById("approve").onclick=async()=>{
   const agg={};
   (cur.playerLines||[]).forEach(l=>{
     if(!l.gp)return;
-    // key on the canonical name only — a wrong jersey number on one week's
+    // key on the canonical name only; a wrong jersey number on one week's
     // sheet must not fork a player into two season rows
     const k=l.team+"|"+l.name;
     const a=agg[k]=agg[k]||{name:l.name,team:l.team,num:l.num,gp:0,gs:0,pts:0,reb:0,ast:0,fg2m:0,fg2a:0,fg3m:0,fg3a:0,ftm:0,fta:0,pf:0,blk:0,to:0,stl:0};

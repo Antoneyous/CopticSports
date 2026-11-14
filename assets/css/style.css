@@ -970,3 +970,264 @@ details.glog .tbl-scroll{margin-top:12px}
 .nav .cta,.nav .ghost-cta{white-space:nowrap}
 @media(max-width:1320px) and (min-width:781px){ .nav a,.nav span.cta{padding:8px 8px;font-size:12px;letter-spacing:.5px} .topbar .wrap{gap:16px} }
 @media(max-width:1080px) and (min-width:781px){ .nav a,.nav span.cta{padding:8px 6px;font-size:11px;letter-spacing:.3px} }
+
+/* ============================================================
+   V4 · premium pass: contrast, motion, solid badges
+   ============================================================ */
+:root{--ink-dim:#c4d4e3;--ink-faint:#8fa8bf;--line:#234b6c;--ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1)}
+body{line-height:1.6}
+.cardp,.card p{color:var(--ink-dim)}
+
+/* top bar settles into a shadow once you scroll */
+.topbar{transition:background .3s,box-shadow .3s;animation:barIn .7s var(--ease) both}
+.topbar.scrolled{background:rgba(8,19,30,.94);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+@keyframes barIn{from{transform:translateY(-100%)}to{transform:none}}
+.brand img{transition:transform .5s var(--spring)}
+.brand:hover img{transform:rotate(-18deg) scale(1.08)}
+.nav a{position:relative}
+.nav a:not(.cta):not(.ghost-cta)::after{content:"";position:absolute;left:10px;right:10px;bottom:2px;height:2px;border-radius:2px;
+  background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.nav a:not(.cta):not(.ghost-cta):hover::after,.nav a.on::after{transform:scaleX(1)}
+.nav a.on{background:transparent;color:#fff}
+
+/* buttons: lift, glow, shine and a ripple on press */
+.btn,.tabs button,.seg button,.gfilters button{position:relative;overflow:hidden;isolation:isolate;
+  transition:transform .25s var(--spring),box-shadow .25s,background .25s,color .2s,border-color .2s}
+.btn{box-shadow:0 8px 24px rgba(255,113,16,.25)}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);
+  transform:translateX(-120%);transition:transform .7s var(--ease)}
+.btn:hover{transform:translateY(-2px);background:var(--orange);box-shadow:0 14px 34px rgba(255,113,16,.42)}
+.btn:hover::before{transform:translateX(120%)}
+.btn:active,.tabs button:active,.seg button:active{transform:scale(.96)}
+.btn.ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);box-shadow:none;display:inline-flex;align-items:center;gap:8px}
+.btn.ghost:hover{background:rgba(255,255,255,.12);border-color:var(--orange);box-shadow:0 10px 26px rgba(0,0,0,.35)}
+.btn.locked:hover,.btn.locked:active{transform:none}
+.tabs button:hover:not(.on):not(:disabled){color:#fff;border-color:var(--orange);transform:translateY(-1px)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);transform:scale(0);opacity:1;pointer-events:none;
+  animation:ripple .65s var(--ease) forwards;z-index:0}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+
+/* cards: lift + a soft orange light that follows the cursor */
+.card,.pcard2,.team-card2,.game,.capcard,.rec,.scard,.numbers .n,.st-tile{position:relative}
+.card,.game,.rec,.scard{transition:transform .35s var(--ease),border-color .3s,box-shadow .35s}
+.card::after,.pcard2::after,.team-card2::after,.game::after,.capcard::after,.rec::after,.scard::after,.numbers .n::after,.st-tile::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;z-index:3;
+  background:radial-gradient(360px circle at var(--mx,50%) var(--my,50%),rgba(255,140,60,.13),transparent 60%)}
+.card:hover::after,.pcard2:hover::after,.team-card2:hover::after,.game:hover::after,.capcard:hover::after,.rec:hover::after,.scard:hover::after,.numbers .n:hover::after,.st-tile:hover::after{opacity:1}
+.game:hover,.rec:hover{transform:translateY(-3px);border-color:rgba(255,113,16,.55);box-shadow:0 16px 36px rgba(0,0,0,.35)}
+.pcard2{transition:transform .35s var(--spring),border-color .3s,box-shadow .35s}
+.pcard2:hover{transform:translateY(-6px)}
+.pcard2 .pav{transition:transform .45s var(--spring),box-shadow .3s}
+.pcard2:hover .pav{transform:scale(1.07);box-shadow:0 0 0 3px var(--orange),0 12px 28px rgba(0,0,0,.45)}
+.team-card2{transition:transform .4s var(--spring),box-shadow .35s,border-color .3s}
+.team-card2:hover{transform:translateY(-6px)}
+.team-card2 .top img{transition:transform .8s var(--ease),opacity .4s}
+.team-card2:hover .top img{transform:rotate(-24deg) scale(1.12);opacity:.26}
+.tpill{transition:transform .25s var(--spring)}
+a:hover>.tpill,.tpill:hover{transform:translateY(-1px)}
+a.more{transition:color .2s,letter-spacing .3s}
+a.more:hover{color:var(--gold);letter-spacing:1.6px}
+.reveal{transition:opacity .8s var(--ease),transform .8s var(--ease)}
+
+/* solid badges, each one unmistakable */
+.bdg{display:inline-flex;align-items:center;gap:6px;font:800 10px/1 var(--font-body);letter-spacing:1.3px;text-transform:uppercase;
+  padding:5px 10px;border-radius:999px;position:relative;overflow:hidden;white-space:nowrap}
+.bdg i{display:grid;place-items:center;width:17px;height:17px;margin:-2px 0 -2px -5px;border-radius:50%;font-style:normal;font-size:9.5px;font-family:var(--font-disp)}
+.bdg::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);
+  transform:translateX(-130%);animation:bdgShine 4.5s ease-in-out infinite}
+@keyframes bdgShine{0%,70%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+.bdg-cap{background:linear-gradient(135deg,#ffe29a,#ffb23f 55%,#f08a12);color:#2b1700;box-shadow:0 6px 18px rgba(255,170,40,.38)}
+.bdg-cap i{background:#2b1700;color:#ffd27a}
+.bdg-new{background:var(--orange);color:#fff;box-shadow:0 6px 18px rgba(255,113,16,.38)}
+.bdg-champ{background:#0b1a28;color:var(--gold);border:1px solid rgba(255,189,89,.6);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.bdg-champ i{color:var(--gold);font-size:12px;width:auto;margin:0}
+.pcard2 .bdg{position:absolute;top:10px;right:10px;z-index:2}
+@media(prefers-reduced-motion:reduce){.bdg::after{animation:none;display:none}}
+
+/* lists: no bullet dots */
+.mile{padding:0 0 18px;gap:0}
+.mile:before,.mile .dot{display:none}
+.mile>div{border-left:2px solid var(--line);padding-left:14px}
+.mile.past>div{border-left-color:var(--orange)}
+.count.sb .dot{display:none}
+
+/* ---- home hero: headline rises line by line, logo spins in and floats ---- */
+.hero h1 .ln{display:block;overflow:hidden;padding-bottom:.04em}
+.hero h1 .ln>span{display:block;transform:translateY(110%);animation:lnUp 1s var(--ease) forwards}
+.hero h1 .ln:nth-child(2)>span{animation-delay:.14s;color:var(--orange)}
+.hero h1 .ln:nth-child(3)>span{animation-delay:.28s}
+@keyframes lnUp{to{transform:none}}
+.hero .kicker,.hero .verse,.hero .pillars,.hero .count,.hero .hero-cta{opacity:0;animation:fadeUp .9s var(--ease) forwards}
+.hero .kicker{animation-delay:.05s}.hero .verse{animation-delay:.5s}.hero .pillars{animation-delay:.62s}
+.hero .count{animation-delay:.75s}.hero .hero-cta{animation-delay:.85s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.logo-stage{position:relative;display:grid;place-items:center}
+.logo-stage::before{content:"";position:absolute;width:78%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,113,16,.45),rgba(255,113,16,0) 65%);filter:blur(10px);animation:glow 4s ease-in-out infinite}
+.logo-stage::after{content:"";position:absolute;width:96%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(255,189,89,.35);
+  animation:ring 4s var(--ease) infinite}
+.logo-stage .hero-logo{position:relative;animation:logoIn 1.4s var(--spring) .2s both,float 6s ease-in-out 1.6s infinite}
+@keyframes logoIn{from{opacity:0;transform:scale(.55) rotate(-200deg);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes float{50%{transform:translateY(-12px) rotate(3deg)}}
+@keyframes glow{50%{transform:scale(1.12);opacity:.7}}
+@keyframes ring{0%{transform:scale(.8);opacity:0}30%{opacity:1}100%{transform:scale(1.15);opacity:0}}
+.hero-sweep{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.hero-sweep::before{content:"";position:absolute;top:-30%;bottom:-30%;width:28%;left:-40%;
+  background:linear-gradient(100deg,transparent,rgba(255,140,50,.16),transparent);transform:skewX(-18deg);animation:sweep 7s ease-in-out 1s infinite}
+@keyframes sweep{0%{left:-40%}45%,100%{left:120%}}
+.scroll-cue{position:absolute;left:50%;bottom:22px;width:26px;height:42px;margin-left:-13px;border:2px solid rgba(255,255,255,.35);border-radius:14px;z-index:2}
+.scroll-cue::after{content:"";position:absolute;left:50%;top:8px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:var(--orange);animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(14px)}}
+@media(prefers-reduced-motion:reduce){
+  .hero h1 .ln>span,.hero .kicker,.hero .verse,.hero .pillars,.hero .count,.hero .hero-cta,.logo-stage .hero-logo,.topbar{animation:none;opacity:1;transform:none}
+  .logo-stage::before,.logo-stage::after,.hero-sweep::before,.scroll-cue::after{animation:none}
+}
+@media(max-width:780px){ .logo-stage{display:none} .scroll-cue{display:none} }
+
+/* numbers band */
+.numbers .n{transition:background .3s}
+.numbers .n:hover{background:rgba(255,113,16,.06)}
+
+/* ---- compact live card ---- */
+.live-next .ln-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.live-next .k{font-style:normal;color:var(--orange-lt);font-size:11px;font-weight:800;letter-spacing:2.4px;text-transform:uppercase}
+.live-next h3{font-size:24px;margin:6px 0 2px}
+.live-next .mgrid{margin-top:18px}
+.mchip{transition:border-color .25s,transform .25s var(--spring)}
+.mchip:hover{border-color:var(--orange);transform:translateY(-2px)}
+
+/* ---- Season 5 captains (home) ---- */
+.capgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.capcard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:26px 14px 20px;border-radius:var(--radius);
+  overflow:hidden;isolation:isolate;transition:transform .45s var(--spring),box-shadow .4s;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.capcard::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(160deg,rgba(255,255,255,.18),transparent 45%,rgba(0,0,0,.35))}
+.capcard .wm{position:absolute;right:-34px;bottom:-34px;width:130px;opacity:.14;z-index:-1;transition:transform .9s var(--ease),opacity .4s}
+.capcard .pav{width:108px;height:108px;font-size:34px;box-shadow:0 0 0 4px rgba(255,255,255,.35),0 14px 30px rgba(0,0,0,.4);transition:transform .5s var(--spring)}
+.capcard b{font-family:var(--font-disp);text-transform:uppercase;font-size:17px;line-height:1.1}
+.capcard small{font-size:10.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.8}
+.capcard:hover{box-shadow:0 24px 50px rgba(0,0,0,.45)}
+.capcard:hover .pav{transform:scale(1.08)}
+.capcard:hover .wm{transform:rotate(-30deg) scale(1.2);opacity:.24}
+@media(max-width:900px){.capgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:780px){.capgrid{gap:10px}.capcard{padding:18px 10px 14px}.capcard .pav{width:84px;height:84px}.capcard b{font-size:14.5px}}
+
+/* ---- segmented control (player seasons, team rosters) ---- */
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px;padding:5px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:18px}
+.seg button{background:transparent;border:0;color:var(--ink-dim);font:800 12.5px var(--font-body);letter-spacing:1px;text-transform:uppercase;
+  padding:9px 16px;border-radius:10px;cursor:pointer}
+.seg button:hover:not(.on){color:#fff;background:rgba(255,255,255,.06)}
+.seg button.on{background:var(--orange);color:#fff;box-shadow:0 6px 18px rgba(255,113,16,.35)}
+.swap{animation:swapIn .5s var(--ease)}
+@keyframes swapIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---- player profile ---- */
+.st-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.st-tile{border-radius:14px;padding:18px 16px;background:linear-gradient(180deg,var(--navy-800),var(--navy-900));border:1px solid var(--line);overflow:hidden;
+  transition:transform .35s var(--spring),border-color .3s}
+.st-tile:hover{transform:translateY(-3px);border-color:rgba(255,113,16,.5)}
+.st-tile b{display:block;font-family:var(--font-disp);font-size:34px;line-height:1;color:#fff}
+.st-tile span{display:block;margin-top:8px;font-size:10.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--ink-faint)}
+.st-meta{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:var(--ink-dim);font-size:13.5px}
+.p-hero .chips{gap:8px}
+.p-hero .tstats b{font-size:34px}
+.p-hero .pav.xl{animation:avIn .9s var(--spring) both}
+@keyframes avIn{from{opacity:0;transform:scale(.7) rotate(-8deg)}to{opacity:1;transform:none}}
+.glog-toggle{margin-top:16px}
+@media(max-width:780px){.st-row{grid-template-columns:repeat(2,1fr)}.st-tile b{font-size:28px}}
+
+/* ---- team page ---- */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.rp{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.02);
+  transition:transform .3s var(--spring),border-color .25s,background .25s}
+.rp:hover{transform:translateX(4px);border-color:rgba(255,113,16,.5);background:rgba(255,113,16,.05)}
+.rp .pav{width:40px;height:40px;font-size:13px}
+.rp b{font-size:14.5px;line-height:1.2;display:block}
+.rp span{font-size:11.5px;color:var(--ink-faint);font-weight:700;letter-spacing:.6px}
+.rp .bdg{margin-left:auto}
+.lead3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lead3 a{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:18px 10px;border-radius:14px;border:1px solid var(--line);
+  background:rgba(255,255,255,.02);transition:transform .35s var(--spring),border-color .3s}
+.lead3 a:hover{transform:translateY(-4px);border-color:rgba(255,113,16,.55)}
+.lead3 .pav{width:64px;height:64px;font-size:20px}
+.lead3 i{font-style:normal;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink-faint)}
+.lead3 b{font-size:14px;line-height:1.2}
+.lead3 em{font-style:normal;font-family:var(--font-disp);font-size:28px;color:var(--orange);line-height:1}
+.team-card2 .cap-line{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-dim)}
+.team-card2 .cap-line .pav{width:30px;height:30px;font-size:11px}
+.team-card2 .cap-line b{color:#fff}
+@media(max-width:780px){.lead3{grid-template-columns:repeat(3,1fr);gap:8px}.lead3 a{padding:14px 6px}.lead3 .pav{width:48px;height:48px}.lead3 em{font-size:22px}
+  .team-card2 .cap-line{font-size:11.5px}.team-card2 .cap-line .pav{width:24px;height:24px}}
+
+/* register page cards */
+.signup-list span{display:block}
+@media(max-width:780px){ .highs[style]{grid-template-columns:1fr 1fr!important} }
+.p-hero .chips .bdg{font-size:10.5px;padding:6px 11px}
+.rp .bdg{flex:none}
+.rp>div{min-width:0}
+.pcard2{padding-top:24px}
+.capcard .wm{right:-44px;bottom:-44px;width:120px;opacity:.12}
+.more-cols,.btn.more-cols{display:none}
+@media(max-width:780px){.more-cols,.btn.more-cols{display:inline-flex}}
+
+/* ============================================================
+   V5 · finish: page transitions, depth, polish
+   ============================================================ */
+/* pages cross-fade into each other instead of blinking (Chrome, Edge, Safari 18+) */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vtOut .28s ease both}
+::view-transition-new(root){animation:vtIn .45s var(--ease) both}
+@keyframes vtOut{to{opacity:0;transform:translateY(-6px)}}
+@keyframes vtIn{from{opacity:0;transform:translateY(10px)}}
+.topbar{view-transition-name:topbar}
+.tabbar{view-transition-name:tabbar}
+@media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}
+
+/* reading progress along the top bar */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;z-index:80;transform-origin:left;transform:scaleX(var(--p,0));
+  background:linear-gradient(90deg,var(--orange),var(--gold));box-shadow:0 0 12px rgba(255,113,16,.6);pointer-events:none}
+
+/* fine film grain over everything, the way printed programs feel */
+body::before{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* scrollbar + focus + selection */
+html{scrollbar-color:#2c5679 #0b1a28;scrollbar-width:thin}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#0b1a28}
+::-webkit-scrollbar-thumb{background:#2c5679;border-radius:10px;border:2px solid #0b1a28}
+::-webkit-scrollbar-thumb:hover{background:var(--orange)}
+:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:6px}
+
+/* hero photos drift slower than the page */
+.hero-bg{translate:0 var(--py,0px)}
+
+/* loading shimmer */
+.skel{border-radius:16px;background:linear-gradient(100deg,var(--navy-800) 30%,#1d4466 50%,var(--navy-800) 70%);background-size:300% 100%;animation:skel 1.4s ease-in-out infinite}
+@keyframes skel{from{background-position:100% 0}to{background-position:0 0}}
+
+/* inner page titles rise in like the home hero */
+.page-hero .kicker,.page-hero h1,.page-hero p{animation:fadeUp .9s var(--ease) both}
+.page-hero h1{animation-delay:.08s}.page-hero p{animation-delay:.18s}
+.p-hero h1,.team-hero h2{animation:fadeUp .8s var(--ease) .1s both}
+@media(prefers-reduced-motion:reduce){.page-hero .kicker,.page-hero h1,.page-hero p,.p-hero h1,.team-hero h2{animation:none}}
+
+/* 3D tilt on the big photo cards */
+.capgrid>.capcard,.pillar-grid>.pcard{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));
+  transition:transform .5s var(--ease),box-shadow .4s}
+.capgrid>.capcard:hover,.pillar-grid>.pcard:hover{--ty:-8px}
+.capgrid>.capcard.tilting,.pillar-grid>.pcard.tilting{transition:transform .12s linear,box-shadow .4s}
+
+/* champions spotlight: a slow gold edge that circles the card */
+@property --ang{syntax:"<angle>";initial-value:0deg;inherits:false}
+.champ-spot{position:relative;border-color:transparent}
+.champ-spot::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1.5px;z-index:2;pointer-events:none;
+  background:conic-gradient(from var(--ang),rgba(255,189,89,.15),var(--gold),rgba(255,113,16,.9),rgba(255,189,89,.15) 40%,rgba(255,189,89,.15));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 6s linear infinite}
+@keyframes spin{to{--ang:360deg}}
+@media(prefers-reduced-motion:reduce){.champ-spot::before{animation:none}}
+
+/* section titles get a short orange underline that draws in */
+.sec-head h2{position:relative;padding-bottom:8px}
+.sec-head h2::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:42px;border-radius:3px;background:linear-gradient(90deg,var(--orange),var(--gold));
+  transform:scaleX(0);transform-origin:left;transition:transform .8s var(--ease) .15s}
+.sec-head.in h2::after,.sec-head:not(.reveal) h2::after{transform:scaleX(1)}
