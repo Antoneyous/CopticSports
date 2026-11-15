@@ -15,7 +15,7 @@
 <meta property="og:url" content="https://coptichoops.com/teams"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261114"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="page-hero" id="thero" style="--hero-pos:center 40%"><div class="hero-bg" style="background-image:url(assets/img/photos/s4-102.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s4-103.jpg);background-position:50% 40%"></div><div class="wrap">
   <div class="kicker">Eight teams, four pairs of brothers</div>
@@ -24,9 +24,9 @@
 </div></section>
 <section class="section"><div class="wrap">
   <div class="sec-head" id="headrow"><h2 id="title">Season 5 teams</h2></div>
-  <div id="content"></div>
+  <div id="content"><div class="grid4 tgrid"><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div></div></div>
 </div></section>
-<script src="assets/js/app.js?v=20261114"></script>
+<script src="assets/js/app.js?v=20261115b"></script>
 <script>
 CS.nav("teams"); CS.footer();
 (async()=>{
@@ -78,7 +78,7 @@ async function detail(t, teams, all, P){
     return {p, gp:sum("gp"), pts:sum("pts"), reb:sum("reb"), ast:sum("ast")};
   }).filter(Boolean);
   const lead = (k,l) => { const x = [...stints].sort((a,b)=>b[k]-a[k])[0];
-    return x ? `<a href="player?p=${x.p.slug}">${CS.avatar({...x.p, team:t})}<i>${l}</i><b>${x.p.name}</b><em data-count="${x[k]}">0</em></a>` : ""; };
+    return x ? `<a href="player?p=${x.p.slug}">${CS.avatar({...x.p, team:t})}<i>${l}</i><b>${x.p.name}</b><em>${x[k]}</em></a>` : ""; };
   // rosters: one season at a time
   const sns = Object.keys(info.seasons).sort((a,b)=>b-a);
   const roster = sn=>{

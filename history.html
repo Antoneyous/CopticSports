@@ -16,7 +16,7 @@
 <meta property="og:url" content="https://coptichoops.com/history"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261114"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
 <header id="topbar" class="topbar"></header>
 
 <section class="page-hero" style="--hero-pos:center 35%"><div class="hero-bg" style="background-image:url(assets/img/photos/s1-000.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/s4-111.jpg);background-position:50% 30%"></div><div class="wrap">
@@ -27,7 +27,7 @@
 
 <section class="section"><div class="wrap">
   <div class="sec-head reveal"><h2>The champions</h2></div>
-  <div class="seasons-tl" id="tl"></div>
+  <div class="seasons-tl" id="tl"><div class="skel" style="height:250px"></div><div class="skel" style="height:250px"></div></div>
 </div></section>
 
 <section class="section"><div class="wrap">
@@ -47,7 +47,7 @@
   <p class="note" style="margin-top:14px">Regular-season records from the official standings. Season 1 Semifinal and Finals scores were never recorded on the old site.</p>
 </div></section>
 
-<script src="assets/js/app.js?v=20261114"></script>
+<script src="assets/js/app.js?v=20261115b"></script>
 <script>
 CS.nav("history"); CS.footer();
 (async()=>{
@@ -57,7 +57,7 @@ CS.nav("history"); CS.footer();
   const cards = [];
   if(cur) cards.push(`<div class="scard next reveal"><div class="sn"><b>${cur.id}</b><span>${cur.year}</span></div>
     <div class="ph"><img src="assets/img/logo-finals.png" alt=""></div>
-    <div class="tx"><div class="yr">Tips off Jan 3, 2027</div><h3 style="font-family:var(--font-disp);text-transform:uppercase;font-size:28px">Your name here?</h3>
+    <div class="tx"><div class="yr">Tips off Jan 3, 2027</div><h3 style="font-family:var(--font-disp);text-transform:uppercase;font-size:28px">${CS.regLocked?"Who lifts it next?":"Your name here?"}</h3>
       <p>Eight teams. One trophy. Nobody has ever won back-to-back. St. Gregory gets the first shot.</p>
       ${CS.regLocked?"":`<p><a class="btn" href="register">Register</a></p>`}</div></div>`);
   // Two champions wore different colours the year they won: St. Andrew were in

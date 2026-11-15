@@ -15,13 +15,13 @@
 <meta property="og:url" content="https://coptichoops.com/player"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261114"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="section"><div class="wrap">
   <div class="sec-head"><a class="more" style="margin-left:0" href="players">← All players</a></div>
   <div id="content"><div class="skel" style="height:260px;margin-bottom:24px"></div><div class="skel" style="height:44px;width:360px;margin-bottom:16px"></div><div class="skel" style="height:110px"></div></div>
 </div></section>
-<script src="assets/js/app.js?v=20261114"></script>
+<script src="assets/js/app.js?v=20261115b"></script>
 <script>
 CS.nav("players"); CS.footer();
 const f1 = v => v==null ? "-" : v.toFixed(1);
@@ -77,9 +77,9 @@ const pct = (m,a) => a ? (m/a*100).toFixed(1) : "-";
       <div><small>${p.team||"TCBL"}</small>
         <h1>${p.name}</h1>
         ${chips.length?`<div class="chips">${chips.join("")}</div>`:""}
-        ${t.gp?`<div class="tstats"><div><b data-count="${t.ppg.toFixed(1)}" data-dec="1">0</b><span>PPG</span></div>
-          <div><b data-count="${t.rpg.toFixed(1)}" data-dec="1">0</b><span>RPG</span></div>
-          <div><b data-count="${t.apg.toFixed(1)}" data-dec="1">0</b><span>APG</span></div></div>`:""}</div>
+        ${t.gp?`<div class="tstats"><div><b>${t.ppg.toFixed(1)}</b><span>PPG</span></div>
+          <div><b>${t.rpg.toFixed(1)}</b><span>RPG</span></div>
+          <div><b>${t.apg.toFixed(1)}</b><span>APG</span></div></div>`:""}</div>
     </div>
     ${stats.length ? `<div class="sec-head"><h2 style="font-size:19px">Stats</h2></div>
       <div class="seg" id="seg">${stats.map((s,i)=>`<button type="button" data-k="${s.season}" class="${i?"":"on"}">Season ${s.season}</button>`).join("")}
@@ -93,10 +93,14 @@ const pct = (m,a) => a ? (m/a*100).toFixed(1) : "-";
     seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
     const pn = document.getElementById("panel"); pn.innerHTML = panel(b.dataset.k);
     pn.classList.remove("swap"); void pn.offsetWidth; pn.classList.add("swap"); };
-  document.getElementById("share").onclick = async ()=>{
-    const data = {title:`${p.name} | TCBL`, url:location.href};
-    try{ if(navigator.share) return await navigator.share(data);
-      await navigator.clipboard.writeText(location.href); document.getElementById("share").textContent = "Link copied"; }catch(e){}
+  const share = document.getElementById("share");
+  share.onclick = async ()=>{
+    if(navigator.share){ try{ await navigator.share({title:`${p.name} | TCBL`, url:location.href}); }catch(e){} return; }
+    try{
+      await navigator.clipboard.writeText(location.href);
+      share.textContent = "Link copied ✓"; share.classList.add("done");
+      clearTimeout(share._t); share._t = setTimeout(()=>{ share.textContent = "Share"; share.classList.remove("done"); }, 2000);
+    }catch(e){ CS.toast("Couldn't copy the link. Copy it from the address bar instead."); }
   };
 })();
 </script></body></html>

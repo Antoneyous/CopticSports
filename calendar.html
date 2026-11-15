@@ -15,7 +15,7 @@
 <meta property="og:url" content="https://coptichoops.com/calendar"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261114"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="section"><div class="wrap">
   <div class="sec-head"><h2>Season & Coptic Calendar</h2></div>
@@ -23,7 +23,8 @@
   of the Coptic Orthodox Church, so the league always moves with the rhythm of the Church year.</p>
   <p style="color:var(--ink-faint);max-width:820px;margin-bottom:22px;font-size:13px" id="wfnote"></p>
   <div class="cal-head">
-    <button id="prev">‹</button><h3 id="mlabel"></h3><button id="next">›</button>
+    <button type="button" id="prev" aria-label="Previous month">‹</button><h3 id="mlabel" aria-live="polite"></h3><button type="button" id="next" aria-label="Next month">›</button>
+    <button type="button" id="today" class="cal-today" hidden>Today</button>
     <span style="color:var(--ink-faint);font-size:12.5px" id="fastnote"></span>
   </div>
   <p class="ag-fastnote" id="ag-fastnote"></p>
@@ -35,7 +36,7 @@
     <span><i style="background:#123049;border:1px solid #1d4463"></i>Fasting day, including every Wednesday &amp; Friday</span>
   </div>
 </div></section>
-<script src="assets/js/app.js?v=20261114"></script>
+<script src="assets/js/app.js?v=20261115b"></script>
 <script>
 CS.nav("calendar"); CS.footer();
 let cur;                       // Date of first of displayed month
@@ -119,7 +120,17 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
     document.getElementById("ag-fastnote").textContent = fastLine;
     document.getElementById("prev").disabled = cur<=MIN;
     document.getElementById("next").disabled = new Date(cur.getFullYear(),cur.getMonth()+1,1)>MAX;
+    // "Today" shows only when you've wandered away from the current month
+    document.getElementById("today").hidden = !inRange || (cur.getFullYear()===thisMonth.getFullYear() && cur.getMonth()===thisMonth.getMonth());
   };
+  const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1), inRange = today>=MIN && today<=MAX;
+  document.getElementById("today").onclick = ()=>{ cur = new Date(thisMonth); draw(); document.getElementById("next").focus({preventScroll:true}); };
+  // left / right arrow keys flip months (ignored while typing in a field)
+  document.addEventListener("keydown", e=>{
+    if(e.altKey || e.metaKey || e.ctrlKey || /INPUT|SELECT|TEXTAREA/.test((e.target||{}).tagName||"")) return;
+    const b = e.key==="ArrowLeft" ? document.getElementById("prev") : e.key==="ArrowRight" ? document.getElementById("next") : null;
+    if(b && !b.disabled){ e.preventDefault(); b.click(); }
+  });
   document.getElementById("prev").onclick=()=>{cur.setMonth(cur.getMonth()-1);draw()};
   document.getElementById("next").onclick=()=>{cur.setMonth(cur.getMonth()+1);draw()};
   const wn=document.getElementById("wfnote");

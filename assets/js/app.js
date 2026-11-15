@@ -107,16 +107,35 @@ const CS = {
           target="_blank" rel="noopener">Watch on YouTube</a></p></div>`;
     }
   },
-  // Slim site-wide bar, skipped on pages that already show the player.
-  async liveBar(){
+  // Calls fn(window) now, again at every on-air / off-air flip, and when a phone or
+  // laptop wakes and the tab comes back, so nothing on the page goes stale.
+  async liveWatch(fn){
+    const games = (await this.data("season5")).games;
+    let t = null;
+    const run = ()=>{
+      const w = this.liveWindow(games);
+      fn(w);
+      clearTimeout(t);
+      const next = w.live ? w.live.end : w.next ? w.next.start : null;
+      if(next) t = setTimeout(run, Math.min(next - new Date() + 1000, 2**31-1));
+    };
+    document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) run(); });
+    run();
+  },
+  // Slim site-wide bar, skipped on pages that already show the player. It appears
+  // by itself at tip-off and leaves by itself when the day's games are over.
+  liveBar(){
     if(document.getElementById("livehost")) return;
-    const w = this.liveWindow((await this.data("season5")).games);
-    if(!w.live) return;
-    const a = document.createElement("a");
-    a.className = "livebar"; a.href = "./#live";
-    a.innerHTML = `<span class="ldot"></span><b>We're live now</b>
-      <span>Watch today's games →</span>`;
-    document.body.insertBefore(a, document.body.firstChild);
+    this.liveWatch(w=>{
+      let a = document.querySelector(".livebar");
+      if(w.live && !a){
+        a = document.createElement("a");
+        a.className = "livebar"; a.href = "./#live";
+        a.innerHTML = `<span class="ldot"></span><b>We're live now</b>
+          <span>Watch today's games →</span>`;
+        document.body.insertBefore(a, document.body.firstChild);
+      } else if(!w.live && a) a.remove();
+    });
   },
 
   /* ---- registration state ----
@@ -126,6 +145,11 @@ const CS = {
   // moment, wherever their device's clock is set.
   reg:{ open:"2026-11-09T10:45:00-05:00", close:"2026-11-09T23:59:00-05:00",
         form:"https://pci.jotform.com/form/253064435211144" },
+  // "7 PM" or "10:45 AM", Tampa time, read from reg.open so the label and the rule can't drift
+  regOpenTime(){
+    return new Date(this.reg.open).toLocaleTimeString("en-US",{timeZone:"America/New_York",
+      hour:"numeric", minute:"2-digit"}).replace(":00","");
+  },
   regState(now){
     now = now || new Date();
     if(now < new Date(this.reg.open))  return "soon";
@@ -140,11 +164,11 @@ const CS = {
       el.innerHTML = `<a class="btn" href="${href||this.reg.form}">Register Now</a>`;
     } else if(s==="soon"){
       el.innerHTML = `<span class="btn locked" aria-disabled="true" role="link"
-        title="Registration opens at 7:00 PM Eastern">
+        title="Registration opens at ${this.regOpenTime()} Eastern">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
-        Opens at 7 PM</span>`;
+        Opens at ${this.regOpenTime()}</span>`;
     } else {
       el.innerHTML = "";   // registration over: no button at all
     }
@@ -273,6 +297,7 @@ const CS = {
     more:'M5 12h.01M12 12h.01M19 12h.01',
     register:'M12 20.5h8.5M16.6 4a2.1 2.1 0 0 1 3 3L7.5 19.1l-4 1 1-4z',
     statportal:'M4 20h16M7 16V9M12 16V5M17 16v-4',
+    rulebook:'M5 4.6A1.6 1.6 0 0 1 6.6 3H20v14.6H6.6A1.6 1.6 0 0 0 5 19.2zM5 19.2A1.6 1.6 0 0 0 6.6 21H20M9 7.4h7M9 11h5',
     calendar:'M3.2 8.6h17.6M7.6 3.4v3.2M16.4 3.4v3.2M4.4 6.2h15.2a1.2 1.2 0 0 1 1.2 1.2v12.4a1.2 1.2 0 0 1-1.2 1.2H4.4a1.2 1.2 0 0 1-1.2-1.2V7.4a1.2 1.2 0 0 1 1.2-1.2z'
   },
   // Stat Portal switch. While true the portal shows as locked everywhere and
@@ -296,46 +321,106 @@ const CS = {
     const links = [["./","Home"],["schedule","Schedule"],["teams","Teams"],
       ["players","Players"],["stats","Stats"],["standings","Standings"],["history","History"],
       ["gallery","Gallery"],["calendar","Calendar"]];
-    const onPortal = /upload(\.html)?$/.test(location.pathname);
-    // ---- top bar: brand, links, register + portal ----
+    const regOpen = !this.regLocked;
+    // Right-hand call to action: Register while sign-ups are open. Otherwise the
+    // live stream (or the next broadcast date), filled in once the schedule loads.
+    // Nothing locked or greyed out is ever shown here.
+    const cta = regOpen
+      ? `<a class="spacer ghost-cta${active==="register"?" on":""}" href="register">Register</a>`
+      : `<a class="spacer ghost-cta nav-live" data-live-cta href="./#live" hidden></a>`;
+    const mcta = regOpen
+      ? `<a class="m-only m-portal${active==="register"?" on":""}" href="register">Register</a>`
+      : `<a class="m-only m-portal m-live" data-live-cta href="./#live" hidden></a>`;
     document.getElementById("topbar").innerHTML = `<div class="wrap">
       <a class="brand" href="./" aria-label="TCBL home"><img src="assets/img/logo-mini.png" alt=""><span>TCBL</span></a>
-      ${this.regLocked ? "" : `<a class="m-only m-portal${onPortal?" on":""}" href="register">Register</a>`}
+      ${mcta}
       <nav class="nav">${links.map(([h,l])=>
-        `<a href="${h}" class="${l.toLowerCase()===active?"on":""}">${l}</a>`).join("")}
-        ${this.regLocked ? `<span class="spacer"></span>`+this.regLink("cta") : `<a class="spacer ghost-cta${active==="register"?" on":""}" href="register">Register</a>`}
-        ${this.portalLink("cta")}</nav></div>`;
+        `<a href="${h}" class="${l.toLowerCase()===active?"on":""}"${l.toLowerCase()===active?' aria-current="page"':""}>${l}</a>`).join("")}
+        ${cta}${this.portalLocked ? "" : this.portalLink("cta")}</nav></div>`;
+    if(!regOpen) this.liveWatch(w=>{
+      const html = w.live ? `<span class="ldot"></span>Live now`
+        : w.next ? `Next game · ${this.fmtDate(w.next.date,{month:"short",day:"numeric"})}`
+        : `${this.glyph.yt} YouTube`;
+      document.querySelectorAll("[data-live-cta]").forEach(a=>{
+        a.innerHTML = html; a.hidden = false; a.classList.toggle("is-live", !!w.live);
+        if(w.live || w.next){ a.href = "./#live"; a.removeAttribute("target"); a.removeAttribute("rel"); }
+        else { a.href = this.yt.url; a.target = "_blank"; a.rel = "noopener"; }
+      });
+    });
     // ---- mobile bottom tab bar: 4 main tabs + a "More" sheet ----
     const main = links.slice(0,4), extra = [["stats","Stats"],["standings","Standings"],["history","History"],
-      ["gallery","Gallery"],["calendar","Calendar"],["register","Register"],["upload","Stat Portal"]];
-    const tile = (h,l,k,on) => ((k==="statportal" && this.portalLocked) || (k==="register" && this.regLocked))
-      ? `<span class="locked" aria-disabled="true">${icon(k)}<span>${l}</span></span>`
-      : `<a href="${h}" class="${on?"on":""}">${icon(this.icons[k]?k:"more")}<span>${l}</span></a>`;
-    const inMore = extra.some(([,l])=>l.toLowerCase()===active) || onPortal;
+      ["gallery","Gallery"],["calendar","Calendar"],["assets/docs/TCBL-Rulebook.pdf","Rulebook"]];
     const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${this.icons[k]}"/></svg>`;
+    const inMore = extra.some(([,l])=>l.toLowerCase()===active);
     const tabs = document.createElement("nav");
     tabs.className = "tabbar";
     tabs.setAttribute("aria-label","Primary");
     tabs.innerHTML = main.map(([h,l])=>{
       const k = l.toLowerCase(), cur = k===active;
       return `<a href="${h}" class="${cur?"on":""}"${cur?' aria-current="page"':""}>${icon(k)}<span>${l}</span></a>`;
-    }).join("") + `<button type="button" class="more-btn${inMore?" on":""}" aria-haspopup="true" aria-expanded="false">${icon("more")}<span>More</span></button>`;
+    }).join("") + `<button type="button" class="more-btn${inMore?" on":""}" aria-haspopup="dialog" aria-expanded="false">${icon("more")}<span>More</span></button>`;
     document.body.appendChild(tabs);
     const sheet = document.createElement("div");
-    sheet.className = "sheet"; sheet.setAttribute("role","dialog"); sheet.setAttribute("aria-label","More pages");
-    sheet.innerHTML = `<div class="sheet-scrim"></div><div class="sheet-card">
-      <div class="sheet-grab"></div>
-      <div class="sheet-grid">${extra.map(([h,l])=>{ const k=l.toLowerCase().replace(" ","");
-        return tile(h,l,k,l.toLowerCase()===active||(onPortal&&k==="statportal"));}).join("")}</div>
+    sheet.className = "sheet";
+    sheet.innerHTML = `<div class="sheet-scrim"></div><div class="sheet-card" role="dialog" aria-modal="true" aria-label="More pages">
+      <div class="sheet-grab" aria-hidden="true"></div>
+      <div class="sheet-grid">${extra.map(([h,l])=>{ const k = l.toLowerCase(), on = k===active, pdf = /\.pdf$/.test(h);
+        return `<a href="${h}" class="${on?"on":""}"${on?' aria-current="page"':""}${pdf?' target="_blank" rel="noopener"':""}>${icon(this.icons[k]?k:"more")}<span>${l}</span></a>`;}).join("")}</div>
       <div class="sheet-social"><a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} @coptichoops</a>
         <a href="${this.social.youtube}" target="_blank" rel="noopener">${this.glyph.yt} Live on YouTube</a></div></div>`;
     document.body.appendChild(sheet);
-    const btn = tabs.querySelector(".more-btn");
-    const toggle = open => { sheet.classList.toggle("open", open); btn.setAttribute("aria-expanded", open); };
-    btn.onclick = ()=> toggle(!sheet.classList.contains("open"));
-    sheet.querySelector(".sheet-scrim").onclick = ()=> toggle(false);
-    document.addEventListener("keydown", e=>{ if(e.key==="Escape") toggle(false); });
+    const btn = tabs.querySelector(".more-btn"), card = sheet.querySelector(".sheet-card"), scrim = sheet.querySelector(".sheet-scrim");
+    const isOpen = ()=> sheet.classList.contains("open");
+    const toggle = open => {
+      if(isOpen()===open) return;
+      card.style.transform = ""; scrim.style.opacity = "";
+      sheet.classList.toggle("open", open); btn.setAttribute("aria-expanded", open);
+      // focus moves into the sheet when it opens and back to "More" when it closes
+      if(open) setTimeout(()=>{ const f = card.querySelector(".sheet-grid a"); if(f) f.focus({preventScroll:true}); }, 60);
+      else if(card.contains(document.activeElement)) btn.focus({preventScroll:true});
+    };
+    btn.onclick = ()=> toggle(!isOpen());
+    scrim.onclick = ()=> toggle(false);
+    document.addEventListener("keydown", e=>{
+      if(!isOpen()) return;
+      if(e.key==="Escape"){ toggle(false); return; }
+      if(e.key==="Tab"){   // keep keyboard focus inside the open sheet
+        const f = [...card.querySelectorAll("a[href]")], i = f.indexOf(document.activeElement);
+        if(e.shiftKey && i<=0){ e.preventDefault(); f[f.length-1].focus(); }
+        else if(!e.shiftKey && i===f.length-1){ e.preventDefault(); f[0].focus(); }
+      }
+    });
+    // Drag the sheet down to dismiss. It follows the finger, then either closes
+    // (pulled far enough, or flicked) or springs back open.
+    let y0 = null, dy = 0, t0 = 0, dragging = false, swallow = false;
+    card.addEventListener("touchstart", e=>{
+      if(e.touches.length>1) return;
+      y0 = e.touches[0].clientY; dy = 0; t0 = performance.now(); dragging = false;
+    }, {passive:true});
+    card.addEventListener("touchmove", e=>{
+      if(y0===null) return;
+      dy = e.touches[0].clientY - y0;
+      if(!dragging && dy>6){ dragging = true; card.style.transition = scrim.style.transition = "none"; }
+      if(!dragging) return;
+      const d = Math.max(0, dy);
+      card.style.transform = `translateY(${d}px)`;
+      scrim.style.opacity = String(Math.max(0, 1 - d/card.offsetHeight));
+    }, {passive:true});
+    const endDrag = ()=>{
+      if(y0===null) return;
+      y0 = null;
+      if(!dragging) return;
+      dragging = false;
+      card.style.transition = scrim.style.transition = "";
+      const v = dy / Math.max(1, performance.now()-t0);          // px per ms
+      if(dy > card.offsetHeight*0.28 || v > 0.55) toggle(false);
+      else { card.style.transform = ""; scrim.style.opacity = ""; }
+      swallow = true; setTimeout(()=>swallow = false, 350);       // a drag isn't a tap
+    };
+    card.addEventListener("touchend", endDrag);
+    card.addEventListener("touchcancel", endDrag);
+    card.addEventListener("click", e=>{ if(swallow){ e.preventDefault(); e.stopPropagation(); } }, true);
     this.liveBar();
     this.fx();
   },
@@ -420,18 +505,11 @@ const CS = {
   },
   // Fades sections in as they scroll into view. Anything with .reveal, including
   // elements rendered later, is picked up; reduced-motion users see it all at once.
+  // sections are simply there when the page opens (no fade-in)
   reveal(){
-    if(this._rv) return;
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if(reduce || !("IntersectionObserver" in window)){
-      const show = ()=>document.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));
-      show(); new MutationObserver(show).observe(document.body,{childList:true,subtree:true}); this._rv=1; return;
-    }
-    const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const t=e.target; t.classList.add("in"); io.unobserve(t); if(t.dataset.st) setTimeout(()=>t.style.transitionDelay="",1300);} }),
-      {rootMargin:"0px 0px -8% 0px", threshold:.08});
-    const scan = ()=>document.querySelectorAll(".reveal:not(.in):not([data-rv])").forEach(e=>{ e.dataset.rv=1; io.observe(e); });
-    scan(); new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
-    this._rv = 1;
+    if(this._rv) return; this._rv = 1;
+    const show = ()=>document.querySelectorAll(".reveal:not(.in)").forEach(e=>e.classList.add("in"));
+    show(); new MutationObserver(show).observe(document.body,{childList:true,subtree:true});
   },
   /* ---- player profiles ----
      Every name in the season files and rosters gets a profile at
@@ -460,13 +538,11 @@ const CS = {
       b.appendChild(i); setTimeout(()=>i.remove(), 650);
     });
     const bar = document.getElementById("topbar");
-    const prog = document.createElement("div"); prog.className = "progress"; document.body.appendChild(prog);
     const heroes = [...document.querySelectorAll(".hero .hero-bg,.page-hero .hero-bg")];
     let ticking = false;
     const onScroll = ()=>{ if(ticking) return; ticking = true; requestAnimationFrame(()=>{ ticking = false;
       const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
       if(bar) bar.classList.toggle("scrolled", y > 8);
-      prog.style.setProperty("--p", max>0 ? Math.min(1, y/max) : 0);
       if(!reduce && y < innerHeight*1.2) heroes.forEach(h=>h.style.setProperty("--py", (y*0.28)+"px"));
     }); };
     addEventListener("scroll", onScroll, {passive:true}); onScroll();
@@ -495,10 +571,6 @@ const CS = {
       if(x.isIntersecting){ io.unobserve(x.target); run(x.target); } }),{threshold:.4}) : null;
     const scan = ()=>{
       document.querySelectorAll("[data-count]:not([data-cv])").forEach(el=>{ el.dataset.cv=1; io ? io.observe(el) : run(el); });
-      // grids cascade in, card by card
-      document.querySelectorAll(".pgrid,.grid3,.grid4,.score-strip,.capgrid,.rgrid,.pillar-grid").forEach(g=>{
-        [...g.children].forEach((c,i)=>{ if(!c.dataset.st){ c.dataset.st=1; c.classList.add("reveal"); c.style.transitionDelay = (Math.min(i,8)*55)+"ms"; } });
-      });
     };
     scan(); new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
   },
@@ -582,7 +654,7 @@ const CS = {
         <a href="mailto:${this.social.email}">${this.glyph.mail} Email us</a></div>
     </div>
     <div class="wrap fbottom"><span>Tampa Bay Coptic Basketball League. Sanctioned under the Coptic Orthodox Diocese of the Southern United States</span>
-      <span>${this.regLocked?this.regLink():""} ${this.portalLink()}</span></div>`;
+      ${this.portalLocked ? "" : `<span>${this.portalLink()}</span>`}</div>`;
     document.body.appendChild(f);
     this.reveal();
   },
@@ -618,28 +690,65 @@ const CS = {
     };
     el._cd = setInterval(tick, 1000); tick();
   },
-  async seasonTabs(el, current, onPick, disable1){
-    // which season is live comes from seasons.js, never a hardcoded number
+  /* Season tabs that keep the choice in the address (?s=3): a season can be shared,
+     survives a reload, and Back/Forward step through it. With no ?s the page opens
+     on the newest season that actually has something to show, as judged by has(d),
+     so pages move on to a new season by themselves once its data lands. */
+  async seasonPicker(el, onPick, has){
     const meta = await this.data("seasons");
-    const cur = (meta.find(s=>s.current) || {}).id;
-    el.innerHTML = [5,4,3,2,1].map(n=>
-      `<span class="tabwrap"><button data-s="${n}" ${n===current?'class="on"':""}
-        ${n===1&&disable1?"disabled title='Season 1 archive coming soon'":""}
-        >Season ${n}</button>${n===cur?'<i class="nowlabel">Current</i>':""}</span>`).join("");
+    const ids = meta.map(s=>s.id).sort((a,b)=>b-a), cur = (meta.find(s=>s.current)||{}).id;
+    let def = ids[ids.length-1];
+    for(const n of ids){ if(!has || has(await this.data("season"+n))){ def = n; break; } }
+    const fromUrl = ()=>{ const n = +new URLSearchParams(location.search).get("s"); return ids.includes(n) ? n : def; };
+    el.innerHTML = ids.map(n=>`<span class="tabwrap"><button type="button" data-s="${n}" aria-pressed="false">Season ${n}</button>${n===cur?'<i class="nowlabel">Current</i>':""}</span>`).join("");
+    const go = n=>{
+      el.querySelectorAll("button").forEach(b=>{ const on = +b.dataset.s===n; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+      onPick(n);
+    };
     el.querySelectorAll("button").forEach(b=>b.onclick=()=>{
-      el.querySelectorAll("button").forEach(x=>x.classList.remove("on"));
-      b.classList.add("on"); onPick(+b.dataset.s);
+      if(b.classList.contains("on")) return;
+      const n = +b.dataset.s, u = new URL(location.href);
+      u.searchParams.set("s", n);
+      history.pushState(null, "", u);
+      go(n);
     });
+    addEventListener("popstate", ()=>go(fromUrl()));
+    go(fromUrl());
   },
-  sortTable(tbl, data, render){
-    tbl.querySelectorAll("th[data-k]").forEach(th=>{
-      th.onclick = ()=>{
-        const k = th.dataset.k, dir = th.dataset.dir==="asc" ? -1 : 1;
-        th.dataset.dir = dir===1 ? "asc" : "desc";
-        data.sort((a,b)=> (b[k]??-1e9) > (a[k]??-1e9) ? dir : -dir);
-        render(data);
+  // Small status message near the bottom of the screen. Polite: it never steals focus.
+  toast(msg){
+    let t = document.querySelector(".toast");
+    if(!t){ t = document.createElement("div"); t.className = "toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 2600);
+  },
+  // Sortable headers: every th[data-k] gets a real button (reachable by keyboard), an
+  // arrow on the active column and aria-sort. First tap sorts high to low, the next
+  // flips it. The chosen sort carries over when the season changes.
+  sortTable(tbl, data, render, first){
+    const st = tbl._sort || (tbl._sort = { k:first||null, dir:"desc" });
+    const ths = [...tbl.querySelectorAll("th[data-k]")];
+    const apply = ()=>{
+      if(st.k) data.sort((a,b)=>{
+        const x = a[st.k] ?? -1e9, y = b[st.k] ?? -1e9, c = x<y ? -1 : x>y ? 1 : 0;
+        return st.dir==="asc" ? c : -c;
+      });
+      ths.forEach(th=>{
+        const on = th.dataset.k===st.k;
+        th.classList.toggle("sorted", on);
+        if(on) th.setAttribute("aria-sort", st.dir==="asc" ? "ascending" : "descending"); else th.removeAttribute("aria-sort");
+      });
+      render(data);
+    };
+    ths.forEach(th=>{
+      if(!th.querySelector(".th-sort")) th.innerHTML = `<button type="button" class="th-sort">${th.textContent}<i aria-hidden="true"></i></button>`;
+      th.querySelector(".th-sort").onclick = ()=>{
+        st.dir = (st.k===th.dataset.k && st.dir==="desc") ? "asc" : "desc";
+        st.k = th.dataset.k;
+        apply();
       };
     });
+    apply();
   }
 };
 

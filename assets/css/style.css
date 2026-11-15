@@ -1231,3 +1231,93 @@ html{scrollbar-color:#2c5679 #0b1a28;scrollbar-width:thin}
 .sec-head h2::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:42px;border-radius:3px;background:linear-gradient(90deg,var(--orange),var(--gold));
   transform:scaleX(0);transform-origin:left;transition:transform .8s var(--ease) .15s}
 .sec-head.in h2::after,.sec-head:not(.reveal) h2::after{transform:scaleX(1)}
+
+/* ============================================================
+   Calm open: pages just appear. No reading-progress bar, no
+   headline slide, no logo spin-in, no fade-ins. Hover effects,
+   tilt, badges and the rest of the motion stay.
+   ============================================================ */
+.progress{display:none}
+@view-transition{navigation:none}
+.topbar{animation:none}
+.reveal,.reveal.in{opacity:1;transform:none}
+.hero h1 .ln>span{transform:none;animation:none}
+.hero .kicker,.hero .verse,.hero .pillars,.hero .count,.hero .hero-cta{opacity:1;animation:none}
+.logo-stage .hero-logo{animation:float 6s ease-in-out infinite}
+.page-hero .kicker,.page-hero h1,.page-hero p,.p-hero h1,.team-hero h2{animation:none}
+.p-hero .pav.xl{animation:none}
+.sec-head h2::after{transform:scaleX(1);transition:none}
+
+/* ============================================================
+   Flow & polish pass (Nov 15)
+   ============================================================ */
+/* the hidden attribute always wins, even on elements styled with display:flex/inline-block */
+[hidden]{display:none!important}
+
+/* one designed focus ring for keyboard users, everywhere */
+:where(a,button,summary,select,input,[tabindex]):focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+.tabbar a:focus-visible,.tabbar button:focus-visible,.sheet-grid a:focus-visible,.sheet-social a:focus-visible{outline-offset:-3px;border-radius:12px}
+
+/* nav call to action when registration is closed: next game date, or Live now */
+.nav a.nav-live{display:inline-flex;align-items:center;gap:7px}
+@media(max-width:780px){ .m-portal.m-live{display:inline-flex;align-items:center;gap:7px} }
+.nav a.nav-live svg,.m-live svg{width:15px;height:15px}
+.nav a.nav-live.is-live,.m-portal.m-live.is-live{background:var(--bad);border-color:var(--bad);color:#fff}
+.nav a.nav-live.is-live:hover{color:#fff;border-color:var(--bad);filter:brightness(1.1)}
+.nav-live .ldot,.m-live .ldot{background:#fff;width:8px;height:8px;flex:0 0 8px;box-shadow:0 0 0 0 rgba(255,255,255,.8);animation:wpulse 1.8s infinite}
+@media(max-width:780px){
+  .m-portal.m-live{background:transparent;border:1px solid var(--line);color:#fff}
+}
+@media(prefers-reduced-motion:reduce){.nav-live .ldot,.m-live .ldot{animation:none}}
+
+/* sortable table headers: real buttons with a direction arrow */
+.tbl th{cursor:default}
+.th-sort{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+  font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;transition:color .15s}
+.th-sort:hover{color:var(--ink)}
+.tbl th.num .th-sort{flex-direction:row-reverse}
+.th-sort i{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;
+  opacity:0;transition:opacity .15s,transform .2s}
+.th-sort:hover i{opacity:.45}
+.tbl th.sorted .th-sort{color:var(--orange)}
+.tbl th.sorted .th-sort i{opacity:1}
+.tbl th[aria-sort=ascending] .th-sort i{transform:rotate(180deg)}
+.th-sort:focus-visible{outline:2px solid var(--orange);outline-offset:4px;border-radius:3px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:28px;z-index:300;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  background:var(--navy-800);border:1px solid var(--line);color:var(--ink);padding:11px 18px;border-radius:999px;
+  font-size:13.5px;font-weight:700;box-shadow:0 12px 34px rgba(0,0,0,.45);transition:opacity .25s,transform .3s var(--ease);
+  max-width:calc(100vw - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:780px){.toast{bottom:calc(76px + env(safe-area-inset-bottom))}}
+
+/* share button confirms itself */
+.p-share.done{background:var(--good);border-color:var(--good);color:var(--ink-black)}
+
+/* gallery photos are buttons; the keyboard ring sits inside the rounded tile */
+.masonry .ph{all:unset;display:block;width:100%;cursor:zoom-in}
+.masonry .ph:focus-visible{outline:3px solid var(--orange);outline-offset:-3px;border-radius:14px}
+.masonry figure:focus-within figcaption{opacity:1}
+.masonry figcaption{pointer-events:none}
+.masonry .skel{break-inside:avoid}
+
+/* lightbox: photo glides between slides and follows the finger */
+.lightbox{touch-action:pinch-zoom;transition:background .2s}
+.lightbox img{transition:transform .26s var(--ease),opacity .22s;will-change:transform}
+.lightbox .cap .cnt{margin-left:12px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+
+/* bottom sheet: the card owns the drag gesture */
+@media(max-width:780px){ .sheet-card,.sheet-scrim{touch-action:none} .sheet-grab{margin-top:2px;height:5px;cursor:grab} }
+
+/* calendar "Today" */
+.cal-head .cal-today{width:auto;padding:0 14px;font-weight:800;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;
+  font-family:var(--font-body);border-radius:999px}
+@media(max-width:780px){ .cal-head .cal-today{flex:0 0 auto;padding:0 12px;font-size:11px} }
+
+/* loading placeholders */
+.skel-tr td{padding:12px}
+.skel-tr .skel{height:16px;border-radius:6px}
+.skel-tr:nth-child(3n+2) .skel{width:86%}
+.skel-tr:nth-child(3n) .skel{width:72%}
+@media(prefers-reduced-motion:reduce){.skel{animation:none}}

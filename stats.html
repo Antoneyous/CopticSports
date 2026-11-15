@@ -15,24 +15,21 @@
 <meta property="og:url" content="https://coptichoops.com/stats"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261114"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="section"><div class="wrap">
   <div class="sec-head"><h2>Player Statistics</h2></div>
   <div class="tabs" id="tabs"></div>
-  <div class="grid3" id="leaders" style="margin-bottom:30px"></div>
-  <div class="sec-head"><h2 style="font-size:19px">All Players</h2>
-    <span style="color:var(--ink-faint);font-size:12.5px">tap or click a column to sort</span></div>
+  <div class="grid3" id="leaders" style="margin-bottom:30px"><div class="skel" style="height:236px"></div><div class="skel" style="height:236px"></div><div class="skel" style="height:236px"></div></div>
+  <div class="sec-head"><h2 style="font-size:19px">All Players</h2></div>
   <div class="tbl-scroll"><table class="tbl" id="ptable"><thead><tr>
     <th>Player</th><th>Team</th><th class="num x" data-k="gp">GP</th><th class="num" data-k="pts">PTS</th>
     <th class="num" data-k="ppg">PPG</th><th class="num x" data-k="reb">REB</th><th class="num x" data-k="rpg">RPG</th>
     <th class="num x" data-k="ast">AST</th><th class="num x" data-k="apg">APG</th><th class="num x" data-k="fgp">FG%</th>
     <th class="num x" data-k="fg3m">3PM</th><th class="num x" data-k="ftp">FT%</th><th class="num x" data-k="pf">PF</th>
-  </tr></thead><tbody id="body"></tbody></table></div>
-  <p class="note" style="margin-top:14px">GP counts games with recorded activity. FG% combines 2-pt and 3-pt attempts.
-  Blocks/steals/turnovers were trialed in Season 3 and return as a full stat in Season 5.</p>
+  </tr></thead><tbody id="body"><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr><tr class="skel-tr"><td colspan="13"><div class="skel"></div></td></tr></tbody></table></div>
 </div></section>
-<script src="assets/js/app.js?v=20261114"></script>
+<script src="assets/js/app.js?v=20261115b"></script>
 <script>
 CS.nav("stats"); CS.footer();
 let players = [];
@@ -51,18 +48,17 @@ function render(list){
 async function show(n){
   const s = await CS.data("season"+n);
   players = [...s.players];
-  render(players);
   const cats=[["ppg","Scoring"],["rpg","Rebounding"],["apg","Playmaking"]];
   document.getElementById("leaders").innerHTML = players.length ? cats.map(([k,label])=>{
     // same rule as the homepage: no games-played minimum
-    const top=[...players].sort((a,b)=>b[k]-a[k]).slice(0,5);
+    const top=[...players].sort((a,b)=>b[k]-a[k]).slice(0,3);
     return `<div class="card"><h3>${label}</h3>`+top.map((p,i)=>
       `<div class="leader"><span class="n">${i+1}</span>
        <div class="who"><b>${CS.pLink(p.name)}</b>${CS.team(p.team,"sm")}</div>
        <div class="val"><b>${p[k].toFixed(1)}</b><span>${k}</span></div></div>`).join("")+"</div>";
   }).join("") : "";
-  CS.sortTable(document.getElementById("ptable"), players, render);
+  CS.sortTable(document.getElementById("ptable"), players, render, "pts");
 }
-CS.seasonTabs(document.getElementById("tabs"), 4, show); show(4);
+CS.seasonPicker(document.getElementById("tabs"), show, d=>d.players.length);
 CS.colToggle(document.getElementById("ptable"));
 </script></body></html>
