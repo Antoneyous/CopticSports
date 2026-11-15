@@ -15,14 +15,14 @@
 <meta property="og:url" content="https://coptichoops.com/teams"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261115d"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115e"></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="page-head" id="thero"><div class="wrap"><h1>Teams</h1><p>Eight teams, each named for a saint, paired as brothers: Peter &amp; Andrew, James &amp; John, Basil &amp; Gregory, Maximus &amp; Dometius.</p></div></section>
 <section class="section first"><div class="wrap">
   <div class="sec-head" id="headrow"></div>
   <div id="content"><div class="grid4 tgrid"><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div><div class="skel" style="height:230px"></div></div></div>
 </div></section>
-<script src="assets/js/app.js?v=20261115d"></script>
+<script src="assets/js/app.js?v=20261115e"></script>
 <script>
 CS.nav("teams"); CS.footer();
 (async()=>{
@@ -39,7 +39,7 @@ CS.nav("teams"); CS.footer();
     const cap = cn ? `<span class="cap-line">${CS.avatar({...cp, team:t})}<span><small>Captain</small><b>${cn}</b></span></span>`
       : teams[t].seasons["5"] ? `<span class="bro">Captain to be announced</span>` : "";
     return `<a class="team-card2" href="teams?t=${encodeURIComponent(t)}">
-      <div class="top" style="background:${c.bg};color:${c.fg}">
+      <div class="top" style="background:${c.bg};color:${c.fg}"><img class="wm" src="assets/img/${lm(c.fg)}" alt="" loading="lazy">
         <small>${st.full||t}</small><h3>${t}</h3>
         <div class="rec2">${r.w}–${r.l} all-time</div></div>
       <div class="bot">${cap}${r.titles.length?`<div class="banner-row">${CS.badge("champ", r.titles.length>1?`${r.titles.length}× champions`:`Season ${r.titles[0]} champions`)}</div>`:""}</div></a>`;

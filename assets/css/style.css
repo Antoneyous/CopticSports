@@ -140,6 +140,10 @@ input::placeholder{color:var(--text-3)}
 .person-t b,.rp b{font-weight:700;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .person-m{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .person>.bdg{margin-left:auto}
+.people.list{gap:8px}
+.people.list .person{margin:0;min-height:72px;padding:10px 14px;border:1px solid rgba(255,255,255,.08);transition:border-color .15s,background-color .15s,transform .12s var(--ease)}
+.people.list .person:hover{border-color:rgba(255,255,255,.16);background:var(--surface)}
+.people.list .person:active{transform:scale(.99);background:var(--surface-2)}
 .rp>div{display:flex;flex-direction:column;min-width:0;flex:1}
 .rp>div span{color:var(--text-3);font-size:13px}
 
@@ -357,7 +361,12 @@ details.glog .tbl td:first-child,details.glog .tbl th:first-child{background:var
   transition:transform .15s var(--ease),background-color .15s;-webkit-tap-highlight-color:transparent}
 .team-card2:hover{background:var(--surface-2)}
 .team-card2:active{transform:scale(.98)}
-.team-card2 .top{padding:16px 14px 14px;min-height:108px;display:flex;flex-direction:column;justify-content:flex-end}
+.team-card2 .top{position:relative;overflow:hidden;padding:16px 14px 14px;min-height:108px;display:flex;flex-direction:column;justify-content:flex-end}
+.team-card2 .top>*:not(.wm){position:relative}
+/* the TCBL mark in the corner turns when you hover or press the card */
+.team-card2 .wm{position:absolute;right:-22px;bottom:-26px;width:96px;opacity:.16;pointer-events:none;
+  transition:transform .8s var(--ease),opacity .4s}
+.team-card2:hover .wm,.team-card2:active .wm{transform:rotate(-24deg) scale(1.12);opacity:.26}
 .team-card2 .top small{font-size:11.5px;font-weight:700;opacity:.75}
 .team-card2 .top h3{font-size:19px;margin-top:2px}
 .team-card2 .rec2{font-size:12.5px;font-weight:700;opacity:.75;margin-top:2px;font-variant-numeric:tabular-nums}
@@ -509,7 +518,7 @@ details.glog .tbl td:first-child,details.glog .tbl th:first-child{background:var
    ========================================================================== */
 @media (min-width:640px){
   .people{grid-template-columns:repeat(2,1fr);column-gap:24px}
-  .people.list{grid-template-columns:repeat(2,1fr)}
+  .people.list{grid-template-columns:repeat(2,1fr);column-gap:10px}
   .grid4{grid-template-columns:repeat(2,1fr)}
   .highs{grid-template-columns:repeat(4,1fr)}
   .st-row{grid-template-columns:repeat(4,1fr)}
@@ -567,7 +576,7 @@ details.glog .tbl td:first-child,details.glog .tbl th:first-child{background:var
   .hero-short{min-height:min(60vh,520px)}
 
   .people{grid-template-columns:repeat(4,1fr)}
-  .people.list{grid-template-columns:repeat(3,1fr)}
+  .people.list{grid-template-columns:repeat(3,1fr);column-gap:12px}
   .grid3{grid-template-columns:repeat(3,1fr);gap:16px}
   .grid4{grid-template-columns:repeat(4,1fr);gap:16px}
   .tgrid{grid-template-columns:repeat(4,1fr);gap:16px}
@@ -575,6 +584,7 @@ details.glog .tbl td:first-child,details.glog .tbl th:first-child{background:var
   .photo-card{aspect-ratio:4/5}
   .team-card2 .top{min-height:132px;padding:20px 18px 16px}
   .team-card2 .top h3{font-size:22px}
+  .team-card2 .wm{width:140px;right:-30px;bottom:-38px}
   .team-card2 .bot{padding:14px 18px 16px}
   .tdetail{grid-template-columns:1fr 1.2fr;gap:16px}
   .team-hero{padding:36px 36px}
