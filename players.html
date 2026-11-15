@@ -15,18 +15,18 @@
 <meta property="og:url" content="https://coptichoops.com/players"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115d"></head><body>
 <header id="topbar" class="topbar"></header>
-<section class="section"><div class="wrap">
-  <div class="sec-head"><h2>Players</h2></div>
+<section class="page-head"><div class="wrap"><h1>Players</h1></div></section>
+<section class="section first"><div class="wrap">
   <div class="tabs" id="ptabs">
     <span class="tabwrap"><button data-f="s5" class="on">Season 5</button></span>
     <span class="tabwrap"><button data-f="all">All-time</button></span></div>
-  <div class="p-tools"><input class="p-search" id="q" type="search" placeholder="Search players" autocomplete="off" aria-label="Search players">
+  <div class="p-tools"><input class="p-search" id="q" type="search" placeholder="Search by name" autocomplete="off" aria-label="Search players">
     <span class="p-count" id="count"></span></div>
-  <div class="pgrid" id="grid"><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div><div class="skel" style="height:196px"></div></div>
+  <div class="people list" id="grid"><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div></div>
 </div></section>
-<script src="assets/js/app.js?v=20261115b"></script>
+<script src="assets/js/app.js?v=20261115d"></script>
 <script>
 CS.nav("players"); CS.footer();
 (async()=>{
@@ -40,11 +40,12 @@ CS.nav("players"); CS.footer();
     // captains first, then everyone A to Z by last name
     list.sort((a,b)=> (b.cap5-a.cap5) || last(a.name).localeCompare(last(b.name)) || a.name.localeCompare(b.name));
     document.getElementById("count").textContent = `${list.length} player${list.length===1?"":"s"}`;
-    document.getElementById("grid").innerHTML = list.map(p=>`<a class="pcard2" href="player?p=${p.slug}">
-      ${p.cap5?CS.badge("cap"):p.seasonList.length?"":CS.badge("new")}
-      ${CS.avatar(p,"lg")}<b>${p.name}</b>
-      ${filter==="s5" ? (p.seasons[5]?CS.teamShort(p.seasons[5].team,"sm"):"") : (p.team?CS.teamShort(p.team,"sm"):"")}
-    </a>`).join("") || `<p class="note">No players match “${q.value}”.</p>`;
+    document.getElementById("grid").innerHTML = list.map(p=>{
+      const team = filter==="s5" ? (p.seasons[5] ? p.seasons[5].team : null) : p.team;
+      const tag = p.cap5 ? CS.badge("cap") : p.seasonList.length ? "" : CS.badge("new");
+      return `<a class="person" href="player?p=${p.slug}">${CS.avatar(p)}
+        <span class="person-t"><b>${p.name}</b>${team?`<span class="person-m">${CS.teamShort(team,"sm")}</span>`:""}</span>${tag}</a>`;
+    }).join("") || `<p class="note">No players match “${q.value}”.</p>`;
   };
   document.querySelectorAll("#ptabs button").forEach(b=>b.onclick=()=>{
     document.querySelectorAll("#ptabs button").forEach(x=>x.classList.remove("on")); b.classList.add("on");

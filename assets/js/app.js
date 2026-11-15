@@ -44,7 +44,7 @@ const CS = {
     if(!name) return "";
     const c = this.colors[name] || {bg:"#1b405e",fg:"#ffffff"};
     const light = ["#ffffff","#ccba92","#67aade","#b2d034"].includes(c.bg.toLowerCase());
-    return `<span class="tpill${size?" "+size:""}${light?" light":""}" style="background:${c.bg};color:${c.fg}">${name.replace("St. ","")}</span>`;
+    return `<span class="tpill${size?" "+size:""}${light?" light":""}" style="background:${c.bg};color:${c.fg}">${name}</span>`;
   },
 
   /* ---- YouTube live stream ----
@@ -76,35 +76,34 @@ const CS = {
   },
   matchups(games){
     const m = games.filter(g=>g.team1 && g.team2).map(g=>
-      `<span class="mchip">${this.teamShort(g.team1,"sm")}<i>vs</i>${this.teamShort(g.team2,"sm")}
-        <b>${this.fmtTime(g.time)}</b></span>`).join("");
+      `<div class="mchip"><span class="mteams">${this.teamShort(g.team1,"sm")}<i>vs</i>${this.teamShort(g.team2,"sm")}</span>
+        <b>${this.fmtTime(g.time)}</b></div>`).join("");
     return m ? `<div class="mgrid">${m}</div>` : "";
   },
   // Renders the player when a game is on, and a countdown to the next one when not.
-  async liveSection(host){
+  async liveSection(host, onlyLive){
     if(!host) return;
     const w = this.liveWindow((await this.data("season5")).games);
     clearTimeout(host._liveT);
+    const sec = host.closest("section");
+    if(onlyLive && sec) sec.hidden = !w.live;
     if(w.live){
       // switch back to "off air" by itself once the day's games are over
-      host._liveT = setTimeout(()=>this.liveSection(host), Math.min(w.live.end - new Date() + 1000, 2**31-1));
-      host.innerHTML = `<div class="livenow"><span class="ldot"></span>Live now
-        ${this.fmtDate(w.live.date)}${w.live.games[0].venue?", "+w.live.games[0].venue:""}</div>
+      host._liveT = setTimeout(()=>this.liveSection(host, onlyLive), Math.min(w.live.end - new Date() + 1000, 2**31-1));
+      host.innerHTML = `<div class="livenow"><span class="ldot"></span>Live now${w.live.games[0].venue?" · "+w.live.games[0].venue:""}</div>
         ${this.liveEmbed()}${this.matchups(w.live.games)}`;
     } else if(w.next){
       const g0 = w.next.games[0]||{};
-      host.innerHTML = `<div class="card offair live-next">
-        <div class="ln-head"><div><i class="k">Next broadcast</i><h3>${this.fmtDate(w.next.date)}</h3>
-          <span class="cardp">${g0.venue?g0.venue+" · ":""}First tip ${this.fmtTime(g0.time)}</span></div>
-          <a class="btn ghost" href="${this.yt.url}" target="_blank" rel="noopener">${this.glyph.yt} YouTube</a></div>
+      host.innerHTML = `<div class="card live-next">
+        <div class="ln-head"><div><span class="eyebrow">Next broadcast</span><h3>${this.fmtDate(w.next.date,{weekday:"long",month:"short",day:"numeric"})}</h3>
+          <p class="cardp">${g0.venue?g0.venue+" · ":""}First tip ${this.fmtTime(g0.time)}</p></div></div>
         ${this.matchups(w.next.games)}</div>`;
       // flip to the live player by itself when the first game tips
-      host._liveT = setTimeout(()=>this.liveSection(host), Math.min(w.next.start - new Date() + 1000, 2**31-1));
+      host._liveT = setTimeout(()=>this.liveSection(host, onlyLive), Math.min(w.next.start - new Date() + 1000, 2**31-1));
     } else {
-      host.innerHTML = `<div class="card offair"><h3>That's a wrap on the season</h3>
-        <p class="cardp">Every game from the season is up on our YouTube channel.</p>
-        <p style="margin-top:14px"><a class="btn ghost" href="${this.yt.url}"
-          target="_blank" rel="noopener">Watch on YouTube</a></p></div>`;
+      host.innerHTML = `<div class="card"><h3>That's a wrap on the season</h3>
+        <p class="cardp">Every game is on our YouTube channel.</p>
+        <p class="card-cta"><a class="btn ghost" href="${this.yt.url}" target="_blank" rel="noopener">Watch on YouTube</a></p></div>`;
     }
   },
   // Calls fn(window) now, again at every on-air / off-air flip, and when a phone or
@@ -277,6 +276,12 @@ const CS = {
       <div class="row ${win?"win":""} ${lose?"dim":""}">${this.team(team)}
         <span class="score">${score??""}</span></div>` : "";
     const label = g.status==="FFT" ? "FORFEIT" : g.status==="BYE" ? "BYE WEEK" : g.status==="NR" ? "NOT REPORTED" : done ? "FINAL" : this.fmtTime(g.time);
+    if(g.status==="BYE")
+      return `<div class="game up"><span class="tbd">No games. Rest &amp; fellowship</span></div>`;
+    if(!done && g.status!=="FFT" && !g.team1)
+      return `<div class="game up"><span class="tbd">Matchups set by the standings</span><b>${this.fmtTime(g.time)}</b></div>`;
+    if(!done && g.status!=="FFT" && g.team1 && g.team2)
+      return `<div class="game up"><span class="mteams">${this.teamShort(g.team1,"sm")}<i>vs</i>${this.teamShort(g.team2,"sm")}</span><b>${this.fmtTime(g.time)}</b></div>`;
     return `<div class="game">
       <div class="meta"><span>${g.stage}${g.venue?", "+g.venue:""}</span>
       <span class="status-${g.status}">${label}</span></div>
@@ -520,58 +525,15 @@ const CS = {
     const m = {cap:["bdg-cap","C",text||"Captain"], new:["bdg-new","",text||"New"], champ:["bdg-champ","★",text||"Champion"]}[kind];
     return m ? `<span class="bdg ${m[0]}">${m[1]?`<i>${m[1]}</i>`:""}${m[2]}</span>` : "";
   },
-  // motion layer: cursor spotlight on cards, button ripples, count-ups, staggered grids
+  // No motion layer: no tilt, spotlight, ripples, parallax or count-ups.
+  // Anything still marked data-count simply shows its value.
   fx(){
     if(this._fx) return; this._fx = 1;
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const SPOT = ".card,.pcard2,.team-card2,.game,.capcard,.rec,.scard,.numbers .n,.st-tile";
-    document.addEventListener("pointermove", e=>{
-      const c = e.target.closest && e.target.closest(SPOT); if(!c) return;
-      const r = c.getBoundingClientRect();
-      c.style.setProperty("--mx", (e.clientX-r.left)+"px"); c.style.setProperty("--my", (e.clientY-r.top)+"px");
-    }, {passive:true});
-    document.addEventListener("pointerdown", e=>{
-      const b = e.target.closest && e.target.closest(".btn,.tabs button,.seg button,.gfilters button");
-      if(!b || reduce) return;
-      const r = b.getBoundingClientRect(), d = Math.max(r.width,r.height)*2.2, i = document.createElement("i");
-      i.className = "ripple"; i.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
-      b.appendChild(i); setTimeout(()=>i.remove(), 650);
+    const scan = ()=>document.querySelectorAll("[data-count]:not([data-cv])").forEach(el=>{
+      el.dataset.cv = 1;
+      const v = +el.dataset.count, dec = +(el.dataset.dec||0);
+      el.textContent = dec ? v.toFixed(dec) : Math.round(v).toLocaleString("en-US");
     });
-    const bar = document.getElementById("topbar");
-    const heroes = [...document.querySelectorAll(".hero .hero-bg,.page-hero .hero-bg")];
-    let ticking = false;
-    const onScroll = ()=>{ if(ticking) return; ticking = true; requestAnimationFrame(()=>{ ticking = false;
-      const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
-      if(bar) bar.classList.toggle("scrolled", y > 8);
-      if(!reduce && y < innerHeight*1.2) heroes.forEach(h=>h.style.setProperty("--py", (y*0.28)+"px"));
-    }); };
-    addEventListener("scroll", onScroll, {passive:true}); onScroll();
-    // big photo cards tilt toward the cursor
-    if(!reduce && matchMedia("(hover:hover)").matches){
-      document.addEventListener("pointermove", e=>{
-        const c = e.target.closest && e.target.closest(".capcard,.pcard"); if(!c) return;
-        const r = c.getBoundingClientRect(), x = (e.clientX-r.left)/r.width-.5, y = (e.clientY-r.top)/r.height-.5;
-        c.classList.add("tilting"); c.style.setProperty("--ry", (x*10)+"deg"); c.style.setProperty("--rx", (-y*8)+"deg");
-      }, {passive:true});
-      document.addEventListener("pointerout", e=>{
-        const c = e.target.closest && e.target.closest(".capcard,.pcard");
-        if(c && !c.contains(e.relatedTarget)){ c.classList.remove("tilting"); c.style.setProperty("--ry","0deg"); c.style.setProperty("--rx","0deg"); }
-      });
-    }
-    // numbers roll up from zero the first time they scroll into view
-    const run = el=>{
-      const end = +el.dataset.count, dec = +(el.dataset.dec||0), t0 = performance.now(), dur = 1400;
-      const fmt = v => dec ? v.toFixed(dec) : Math.round(v).toLocaleString("en-US");
-      if(reduce){ el.textContent = fmt(end); return; }
-      const step = now=>{ const k = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-k,4);
-        el.textContent = fmt(end*e); if(k<1) requestAnimationFrame(step); };
-      requestAnimationFrame(step);
-    };
-    const io = "IntersectionObserver" in window ? new IntersectionObserver(es=>es.forEach(x=>{
-      if(x.isIntersecting){ io.unobserve(x.target); run(x.target); } }),{threshold:.4}) : null;
-    const scan = ()=>{
-      document.querySelectorAll("[data-count]:not([data-cv])").forEach(el=>{ el.dataset.cv=1; io ? io.observe(el) : run(el); });
-    };
     scan(); new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
   },
   slug(name){
@@ -640,55 +602,36 @@ const CS = {
 
   footer(){
     const f = document.createElement("footer");
-    const col = (t, items)=>`<div class="fcol"><h4>${t}</h4>${items.map(([h,l,ext])=>
-      `<a href="${h}"${ext?' target="_blank" rel="noopener"':""}>${l}</a>`).join("")}</div>`;
-    f.innerHTML = `<div class="wrap fgrid">
-      <div class="fbrand"><img src="assets/img/logo-white.png" alt="TCBL">
-        <p class="verse">"Honor all people. Love the brotherhood. Fear God…" <span>1 Peter 2:17</span></p>
-        <p class="fpillars">Faith. Fellowship. Fitness.</p></div>
-      ${col("League",[["schedule","Schedule"],["teams","Teams"],["players","Players"],["stats","Stats"],["standings","Standings"],["assets/docs/TCBL-Rulebook.pdf","Rulebook",1]])}
-      ${col("Story",[["history","History"],["gallery","Gallery"],["calendar","Coptic calendar"]].concat(this.regLocked?[]:[["register","Register"]]))}
-      <div class="fcol"><h4>Follow</h4>
-        <a href="${this.social.instagram}" target="_blank" rel="noopener">${this.glyph.ig} Instagram</a>
-        <a href="${this.social.youtube}" target="_blank" rel="noopener">${this.glyph.yt} YouTube</a>
-        <a href="mailto:${this.social.email}">${this.glyph.mail} Email us</a></div>
-    </div>
-    <div class="wrap fbottom"><span>Tampa Bay Coptic Basketball League. Sanctioned under the Coptic Orthodox Diocese of the Southern United States</span>
-      ${this.portalLocked ? "" : `<span>${this.portalLink()}</span>`}</div>`;
+    f.className = "foot";
+    f.innerHTML = `<div class="wrap">
+      <img class="foot-logo" src="assets/img/logo-white.png" alt="TCBL" loading="lazy">
+      <p class="foot-verse">"Honor all people. Love the brotherhood. Fear God…" <span>1 Peter 2:17</span></p>
+      <nav class="foot-links" aria-label="More">
+        <a href="assets/docs/TCBL-Rulebook.pdf" target="_blank" rel="noopener">Rulebook</a>
+        <a href="${this.social.instagram}" target="_blank" rel="noopener">Instagram</a>
+        <a href="${this.social.youtube}" target="_blank" rel="noopener">YouTube</a>
+        <a href="mailto:${this.social.email}">Email us</a>
+        ${this.portalLocked ? "" : this.portalLink()}
+      </nav>
+      <p class="foot-fine">Tampa Bay Coptic Basketball League · Coptic Orthodox Diocese of the Southern United States</p>
+    </div>`;
     document.body.appendChild(f);
     this.reveal();
   },
-  // Ticks every second; when it reaches zero it stops and calls onDone, which
-  // the page uses to swap in whatever comes next.
+  // A quiet countdown line ("49 days until tip-off"). Refreshes every 30 seconds,
+  // no ticking digits. At zero it stops and calls onDone.
   countdown(el, target, label, onDone){
     if(!el) return;
     clearInterval(el._cd);
-    const units = [["d","Days"],["h","Hours"],["m","Min"],["s","Sec"]];
-    el.classList.add("sb");
-    el.innerHTML = `<div class="count-label">${label}</div>
-      <div class="sb-row">${units.map(([k,l],i)=>`${i?'<i class="sb-colon">:</i>':""}<div class="cell" data-u="${k}">
-        <div class="dg"><em>88</em><b>00</b></div><span>${l}</span></div>`).join("")}</div>
-      <div class="sb-clock" aria-hidden="true"><i></i></div>`;
-    const B = {}, G = {};
-    units.forEach(([k])=>{ B[k] = el.querySelector(`[data-u="${k}"] b`); G[k] = el.querySelector(`[data-u="${k}"] em`); });
-    const bar = el.querySelector(".sb-clock i");
+    const pl = (n,w)=>`${n} ${w}${n===1?"":"s"}`;
     const tick = ()=>{
       const ms = new Date(target) - new Date();
-      if(ms<=0){ clearInterval(el._cd); el.classList.remove("sb"); el.innerHTML = ""; if(onDone) onDone(); return; }
-      const v = { d:Math.floor(ms/864e5), h:Math.floor(ms%864e5/36e5), m:Math.floor(ms%36e5/6e4), s:Math.floor(ms%6e4/1e3) };
-      for(const k in v){
-        const t = String(v[k]).padStart(2,"0");
-        if(B[k].textContent !== t){
-          B[k].textContent = t; G[k].textContent = "8".repeat(t.length);
-          B[k].classList.remove("tick"); void B[k].offsetWidth; B[k].classList.add("tick");
-        }
-      }
-      // shot-clock bar: drains with the seconds, snaps back full each minute
-      const w = v.s/59*100;
-      bar.classList.toggle("reset", v.s===59);
-      bar.style.width = w + "%";
+      if(ms<=0){ clearInterval(el._cd); el.innerHTML = ""; if(onDone) onDone(); return; }
+      const d = Math.floor(ms/864e5), h = Math.floor(ms%864e5/36e5), m = Math.floor(ms%36e5/6e4);
+      const left = d>=3 ? pl(d,"day") : d>=1 ? `${pl(d,"day")}, ${pl(h,"hour")}` : h>=1 ? `${pl(h,"hour")}, ${m} min` : m>=1 ? `${m} min` : "Under a minute";
+      el.innerHTML = `<b>${left}</b> ${label}`;
     };
-    el._cd = setInterval(tick, 1000); tick();
+    el._cd = setInterval(tick, 30000); tick();
   },
   /* Season tabs that keep the choice in the address (?s=3): a season can be shared,
      survives a reload, and Back/Forward step through it. With no ?s the page opens
@@ -700,7 +643,7 @@ const CS = {
     let def = ids[ids.length-1];
     for(const n of ids){ if(!has || has(await this.data("season"+n))){ def = n; break; } }
     const fromUrl = ()=>{ const n = +new URLSearchParams(location.search).get("s"); return ids.includes(n) ? n : def; };
-    el.innerHTML = ids.map(n=>`<span class="tabwrap"><button type="button" data-s="${n}" aria-pressed="false">Season ${n}</button>${n===cur?'<i class="nowlabel">Current</i>':""}</span>`).join("");
+    el.innerHTML = ids.map(n=>`<button type="button" data-s="${n}" aria-pressed="false">Season ${n}</button>`).join("");
     const go = n=>{
       el.querySelectorAll("button").forEach(b=>{ const on = +b.dataset.s===n; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
       onPick(n);
@@ -751,30 +694,3 @@ const CS = {
     apply();
   }
 };
-
-// Rotating hero photos: sections with data-rotate crossfade between the
-// photo in the markup and the extra slides listed in the attribute.
-document.addEventListener("DOMContentLoaded", ()=>{
-  document.querySelectorAll("[data-rotate]").forEach(sec=>{
-    let slides; try{ slides = JSON.parse(sec.dataset.rotate); }catch(e){ return; }
-    const d0 = sec.querySelector(":scope > .hero-bg:not(.m)"), m0 = sec.querySelector(":scope > .hero-bg.m");
-    if(!d0 || !m0 || !slides.length) return;
-    const groups = [[d0, m0]];
-    let last = m0;
-    slides.forEach(s=>{
-      const d = d0.cloneNode(), m = m0.cloneNode();
-      d.style.backgroundImage = `url(${s.d})`; if(s.dp) d.style.backgroundPosition = s.dp;
-      m.style.backgroundImage = `url(${s.m})`; if(s.mp) m.style.backgroundPosition = s.mp;
-      d.classList.add("off"); m.classList.add("off");
-      last.after(d, m); last = m; groups.push([d, m]);
-    });
-    if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let i = 0;
-    setInterval(()=>{
-      if(document.hidden) return;
-      groups[i].forEach(e=>e.classList.add("off"));
-      i = (i+1) % groups.length;
-      groups[i].forEach(e=>e.classList.remove("off"));
-    }, 6000);
-  });
-});

@@ -15,13 +15,12 @@
 <meta property="og:url" content="https://coptichoops.com/calendar"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115d"></head><body>
 <header id="topbar" class="topbar"></header>
-<section class="section"><div class="wrap">
-  <div class="sec-head"><h2>Season & Coptic Calendar</h2></div>
-  <p style="color:var(--ink-dim);max-width:820px;margin-bottom:10px">Every game day alongside the fasts and feasts
-  of the Coptic Orthodox Church, so the league always moves with the rhythm of the Church year.</p>
-  <p style="color:var(--ink-faint);max-width:820px;margin-bottom:22px;font-size:13px" id="wfnote"></p>
+<section class="page-head"><div class="wrap"><h1>Calendar</h1></div></section>
+<section class="section first"><div class="wrap">
+  <p class="lede">Game days alongside the fasts and feasts of the Coptic Orthodox Church.</p>
+  <p class="note" id="wfnote"></p>
   <div class="cal-head">
     <button type="button" id="prev" aria-label="Previous month">‹</button><h3 id="mlabel" aria-live="polite"></h3><button type="button" id="next" aria-label="Next month">›</button>
     <button type="button" id="today" class="cal-today" hidden>Today</button>
@@ -36,7 +35,7 @@
     <span><i style="background:#123049;border:1px solid #1d4463"></i>Fasting day, including every Wednesday &amp; Friday</span>
   </div>
 </div></section>
-<script src="assets/js/app.js?v=20261115b"></script>
+<script src="assets/js/app.js?v=20261115d"></script>
 <script>
 CS.nav("calendar"); CS.footer();
 let cur;                       // Date of first of displayed month
@@ -89,10 +88,10 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
     for(let d=1;d<=dim;d++){
       const key=`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
       const isToday = key===todayKey;
-      // grid cells are ~100px wide, so games collapse to one line: time + two codes
-      const evs=(events[key]||[]).map(e=> e.teams
-        ? `<div class="evt game"><b class="t">${e.label.replace(/\s?[AP]M$/,"")}</b>${CS.teamTag(e.teams[0])}<i>v</i>${CS.teamTag(e.teams[1])}</div>`
-        : `<div class="evt ${e.type} ${e.major?"major":""}">${e.label}</div>`).join("");
+      // grid cells are narrow, so a game day collapses to one line that links to the schedule
+      const dayEvs=events[key]||[], gms=dayEvs.filter(e=>e.teams);
+      const evs=(gms.length ? `<a class="evt game-day" href="schedule">${gms.length} game${gms.length>1?"s":""} · ${gms[0].label}</a>` : "")
+        + dayEvs.filter(e=>!e.teams).map(e=>`<div class="evt ${e.type} ${e.major?"major":""}">${e.label}</div>`).join("");
       // the mobile agenda has room for real names
       const evsAg=(events[key]||[]).map(e=> e.teams
         ? `<div class="evt game ag">${CS.teamShort(e.teams[0],"sm")}<i>v</i>${CS.teamShort(e.teams[1],"sm")}<b class="t">${e.label}</b></div>`
@@ -102,7 +101,7 @@ const MIN=new Date(2026,8,1), MAX=new Date(2027,4,31);
         <span class="dnum">${d}</span> ${fasting?`<span class="fast-tag">${shortFast(fastName[key])}</span>`:""}
         ${evs}</div>`;
       // agenda skips ordinary empty days so the list stays scannable
-      if(evs || fasting){
+      if(evs){
         const dow=new Date(cur.getFullYear(),cur.getMonth(),d).getDay();
         agenda+=`<div class="ag-day ${fasting?"fasting":""} ${evs?"":"quiet"} ${isToday?"today":""}">
           <div class="ag-date"><b>${d}</b><span>${isToday?"Today":DOW[dow]}</span></div>

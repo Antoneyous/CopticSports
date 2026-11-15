@@ -16,21 +16,22 @@
 <meta property="og:url" content="https://coptichoops.com/register"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115d"></head><body>
 <header id="topbar" class="topbar"></header>
 
-<section class="hero photo" data-rotate='[{"d": "assets/img/photos/hero-register-2.jpg", "m": "assets/img/photos/hero-register-2-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-register-3.jpg", "m": "assets/img/photos/hero-register-3-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-register-4.jpg", "m": "assets/img/photos/hero-register-4-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}, {"d": "assets/img/photos/hero-register-5.jpg", "m": "assets/img/photos/hero-register-5-m.jpg", "dp": "85% 45%", "mp": "50% 35%"}]' style="--hero-pos:85% 45%"><div class="hero-bg" style="background-image:url(assets/img/photos/hero-register.jpg)"></div><div class="hero-bg m" style="background-image:url(assets/img/photos/hero-register-m.jpg);background-position:55% 40%"></div><div class="wrap hero-grid">
-  <div>
-    <div class="kicker">Tampa Bay Coptic Basketball League</div>
-    <h1><span>Season 5</span><span class="accent">Registration</span></h1>
-    <p class="verse">Players sign up individually. Teams are formed at the captains' draft.</p>
-    <div class="pillars"><span class="pill"><i>✚</i>Faith</span>
-      <span class="pill"><i>✚</i>Fellowship</span><span class="pill"><i>✚</i>Fitness</span></div>
-    <div class="count" id="regcount"></div>
+<section class="hero hero-short">
+  <picture class="hero-media">
+    <source media="(min-width:768px)" srcset="assets/img/photos/hero-register.jpg">
+    <img src="assets/img/photos/hero-register-m.jpg" alt="" style="--pos-m:55% 40%;--pos-d:85% 45%">
+  </picture>
+  <div class="wrap hero-body">
+    <p class="kicker">Season 5</p>
+    <h1>Registration</h1>
+    <p class="hero-sub">Players sign up on their own. Captains build the teams at the draft.</p>
+    <p class="hero-sub" id="regcount"></p>
     <div class="hero-cta" id="hero-reg"></div>
   </div>
-  <img class="hero-logo" src="assets/img/logo-white.png" alt="TCBL logo">
-</div></section>
+</section>
 
 <section class="section"><div class="wrap">
   <div class="sec-head"><h2>Before You Register</h2>
@@ -70,16 +71,16 @@
   and a dedicated team of servants.</p>
 </div></section>
 
-<script src="assets/js/app.js?v=20261115b"></script>
+<script src="assets/js/app.js?v=20261115d"></script>
 <script>
 CS.nav("register"); CS.footer();
 // Locked once registration closes, same as the Stat Portal.
 if(CS.regLocked){
   document.querySelectorAll("section").forEach(x=>x.style.display="none");
-  document.getElementById("topbar").insertAdjacentHTML("afterend", `<section class="section" style="padding-top:120px"><div class="wrap" style="max-width:640px">
-    <div class="card" style="text-align:center;padding:40px 26px">
-      <h3 style="font-size:22px">Registration is locked</h3>
-      <p class="cardp" style="margin:10px auto 22px;max-width:440px">Season 5 registration is closed. Want to serve as a coach or volunteer? Email <a class="plink" href="mailto:coptichoops@gmail.com">coptichoops@gmail.com</a>.</p>
+  document.getElementById("topbar").insertAdjacentHTML("afterend", `<section class="section"><div class="wrap narrow">
+    <div class="card center">
+      <h3>Registration is closed</h3>
+      <p class="cardp">Season 5 registration is closed. Want to serve as a coach or volunteer? Email <a class="plink" href="mailto:coptichoops@gmail.com">coptichoops@gmail.com</a>.</p>
       <a class="btn" href="./">Back to home</a></div></div></section>`);
 }
 
@@ -89,11 +90,9 @@ CS.regWatch(state=>{
 CS.regButton(document.getElementById("hero-reg"));
 (function(){
   const el = document.getElementById("regcount");
-  if(state==="soon")      CS.countdown(el, CS.reg.open,  "Opens at " + CS.regOpenTime());
+  if(state==="soon")      CS.countdown(el, CS.reg.open, "until sign-ups open at " + CS.regOpenTime());
   else if(state==="open") { clearInterval(el._cd); el.innerHTML = ""; }
-  else { clearInterval(el._cd); el.innerHTML = `<div class="count-label">Season 5 registration is closed</div>
-    <div class="cell wide"><b style="font-size:19px">See you next season</b>
-    <a class="plink" href="mailto:coptichoops@gmail.com">coptichoops@gmail.com</a></div>`; }
+  else { clearInterval(el._cd); el.textContent = "Season 5 registration is closed"; }
 })();
 // the big call to action mirrors the same state
 (function(){

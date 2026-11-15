@@ -15,34 +15,32 @@
 <meta property="og:url" content="https://coptichoops.com/schedule"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115d"></head><body>
 <header id="topbar" class="topbar"></header>
-<section class="section" id="live"><div class="wrap">
-  <div class="sec-head"><h2>Watch Live</h2>
-    <a class="more" href="https://www.youtube.com/@Coptichoops" target="_blank" rel="noopener">Our YouTube channel →</a></div>
+<section class="page-head"><div class="wrap"><h1>Schedule</h1></div></section>
+<section class="section first" id="live" hidden><div class="wrap">
+  <div class="sec-head"><h2>Watch live</h2>
+    <a class="more" href="https://www.youtube.com/@Coptichoops" target="_blank" rel="noopener">YouTube</a></div>
   <div id="livehost"></div>
 </div></section>
-<section class="section"><div class="wrap">
-  <div class="sec-head"><h2>Schedule & Results</h2></div>
+<section class="section first"><div class="wrap">
   <div class="tabs" id="tabs"></div>
   <div id="weeks" aria-busy="true"><div class="skel-week"><div class="skel" style="height:22px;width:180px;margin-bottom:14px"></div>
     <div class="score-strip"><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div></div></div></div>
 </div></section>
-<script src="assets/js/app.js?v=20261115b"></script>
+<script src="assets/js/app.js?v=20261115d"></script>
 <script>
 CS.nav("schedule"); CS.footer();
-CS.liveSection(document.getElementById("livehost"));
+CS.liveSection(document.getElementById("livehost"), true);
 async function show(n){
   const s = await CS.data("season"+n);
   document.getElementById("weeks").removeAttribute("aria-busy");
   const byWeek = {};
   s.games.forEach(g=>{ (byWeek[g.stage] = byWeek[g.stage]||{date:g.date, venue:g.venue, games:[]}).games.push(g); });
   document.getElementById("weeks").innerHTML = Object.entries(byWeek).map(([stage,w])=>`
-    <div style="margin-bottom:30px">
-      <div class="sec-head" style="margin-bottom:12px">
-        <h2 style="font-size:18px">${stage}</h2>
-        <span style="color:var(--ink-faint);font-size:13px">${CS.fmtDate(w.date)}${w.venue?", "+w.venue:""}</span>
-      </div>
+    <div class="week">
+      <div class="week-head"><h3>${stage}</h3>
+        <span>${CS.fmtDate(w.date,{weekday:"short",month:"short",day:"numeric"})}${w.venue?" · "+w.venue:""}</span></div>
       <div class="score-strip">${w.games.map(g=>CS.gameCard(g)).join("")}</div>
     </div>`).join("") || "<p class='note'>No games recorded for this season yet.</p>";
 }

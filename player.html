@@ -15,13 +15,13 @@
 <meta property="og:url" content="https://coptichoops.com/player"><meta property="og:image" content="https://coptichoops.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://coptichoops.com/assets/img/og.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=20261115b"></head><body>
+<link rel="stylesheet" href="assets/css/style.css?v=20261115d"></head><body>
 <header id="topbar" class="topbar"></header>
 <section class="section"><div class="wrap">
-  <div class="sec-head"><a class="more" style="margin-left:0" href="players">← All players</a></div>
+  <a class="back" href="players">All players</a>
   <div id="content"><div class="skel" style="height:260px;margin-bottom:24px"></div><div class="skel" style="height:44px;width:360px;margin-bottom:16px"></div><div class="skel" style="height:110px"></div></div>
 </div></section>
-<script src="assets/js/app.js?v=20261115b"></script>
+<script src="assets/js/app.js?v=20261115d"></script>
 <script>
 CS.nav("players"); CS.footer();
 const f1 = v => v==null ? "-" : v.toFixed(1);
@@ -66,28 +66,26 @@ const pct = (m,a) => a ? (m/a*100).toFixed(1) : "-";
   // career highs
   const games = p.lines.filter(l=>l.gp);
   const high = (k,l) => { const g = [...games].sort((a,b)=>(b[k]||0)-(a[k]||0))[0];
-    return g && g[k] ? `<div class="h"><i>${l}</i><b>${g[k]}</b><span>vs ${(g.opp||"").replace("St. ","")}, Season ${g.season}</span></div>` : ""; };
+    return g && g[k] ? `<div class="h"><i>${l}</i><b>${g[k]}</b><span>vs ${g.opp||"-"}, Season ${g.season}</span></div>` : ""; };
   const highs = games.length ? [["pts","Points"],["reb","Rebounds"],["ast","Assists"],["fg3m","Threes"]].map(([k,l])=>high(k,l)).join("") : "";
 
   el.innerHTML = `
-    <div class="p-hero reveal${light?" light":""}" style="background:${c.bg};color:${c.fg};${c.bg.toLowerCase()==="#ffffff"?"border:1px solid #ddd;":""}">
-      <img class="wm" src="assets/img/${lm}" alt="">${p.num!=null?`<span class="bignum">${p.num}</span>`:""}
+    <div class="p-hero">
       <button class="p-share" type="button" id="share">Share</button>
       ${CS.avatar(p,"xl")}
-      <div><small>${p.team||"TCBL"}</small>
-        <h1>${p.name}</h1>
-        ${chips.length?`<div class="chips">${chips.join("")}</div>`:""}
+      <div><h1>${p.name}</h1>
+        <div class="p-meta">${p.team?CS.team(p.team,"sm"):""}${p.num!=null?`<span>#${p.num}</span>`:""}${chips.join("")}</div>
         ${t.gp?`<div class="tstats"><div><b>${t.ppg.toFixed(1)}</b><span>PPG</span></div>
           <div><b>${t.rpg.toFixed(1)}</b><span>RPG</span></div>
           <div><b>${t.apg.toFixed(1)}</b><span>APG</span></div></div>`:""}</div>
     </div>
-    ${stats.length ? `<div class="sec-head"><h2 style="font-size:19px">Stats</h2></div>
+    ${stats.length ? `<div class="sec-head"><h2>Stats</h2></div>
       <div class="seg" id="seg">${stats.map((s,i)=>`<button type="button" data-k="${s.season}" class="${i?"":"on"}">Season ${s.season}</button>`).join("")}
         ${stats.length>1?`<button type="button" data-k="career">Career</button>`:""}</div>
-      <div id="panel" style="margin-bottom:28px">${panel(String(stats[0].season))}</div>`
-    : `<div class="card reveal" style="margin-bottom:26px"><h3>Welcome to the TCBL</h3>
+      <div id="panel">${panel(String(stats[0].season))}</div>`
+    : `<div class="card"><h3>Welcome to the TCBL</h3>
         <p class="cardp">${p.name.split(" ")[0]}'s stats show up here once Season ${cur} tips off.</p></div>`}
-    ${highs?`<div class="card reveal" style="margin-bottom:26px"><h3>Career highs</h3><div class="highs" style="grid-template-columns:repeat(4,1fr)">${highs}</div></div>`:""}`;
+    ${highs?`<div class="sec-head"><h2>Career highs</h2></div><div class="highs">${highs}</div>`:""}`;
   const seg = document.getElementById("seg");
   if(seg) seg.onclick = e=>{ const b = e.target.closest("button"); if(!b || b.classList.contains("on")) return;
     seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
